@@ -9,6 +9,8 @@ export enum ChatModels {
   GPT_4 = "gpt-4",
   GPT_4_TURBO = "gpt-4-turbo-preview",
   GPT_4_32K = "gpt-4-32k",
+  GPT_4o = "gpt-4o",
+  GPT_4o_MINI = "gpt-4o-mini",
   GEMINI_15_PRO = "gemini-pro",
   CLAUDE_3_SONNET = "claude-3-5-sonnet-20240620",
   CLAUDE_3_OPUS = "claude-3-opus-20240229"
@@ -19,6 +21,8 @@ export enum ChatModelDisplayNames {
   GPT_4 = "GPT-4",
   GPT_4_TURBO = "GPT-4 Turbo",
   GPT_4_32K = "GPT-4 32k",
+  GPT_4o = "GPT-4o",
+  GPT_4o_MINI = "GPT-4o Mini",
   GEMINI_15_PRO = "Gemini 1.5",
   CLAUDE_3_OPUS = "Claude 3 Opus",
   CLAUDE_3_SONNET = "Claude 3 Sonnet",
