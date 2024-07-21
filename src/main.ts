@@ -1,5 +1,6 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, WorkspaceLeaf} from 'obsidian';
+import { CHAT_VIEWTYPE } from './constants';
+import ChatView from '@/components/ChatView';
 // Remember to rename these classes and interfaces!
 
 interface MyPluginSettings {
@@ -13,6 +14,8 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 export default class SRPlugin extends Plugin {
 	settings: MyPluginSettings;
 	chatIsVisible = false;
+	activateViewPromise: Promise<void> | null = null;
+
 
 	async onload() {
 		await this.loadSettings();
@@ -25,11 +28,15 @@ export default class SRPlugin extends Plugin {
 			},
 		});
 
+		this.registerView(
+			CHAT_VIEWTYPE,
+			(leaf: WorkspaceLeaf) => new ChatView(leaf, this),
+		);
+
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
+			this.toggleView();
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
@@ -101,7 +108,28 @@ export default class SRPlugin extends Plugin {
 	}
 
 	toggleView() {
-		
+		const leaves = this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE);
+		leaves.length > 0 ? this.deactivateView() : this.activateView();
+	}
+
+	async activateView() {
+		this.app.workspace.detachLeavesOfType(CHAT_VIEWTYPE);
+		this.activateViewPromise = this.app.workspace
+		.getRightLeaf(false)!
+		.setViewState({
+			type: CHAT_VIEWTYPE,
+			active: true,
+		});
+		await this.activateViewPromise;
+		this.app.workspace.revealLeaf(
+			this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE)[0],
+		);
+		this.chatIsVisible = true;
+	}
+	
+	async deactivateView() {
+		this.app.workspace.detachLeavesOfType(CHAT_VIEWTYPE);
+		this.chatIsVisible = false;
 	}
 
 }

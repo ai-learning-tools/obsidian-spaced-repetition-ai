@@ -44,8 +44,8 @@ export default class CopilotView extends ItemView {
     root.render(
       <React.StrictMode>
         <div>
-          <h1>Copilot Chat</h1>
-          <p>Chat with your AI assistant</p>
+          <h1>Chat here</h1>
+          <p>Chat with AI assitant for card generation</p>
         </div>
       </React.StrictMode>
     );
