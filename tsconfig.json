@@ -11,6 +11,9 @@
     "importHelpers": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["src/*"]
+    },
 	"strictNullChecks": true,
     "lib": [
       "DOM",

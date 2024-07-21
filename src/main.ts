@@ -10,11 +10,21 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 	mySetting: 'default'
 }
 
-export default class MyPlugin extends Plugin {
+export default class SRPlugin extends Plugin {
 	settings: MyPluginSettings;
+	chatIsVisible = false;
 
 	async onload() {
 		await this.loadSettings();
+
+		this.addCommand({
+			id: "chat-toggle-window",
+			name: "Toggle Copilot Chat Window",
+			callback: () => {
+			this.toggleView();
+			},
+		});
+
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
@@ -89,6 +99,11 @@ export default class MyPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+
+	toggleView() {
+		
+	}
+
 }
 
 class SampleModal extends Modal {

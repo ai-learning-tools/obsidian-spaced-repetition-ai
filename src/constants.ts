@@ -1,0 +1,1 @@
+export const CHAT_VIEWTYPE = "sr-chat-view";
