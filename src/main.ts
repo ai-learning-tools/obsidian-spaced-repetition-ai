@@ -1,21 +1,14 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-
-// Remember to rename these classes and interfaces!
-
-interface MyPluginSettings {
-	mySetting: string;
-}
-
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
-}
+import { SRSettingTab, SRSettings } from './components/SettingsPage';
+import { DEFAULT_SETTINGS } from './constants';
 
 export default class SRPlugin extends Plugin {
-	settings: MyPluginSettings;
+	settings: SRSettings;
 	chatIsVisible = false;
 
 	async onload() {
 		await this.loadSettings();
+		this.addSettingTab(new SRSettingTab(this.app, this));
 
 		this.addCommand({
 			id: "chat-toggle-window",
@@ -24,7 +17,6 @@ export default class SRPlugin extends Plugin {
 			this.toggleView();
 			},
 		});
-
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
@@ -119,31 +111,5 @@ class SampleModal extends Modal {
 	onClose() {
 		const {contentEl} = this;
 		contentEl.empty();
-	}
-}
-
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
-
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		const {containerEl} = this;
-
-		containerEl.empty();
-
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
 	}
 }
