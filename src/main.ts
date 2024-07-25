@@ -1,7 +1,8 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, WorkspaceLeaf} from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Plugin, WorkspaceLeaf} from 'obsidian';
 import { CHAT_VIEWTYPE, DEFAULT_SETTINGS } from '@/constants';
 import ChatView from '@/components/ChatView';
 import { SRSettingTab, SRSettings } from './components/SettingsPage';
+import './tailwind.css';
 // Remember to rename these classes and interfaces!
 
 export default class SRPlugin extends Plugin {

@@ -3,7 +3,7 @@ import { CHAT_VIEWTYPE } from '@/constants';
 import { ItemView, WorkspaceLeaf } from 'obsidian';
 import * as React from 'react';
 import { Root, createRoot } from 'react-dom/client';
-import SRPlugin from `@/main`;
+import SRPlugin from '@/main';
 
 
 export default class CopilotView extends ItemView {
@@ -36,14 +36,14 @@ export default class CopilotView extends ItemView {
     // if (this.plugin.activateViewPromise) {
     //   await this.plugin.activateViewPromise;
     // }
-    return this.plugin.isChatVisible();
+    return this.plugin.chatIsVisible;
   }
 
   async onOpen(): Promise<void> {
     const root = createRoot(this.containerEl.children[1]);
     root.render(
       <React.StrictMode>
-        <div>
+        <div className='bg-tahiti-200 underline'>
           <h1>Chat here</h1>
           <p>Chat with AI assitant for card generation</p>
         </div>

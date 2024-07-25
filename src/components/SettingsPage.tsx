@@ -1,7 +1,5 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import MyPlugin from "@/main";
-import { ChatModels, ChatModelDisplayNames } from "@/constants";
-
 export interface SRSettings {
   defaultModel: string;
   defaultModelDisplayName: string;
