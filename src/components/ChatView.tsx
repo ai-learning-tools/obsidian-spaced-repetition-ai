@@ -43,8 +43,8 @@ export default class CopilotView extends ItemView {
     const root = createRoot(this.containerEl.children[1]);
     root.render(
       <React.StrictMode>
-        <div className='bg-tahiti-200 underline'>
-          <h1>Chat here</h1>
+        <div className='underline'>
+          <h1 className='bg-red-100'>Chat here</h1>
           <p>Chat with AI assitant for card generation</p>
         </div>
       </React.StrictMode>

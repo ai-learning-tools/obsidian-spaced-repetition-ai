@@ -5,7 +5,7 @@
   box-sizing: border-box;
   border-width: 0;
   border-style: solid;
-  border-color: currentColor;
+  border-color: #e5e7eb;
 }
 ::before,
 ::after {
@@ -332,9 +332,13 @@ video {
   --tw-contain-paint: ;
   --tw-contain-style: ;
 }
-.bg-tahiti-200 {
+.bg-black {
   --tw-bg-opacity: 1;
-  background-color: rgb(165 243 252 / var(--tw-bg-opacity));
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity));
+}
+.bg-red-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(254 226 226 / var(--tw-bg-opacity));
 }
 .underline {
   text-decoration-line: underline;
