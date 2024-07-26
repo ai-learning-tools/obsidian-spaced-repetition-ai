@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Plugin, WorkspaceLeaf} from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Plugin, TFile, WorkspaceLeaf} from 'obsidian';
 import { CHAT_VIEWTYPE, DEFAULT_SETTINGS } from '@/constants';
 import ChatView from '@/components/ChatView';
 import { SRSettingTab, SRSettings } from './components/SettingsPage';
@@ -9,7 +9,6 @@ export default class SRPlugin extends Plugin {
 	settings: SRSettings;
 	chatIsVisible = false;
 	activateViewPromise: Promise<void> | null = null;
-
 
 	async onload() {
 		await this.loadSettings();
@@ -27,7 +26,6 @@ export default class SRPlugin extends Plugin {
 			CHAT_VIEWTYPE,
 			(leaf: WorkspaceLeaf) => new ChatView(leaf, this),
 		);
-
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
@@ -83,11 +81,14 @@ export default class SRPlugin extends Plugin {
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
 		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
+			// console.log('click', evt);
 		});
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+
+		// Get list of files in vault
+		this.getFilesInVault();
 	}
 
 	onunload() {
@@ -127,6 +128,12 @@ export default class SRPlugin extends Plugin {
 		this.chatIsVisible = false;
 	}
 
+	async getFilesInVault() {
+		const files = this.app.vault.getFiles();
+		console.log("DEBUG-Athena", files)
+		files.sort((a, b) => b.stat.mtime - a.stat.mtime);
+		return files;
+	}	
 }
 
 class SampleModal extends Modal {

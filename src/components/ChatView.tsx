@@ -4,7 +4,7 @@ import { ItemView, WorkspaceLeaf } from 'obsidian';
 import * as React from 'react';
 import { Root, createRoot } from 'react-dom/client';
 import SRPlugin from '@/main';
-
+import ChatSegment from '@/components/ChatSegment'
 
 export default class CopilotView extends ItemView {
   private root: Root | null = null;
@@ -39,14 +39,15 @@ export default class CopilotView extends ItemView {
     return this.plugin.chatIsVisible;
   }
 
+  getFilesInVault() {
+    return this.plugin.getFilesInVault
+  }
+
   async onOpen(): Promise<void> {
     const root = createRoot(this.containerEl.children[1]);
     root.render(
       <React.StrictMode>
-        <div className='underline'>
-          <h1 className='bg-red-100'>Chat here</h1>
-          <p>Chat with AI assitant for card generation</p>
-        </div>
+        <ChatSegment plugin={this.plugin}/>
       </React.StrictMode>
     );
   }
