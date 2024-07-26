@@ -2,7 +2,7 @@ import { SRSettings } from "./components/SettingsPage";
 import { Platform } from "obsidian";
 
 // @ts-ignore
-let safeStorage = Electron.SafeStorage;
+let safeStorage: Electron.SafeStorage;
 
 if (Platform.isDesktop) {
   safeStorage = require("electron")?.remote?.safeStorage;

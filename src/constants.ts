@@ -47,8 +47,7 @@ export const ANTHROPIC_MODELS = [
   ChatModelDisplayNames.CLAUDE_3_OPUS,
   ChatModelDisplayNames.CLAUDE_3_SONNET
 ];
-
-export const DISPLAY_NAME_TO_MODEL = {
+export const DISPLAY_NAME_TO_MODEL: Record<ChatModelDisplayNames, ChatModels> = {
   [ChatModelDisplayNames.GPT_35_TURBO]: ChatModels.GPT_35_TURBO,
   [ChatModelDisplayNames.GPT_4]: ChatModels.GPT_4,
   [ChatModelDisplayNames.GPT_4_TURBO]: ChatModels.GPT_4_TURBO,
@@ -59,6 +58,10 @@ export const DISPLAY_NAME_TO_MODEL = {
   [ChatModelDisplayNames.CLAUDE_3_OPUS]: ChatModels.CLAUDE_3_OPUS,
   [ChatModelDisplayNames.CLAUDE_3_SONNET]: ChatModels.CLAUDE_3_SONNET,
 };
+
+export const MODEL_TO_DISPLAY_NAME: Record<ChatModels, ChatModelDisplayNames> = Object.fromEntries(
+  Object.entries(DISPLAY_NAME_TO_MODEL).map(([displayName, model]) => [model, displayName as ChatModelDisplayNames])
+) as Record<ChatModels, ChatModelDisplayNames>;
 
 export const DEFAULT_SETTINGS: SRSettings = {
   defaultModel: ChatModels.GPT_4,

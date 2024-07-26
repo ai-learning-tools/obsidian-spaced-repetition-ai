@@ -3,8 +3,8 @@ import { CHAT_VIEWTYPE } from '@/constants';
 import { ItemView, WorkspaceLeaf } from 'obsidian';
 import * as React from 'react';
 import { Root, createRoot } from 'react-dom/client';
-import SRPlugin from `@/main`;
-
+import SRPlugin from '@/main';
+import ChatSegment from '@/components/ChatSegment'
 
 export default class CopilotView extends ItemView {
   private root: Root | null = null;
@@ -36,17 +36,18 @@ export default class CopilotView extends ItemView {
     // if (this.plugin.activateViewPromise) {
     //   await this.plugin.activateViewPromise;
     // }
-    return this.plugin.isChatVisible();
+    return this.plugin.chatIsVisible;
+  }
+
+  getFilesInVault() {
+    return this.plugin.getFilesInVault
   }
 
   async onOpen(): Promise<void> {
     const root = createRoot(this.containerEl.children[1]);
     root.render(
       <React.StrictMode>
-        <div>
-          <h1>Chat here</h1>
-          <p>Chat with AI assitant for card generation</p>
-        </div>
+        <ChatSegment plugin={this.plugin}/>
       </React.StrictMode>
     );
   }

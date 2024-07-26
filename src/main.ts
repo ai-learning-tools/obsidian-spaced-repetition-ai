@@ -1,7 +1,8 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, WorkspaceLeaf} from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Plugin, WorkspaceLeaf} from 'obsidian';
 import { CHAT_VIEWTYPE, DEFAULT_SETTINGS, DEFAULT_SYSTEM_PROMPT, PROXY_SERVER_PORT } from '@/constants';
 import ChatView from '@/components/ChatView';
 import { SRSettingTab, SRSettings } from '@/components/SettingsPage';
+import '@/tailwind.css';
 import ChainManager from '@/LLM/chainManager';
 import { LangChainParams, SetChainOptions } from '@/aiParams';
 import EncryptionService from '@/encryptionService';
@@ -102,11 +103,14 @@ export default class SRPlugin extends Plugin {
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
 		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
+			// console.log('click', evt);
 		});
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+
+		// Get list of files in vault
+		this.getFilesInVault();
 	}
 
 	onunload() {
@@ -169,6 +173,12 @@ export default class SRPlugin extends Plugin {
 		};
 	}
 
+	async getFilesInVault() {
+		const files = this.app.vault.getFiles();
+		console.log("DEBUG-Athena", files)
+		files.sort((a, b) => b.stat.mtime - a.stat.mtime);
+		return files;
+	}	
 }
 
 class SampleModal extends Modal {

@@ -1,7 +1,6 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import SRPlugin from "@/main";
-import ChainManager from "@/LLM/chainManager";
-import { ChatModels, ChatModelDisplayNames, DISPLAY_NAME_TO_MODEL } from "@/constants";
+import { ChatModels, ChatModelDisplayNames, MODEL_TO_DISPLAY_NAME, DISPLAY_NAME_TO_MODEL } from "@/constants";
 
 export interface SRSettings {
   defaultModel: ChatModels;
@@ -9,9 +8,6 @@ export interface SRSettings {
   openAIApiKey: string;
   anthropicApiKey: string;
   googleApiKey: string;
-	temperature: number;
-	maxTokens: number;
-	chatContextTurns: number;
 }
 
 export class SRSettingTab extends PluginSettingTab {
@@ -29,11 +25,11 @@ export class SRSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Default Model')
       .addDropdown(dropdown => dropdown
-				.addOptions(DISPLAY_NAME_TO_MODEL)
+				.addOptions(MODEL_TO_DISPLAY_NAME)
 				.setValue(this.plugin.settings.defaultModelDisplayName)
-				.onChange(async (value) => {
-					this.plugin.settings.defaultModelDisplayName = value as ChatModelDisplayNames;
-					this.plugin.settings.defaultModel = DISPLAY_NAME_TO_MODEL[value as ChatModelDisplayNames];
+				.onChange(async (value: ChatModels) => {
+					this.plugin.settings.defaultModel = value;
+					this.plugin.settings.defaultModelDisplayName = MODEL_TO_DISPLAY_NAME[value];
 					await this.plugin.saveSettings();
 				}));
 
