@@ -1,18 +1,39 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, WorkspaceLeaf} from 'obsidian';
-import { CHAT_VIEWTYPE, DEFAULT_SETTINGS } from '@/constants';
+import { CHAT_VIEWTYPE, DEFAULT_SETTINGS, DEFAULT_SYSTEM_PROMPT, PROXY_SERVER_PORT } from '@/constants';
 import ChatView from '@/components/ChatView';
-import { SRSettingTab, SRSettings } from './components/SettingsPage';
-// Remember to rename these classes and interfaces!
+import { SRSettingTab, SRSettings } from '@/components/SettingsPage';
+import ChainManager from '@/LLM/chainManager';
+import { LangChainParams, SetChainOptions } from '@/aiParams';
+import EncryptionService from '@/encryptionService';
+import { ProxyServer } from '@/proxyServer';
+import SharedState from '@/sharedState';
 
 export default class SRPlugin extends Plugin {
 	settings: SRSettings;
+	sharedState: SharedState;
 	chatIsVisible = false;
 	activateViewPromise: Promise<void> | null = null;
-
+	chainManager: ChainManager;
+	encryptionService: EncryptionService;
+	proxyServer: ProxyServer;
 
 	async onload() {
+		
 		await this.loadSettings();
 		this.addSettingTab(new SRSettingTab(this.app, this));
+		this.proxyServer = new ProxyServer(PROXY_SERVER_PORT);
+		this.sharedState = new SharedState();
+		this.encryptionService = new EncryptionService(this.settings);
+
+		const langChainParams = this.getChainManagerParams();
+		this.chainManager = new ChainManager(
+			this.app,
+			langChainParams,
+			this.encryptionService,
+			this.settings
+		);
+
+		await this.saveSettings();
 
 		this.addCommand({
 			id: "chat-toggle-window",
@@ -26,7 +47,6 @@ export default class SRPlugin extends Plugin {
 			CHAT_VIEWTYPE,
 			(leaf: WorkspaceLeaf) => new ChatView(leaf, this),
 		);
-
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
@@ -98,6 +118,7 @@ export default class SRPlugin extends Plugin {
 	}
 
 	async saveSettings() {
+		this.encryptionService.encryptAllKeys();
 		await this.saveData(this.settings);
 	}
 
@@ -124,6 +145,28 @@ export default class SRPlugin extends Plugin {
 	async deactivateView() {
 		this.app.workspace.detachLeavesOfType(CHAT_VIEWTYPE);
 		this.chatIsVisible = false;
+	}
+
+	getChainManagerParams(): LangChainParams {
+		const {
+			defaultModel,
+			defaultModelDisplayName,
+			openAIApiKey,
+			anthropicApiKey,
+			googleApiKey
+		} = this.settings;
+		return {
+			model: defaultModel,
+			modelDisplayName: defaultModelDisplayName,
+			temperature: 0.1,
+			maxTokens: 3000,
+			chatContextTurns: 15,
+			openAIApiKey,
+			anthropicApiKey,
+			googleApiKey,
+			systemMessage: DEFAULT_SYSTEM_PROMPT,
+			options: { forceNewCreation: true } as SetChainOptions,
+		};
 	}
 
 }

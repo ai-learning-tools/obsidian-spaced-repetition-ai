@@ -2,7 +2,11 @@ import { SRSettings } from "@/components/SettingsPage";
 
 export const CHAT_VIEWTYPE = "sr-chat-view";
 
+export const AI_SENDER = "berta";
+
 export const DEFAULT_SYSTEM_PROMPT = "You are Obsidian Spaced Repetition Copilot, a helpful assistant that creates and edits spaced repetition flashcards from Obsidian notes."
+
+export const PROXY_SERVER_PORT = 53001;
 
 export enum ChatModels {
   GPT_35_TURBO = "gpt-3.5-turbo",
@@ -44,6 +48,18 @@ export const ANTHROPIC_MODELS = [
   ChatModelDisplayNames.CLAUDE_3_SONNET
 ];
 
+export const DISPLAY_NAME_TO_MODEL = {
+  [ChatModelDisplayNames.GPT_35_TURBO]: ChatModels.GPT_35_TURBO,
+  [ChatModelDisplayNames.GPT_4]: ChatModels.GPT_4,
+  [ChatModelDisplayNames.GPT_4_TURBO]: ChatModels.GPT_4_TURBO,
+  [ChatModelDisplayNames.GPT_4_32K]: ChatModels.GPT_4_32K,
+  [ChatModelDisplayNames.GPT_4o]: ChatModels.GPT_4o,
+  [ChatModelDisplayNames.GPT_4o_MINI]: ChatModels.GPT_4o_MINI,
+  [ChatModelDisplayNames.GEMINI_15_PRO]: ChatModels.GEMINI_15_PRO,
+  [ChatModelDisplayNames.CLAUDE_3_OPUS]: ChatModels.CLAUDE_3_OPUS,
+  [ChatModelDisplayNames.CLAUDE_3_SONNET]: ChatModels.CLAUDE_3_SONNET,
+};
+
 export const DEFAULT_SETTINGS: SRSettings = {
   defaultModel: ChatModels.GPT_4,
   defaultModelDisplayName: ChatModelDisplayNames.GPT_4,
@@ -51,3 +67,9 @@ export const DEFAULT_SETTINGS: SRSettings = {
   anthropicApiKey: "",
   googleApiKey: "",
 };
+
+export enum ModelProviders {
+  OPENAI = "openai",
+  ANTHROPIC = "anthropic",
+  GOOGLE = "google",
+}
