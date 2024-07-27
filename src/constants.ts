@@ -2,7 +2,8 @@ import { SRSettings } from "@/components/SettingsPage";
 
 export const CHAT_VIEWTYPE = "sr-chat-view";
 
-export const AI_SENDER = "berta";
+export const USER_SENDER = "me";
+export const AI_SENDER = "ai";
 
 export const DEFAULT_SYSTEM_PROMPT = "You are Obsidian Spaced Repetition Copilot, a helpful assistant that creates and edits spaced repetition flashcards from Obsidian notes."
 

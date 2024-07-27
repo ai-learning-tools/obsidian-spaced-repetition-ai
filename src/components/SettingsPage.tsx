@@ -1,6 +1,6 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import SRPlugin from "@/main";
-import { ChatModels, ChatModelDisplayNames, MODEL_TO_DISPLAY_NAME, DISPLAY_NAME_TO_MODEL } from "@/constants";
+import { ChatModels, ChatModelDisplayNames, MODEL_TO_DISPLAY_NAME } from "@/constants";
 
 export interface SRSettings {
   defaultModel: ChatModels;
@@ -26,7 +26,7 @@ export class SRSettingTab extends PluginSettingTab {
       .setName('Default Model')
       .addDropdown(dropdown => dropdown
 				.addOptions(MODEL_TO_DISPLAY_NAME)
-				.setValue(this.plugin.settings.defaultModelDisplayName)
+				.setValue(this.plugin.settings.defaultModel)
 				.onChange(async (value: ChatModels) => {
 					this.plugin.settings.defaultModel = value;
 					this.plugin.settings.defaultModelDisplayName = MODEL_TO_DISPLAY_NAME[value];

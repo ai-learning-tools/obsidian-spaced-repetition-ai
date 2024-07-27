@@ -58,6 +58,9 @@ export default class EncryptionService {
   }
 
   public getDecryptedKey(apiKey: string): string {
+    if (!apiKey) {
+      return apiKey;
+    }
     if (this.isPlainText(apiKey)) {
       return apiKey;
     }

@@ -85,7 +85,7 @@ export default class ChatModelManager {
   }
 
   private getModelConfig(chatModelProvider: ModelProviders): ModelConfig {
-    const decrypt  = this.encryptionService.getDecryptedKey;
+    const decrypt  = (key: string) => this.encryptionService.getDecryptedKey(key);
     const params = this.langChainParams;
     const baseConfig: ModelConfig = {
       modelName: params.model,

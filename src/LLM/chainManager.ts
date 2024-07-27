@@ -209,7 +209,7 @@ export default class ChainManager {
           isVisible: true,
         });
       }
-      updateCurrentAiMessage("");
+      // TODO @belinda: here currentAIMessage is updated to "" in the original repo. Probably good to keep currentAIMessage and the text that is displayed separate, once UI is implemented.
     }
     return fullAIResponse;
   }

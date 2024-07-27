@@ -18,15 +18,15 @@ export default class SRPlugin extends Plugin {
 	encryptionService: EncryptionService;
 	proxyServer: ProxyServer;
 
-	async onload() {
+	async onload(): Promise<void> {
 		
 		await this.loadSettings();
 		this.addSettingTab(new SRSettingTab(this.app, this));
 		this.proxyServer = new ProxyServer(PROXY_SERVER_PORT);
 		this.sharedState = new SharedState();
+		const langChainParams = this.getChainManagerParams();
 		this.encryptionService = new EncryptionService(this.settings);
 
-		const langChainParams = this.getChainManagerParams();
 		this.chainManager = new ChainManager(
 			this.app,
 			langChainParams,
