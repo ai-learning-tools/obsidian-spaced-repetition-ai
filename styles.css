@@ -366,17 +366,11 @@ video {
 .absolute {
   position: absolute;
 }
-.relative {
-  position: relative;
-}
 .inline-block {
   display: inline-block;
 }
 .flex {
   display: flex;
-}
-.h-64 {
-  height: 16rem;
 }
 .h-40 {
   height: 10rem;
@@ -409,13 +403,6 @@ video {
 }
 .border-2 {
   border-width: 2px;
-}
-.border-b-2 {
-  border-bottom-width: 2px;
-}
-.bg-red-100 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(254 226 226 / var(--tw-bg-opacity));
 }
 .p-2 {
   padding: 0.5rem;
