@@ -50,6 +50,7 @@ const context = await esbuild.context({
 	treeShaking: true, // Enable tree shaking
 	outfile: "main.js", // Output file
 	allowOverwrite: true, // Allow overwriting the output file
+	loader: {'.js': 'jsx'}
 });
 
 // Create esbuild context for CSS, 

@@ -3,8 +3,10 @@ import { useState, useEffect, useRef } from 'react';
 import { ChatModels, ChatModelDisplayNames } from '@/constants';
 import SRPlugin from '@/main';
 import { TFile } from 'obsidian';
-import { MentionsInput, Mention } from 'react-mentions';
 import defaultStyle from '@/components/defaultStyle';
+import MentionsInput from '@/components/mentions/MentionsInput';
+import Mention from '@/components/mentions/Mention'; // Fixed import path
+
 
 interface ChatSegmentProps {
   plugin: SRPlugin;
