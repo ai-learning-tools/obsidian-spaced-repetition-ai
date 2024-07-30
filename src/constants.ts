@@ -1,6 +1,9 @@
 import { SRSettings } from "@/components/SettingsPage";
 
-export const CHAT_VIEWTYPE = "sr-chat-view";
+export enum ViewTypes {
+  CHAT = "sr-chat-view",
+  REVIEW = "sr-review-view",
+}
 
 export const USER_SENDER = "me";
 export const AI_SENDER = "ai";

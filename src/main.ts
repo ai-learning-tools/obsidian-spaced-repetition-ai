@@ -1,6 +1,7 @@
 import { App, Editor, MarkdownView, Modal, Plugin, WorkspaceLeaf} from 'obsidian';
-import { CHAT_VIEWTYPE, DEFAULT_SETTINGS, DEFAULT_SYSTEM_PROMPT, PROXY_SERVER_PORT } from '@/constants';
+import { ViewTypes, DEFAULT_SETTINGS, DEFAULT_SYSTEM_PROMPT, PROXY_SERVER_PORT } from '@/constants';
 import ChatView from '@/components/ChatView';
+import ReviewView from '@/components/ReviewView';
 import { SRSettingTab, SRSettings } from '@/components/SettingsPage';
 import '@/tailwind.css';
 import ChainManager from '@/LLM/chainManager';
@@ -38,20 +39,33 @@ export default class SRPlugin extends Plugin {
 
 		this.addCommand({
 			id: "chat-toggle-window",
-			name: "Toggle Copilot Chat Window",
+			name: "Toggle Learning Chat Window",
 			callback: () => {
-			this.toggleView();
+				this.toggleView(ViewTypes.CHAT);
 			},
 		});
 
+		this.addCommand({
+			id: "review-toggle-window",
+			name: "Toggle Learning Review Window",
+			callback: () => {
+				this.toggleView(ViewTypes.REVIEW);
+			}
+		});
+
 		this.registerView(
-			CHAT_VIEWTYPE,
+			ViewTypes.CHAT,
 			(leaf: WorkspaceLeaf) => new ChatView(leaf, this),
+		);
+
+		this.registerView(
+			ViewTypes.REVIEW,
+			(leaf: WorkspaceLeaf) => new ReviewView(leaf, this)
 		);
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			this.toggleView();
+			this.toggleView(ViewTypes.CHAT);
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
@@ -126,29 +140,34 @@ export default class SRPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	toggleView() {
-		const leaves = this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE);
-		leaves.length > 0 ? this.deactivateView() : this.activateView();
+	toggleView(viewType: ViewTypes) {
+		const leaves = this.app.workspace.getLeavesOfType(viewType);
+		leaves.length > 0 ? this.deactivateView(viewType) : this.activateView(viewType);
 	}
 
-	async activateView() {
-		this.app.workspace.detachLeavesOfType(CHAT_VIEWTYPE);
+	async activateView(viewType: ViewTypes) {
+		this.app.workspace.detachLeavesOfType(viewType);
 		this.activateViewPromise = this.app.workspace
 		.getRightLeaf(false)!
 		.setViewState({
-			type: CHAT_VIEWTYPE,
+			type: viewType,
 			active: true,
 		});
-		await this.activateViewPromise;
+		await this.activateViewPromise; // TODO @belinda or @athena: this doesn't look like it does anything lol. remove?
 		this.app.workspace.revealLeaf(
-			this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE)[0],
+			this.app.workspace.getLeavesOfType(viewType)[0],
 		);
-		this.chatIsVisible = true;
+
+		if (viewType === ViewTypes.CHAT) {
+			this.chatIsVisible = true;
+		}
 	}
 	
-	async deactivateView() {
-		this.app.workspace.detachLeavesOfType(CHAT_VIEWTYPE);
-		this.chatIsVisible = false;
+	async deactivateView(viewType: ViewTypes) {
+		this.app.workspace.detachLeavesOfType(viewType);
+		if (viewType === ViewTypes.CHAT) {
+			this.chatIsVisible = false;
+		}
 	}
 
 	getChainManagerParams(): LangChainParams {
