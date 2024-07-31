@@ -16,7 +16,7 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({ plugin }) => {
   const [message, setMessage] = useState<string>('');
   const [selectedModel, setSelectedModel] = useState<string>(ChatModels.GPT_35_TURBO);
   const [files, setFiles] = useState<TFile[]>([]);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  // const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -35,7 +35,7 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({ plugin }) => {
           onChange={(e, newValue) => setMessage(newValue)}
           className="w-full resize-none p-2 height-auto overflow-hidden"
           placeholder="Type your message"
-          suggestionsPortalHost={containerRef.current}
+          suggestionsPortalHost={container}
           // style={defaultStyle}
         >
           <Mention
@@ -73,7 +73,9 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({ plugin }) => {
       <div
         id="suggestionPortal"
         className="flex border-2 h-40"
-        ref={containerRef}
+        ref={el => {
+          container = el
+        }}
       ></div>
       <div>
         <p>Using</p>

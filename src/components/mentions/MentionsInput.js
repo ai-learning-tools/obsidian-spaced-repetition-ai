@@ -272,6 +272,7 @@ class MentionsInput extends React.Component {
 
     const { position, left, top, right } = this.state.suggestionsPosition
 
+    // TODO: this is where suggestion position is set up
     const suggestionsNode = (
       <SuggestionsOverlay
         id={this.uuidSuggestionsOverlay}
@@ -711,6 +712,8 @@ class MentionsInput extends React.Component {
     })
   }
 
+
+  // TODO: Athena
   updateSuggestionsPosition = () => {
     let { caretPosition } = this.state
     const {
@@ -728,10 +731,20 @@ class MentionsInput extends React.Component {
     // first get viewport-relative position (highlighter is offsetParent of caret):
     const caretOffsetParentRect = highlighter.getBoundingClientRect()
     const caretHeight = getComputedStyleLengthProp(highlighter, 'font-size')
+
+    // this value is relative to whole window and not just current leaf
+    // const viewportRelative = {
+    //   left: caretOffsetParentRect.left + caretPosition.left,
+    //   top: caretOffsetParentRect.top + caretPosition.top + caretHeight,
+    // }
+
     const viewportRelative = {
-      left: caretOffsetParentRect.left + caretPosition.left,
-      top: caretOffsetParentRect.top + caretPosition.top + caretHeight,
+      left: caretPosition.left,
+      top: caretPosition.top + caretHeight,
     }
+
+    console.log("DEBUG-ATHENA", viewportRelative)
+
     const viewportHeight = Math.max(
       document.documentElement.clientHeight,
       window.innerHeight || 0
@@ -745,15 +758,16 @@ class MentionsInput extends React.Component {
 
     // if suggestions menu is in a portal, update position to be releative to its portal node
     if (suggestionsPortalHost) {
+      console.log("DEEBUG-ATHENA", "suggestion portal")
       position.position = 'fixed'
       let left = viewportRelative.left
       let top = viewportRelative.top
-      // absolute/fixed positioned elements are positioned according to their entire box including margins; so we remove margins here:
-      left -= getComputedStyleLengthProp(suggestions, 'margin-left')
-      top -= getComputedStyleLengthProp(suggestions, 'margin-top')
+      // // absolute/fixed positioned elements are positioned according to their entire box including margins; so we remove margins here:
+      // left -= getComputedStyleLengthProp(suggestions, 'margin-left')
+      // top -= getComputedStyleLengthProp(suggestions, 'margin-top')
       // take into account highlighter/textinput scrolling:
-      left -= highlighter.scrollLeft
-      top -= highlighter.scrollTop
+      // left -= highlighter.scrollLeft
+      // top -= highlighter.scrollTop
       // guard for mentions suggestions list clipped by right edge of window
       const viewportWidth = Math.max(
         document.documentElement.clientWidth,

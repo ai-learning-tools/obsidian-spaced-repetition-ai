@@ -1,6 +1,5 @@
 import React, { Children, useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
-import { inline } from 'substyle'
 import { defaultStyle } from './utils'
 
 import { getSuggestionHtmlId } from './utils'
@@ -12,10 +11,6 @@ function SuggestionsOverlay({
   suggestions = {},
   a11ySuggestionsListLabel,
   focusIndex,
-  position,
-  left,
-  right,
-  top,
   scrollFocusedIntoView,
   isLoading,
   isOpened,
@@ -130,8 +125,10 @@ function SuggestionsOverlay({
   }
 
   return (
+    // TODO: Athena - remove this 
     <div
-      {...inline({ position: position || 'absolute', left, right, top }, style)}
+      { ...style }
+      className='w-full'
       onMouseDown={onMouseDown}
       ref={containerRef}
     >
