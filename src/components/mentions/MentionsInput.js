@@ -18,6 +18,7 @@ import {
   omit,
   getSuggestionHtmlId,
 } from './utils'
+import Mention from '@/components/mentions/Mention'; 
 
 import Highlighter from './Highlighter'
 import PropTypes from 'prop-types'
@@ -83,6 +84,7 @@ const propTypes = {
   onSelect: PropTypes.func,
   onBlur: PropTypes.func,
   onChange: PropTypes.func,
+  onRemove: PropTypes.func, // Added onRemove prop
   suggestionsPortalHost:
     typeof Element === 'undefined'
       ? PropTypes.any
@@ -113,6 +115,7 @@ class MentionsInput extends React.Component {
     onKeyDown: () => null,
     onSelect: () => null,
     onBlur: () => null,
+    onRemove: () => null, // Added default onRemove
   }
 
   constructor(props) {
@@ -138,6 +141,12 @@ class MentionsInput extends React.Component {
       suggestionsPosition: {},
 
       setSelectionAfterHandlePaste: false,
+    }
+  }
+
+  handleRemoveMention = (id) => {
+    if (this.props.onRemove) {
+      this.props.onRemove(id);
     }
   }
 
@@ -497,6 +506,12 @@ class MentionsInput extends React.Component {
       newPlainTextValue,
       getMentions(value, config)
     )
+
+    // Call onRemove for each mention that was removed
+    const removedMentions = getMentions(value.slice(markupStartIndex, markupEndIndex), config)
+    removedMentions.forEach(mention => {
+      this.props.onRemove(mention.id, mention.display)
+    })
   }
 
   // Handle input element's change event
