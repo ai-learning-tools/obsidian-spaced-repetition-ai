@@ -5,13 +5,22 @@ import * as React from 'react';
 import { Root, createRoot } from 'react-dom/client';
 import SRPlugin from '@/main';
 import ChatSegment from '@/components/ChatSegment'
+import SharedState from '@/sharedState';
+import ChainManager from '@/LLM/chainManager';
+import { SRSettings } from './SettingsPage';
 
 export default class CopilotView extends ItemView {
+  private sharedState: SharedState;
+  private chainManager: ChainManager;
+  private debug = true;
+
   private root: Root | null = null;
 
   constructor(leaf: WorkspaceLeaf, private plugin: SRPlugin) {
     super(leaf);
     this.plugin = plugin;
+    this.sharedState = plugin.sharedState;
+    this.chainManager = plugin.chainManager;
   }
 
   getViewType(): string {
@@ -47,7 +56,12 @@ export default class CopilotView extends ItemView {
     const root = createRoot(this.containerEl.children[1]);
     root.render(
       <React.StrictMode>
-        <ChatSegment plugin={this.plugin}/>
+        <ChatSegment 
+        plugin={this.plugin}
+        sharedState={this.sharedState}
+        chainManager={this.chainManager}
+        debug={this.debug}
+        />
       </React.StrictMode>
     );
   }

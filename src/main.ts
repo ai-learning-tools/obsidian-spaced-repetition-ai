@@ -1,18 +1,41 @@
 import { App, Editor, MarkdownView, Modal, Plugin, TFile, WorkspaceLeaf} from 'obsidian';
-import { CHAT_VIEWTYPE, DEFAULT_SETTINGS } from '@/constants';
+import { CHAT_VIEWTYPE, DEFAULT_SETTINGS, PROXY_SERVER_PORT, DEFAULT_SYSTEM_PROMPT } from '@/constants';
 import ChatView from '@/components/ChatView';
 import { SRSettingTab, SRSettings } from './components/SettingsPage';
 import './tailwind.css';
+import ChainManager from '@/LLM/chainManager';
+import { LangChainParams, SetChainOptions } from '@/aiParams';
+import EncryptionService from '@/encryptionService';
+import { ProxyServer } from '@/proxyServer';
+import SharedState from '@/sharedState';
 // Remember to rename these classes and interfaces!
 
 export default class SRPlugin extends Plugin {
 	settings: SRSettings;
+	sharedState: SharedState;
 	chatIsVisible = false;
 	activateViewPromise: Promise<void> | null = null;
+	chainManager: ChainManager;
+	encryptionService: EncryptionService;
+	proxyServer: ProxyServer;
 
-	async onload() {
+	async onload(): Promise<void> {
+		
 		await this.loadSettings();
 		this.addSettingTab(new SRSettingTab(this.app, this));
+		this.proxyServer = new ProxyServer(PROXY_SERVER_PORT);
+		this.sharedState = new SharedState();
+		const langChainParams = this.getChainManagerParams();
+		this.encryptionService = new EncryptionService(this.settings);
+
+		this.chainManager = new ChainManager(
+			this.app,
+			langChainParams,
+			this.encryptionService,
+			this.settings
+		);
+
+		await this.saveSettings();
 
 		this.addCommand({
 			id: "chat-toggle-window",
@@ -100,6 +123,7 @@ export default class SRPlugin extends Plugin {
 	}
 
 	async saveSettings() {
+		this.encryptionService.encryptAllKeys();
 		await this.saveData(this.settings);
 	}
 
@@ -126,6 +150,28 @@ export default class SRPlugin extends Plugin {
 	async deactivateView() {
 		this.app.workspace.detachLeavesOfType(CHAT_VIEWTYPE);
 		this.chatIsVisible = false;
+	}
+
+	getChainManagerParams(): LangChainParams {
+		const {
+			defaultModel,
+			defaultModelDisplayName,
+			openAIApiKey,
+			anthropicApiKey,
+			googleApiKey
+		} = this.settings;
+		return {
+			model: defaultModel,
+			modelDisplayName: defaultModelDisplayName,
+			temperature: 0.1,
+			maxTokens: 3000,
+			chatContextTurns: 15,
+			openAIApiKey,
+			anthropicApiKey,
+			googleApiKey,
+			systemMessage: DEFAULT_SYSTEM_PROMPT,
+			options: { forceNewCreation: true } as SetChainOptions,
+		};
 	}
 
 	async getFilesInVault() {

@@ -1,28 +1,50 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
-import { ChatModels, ChatModelDisplayNames } from '@/constants';
+import { ChatModels, ChatModelDisplayNames, USER_SENDER } from '@/constants';
 import SRPlugin from '@/main';
 import { TFile } from 'obsidian';
-import defaultStyle from '@/components/defaultStyle';
 import MentionsInput from '@/components/mentions/MentionsInput';
 import Mention from '@/components/mentions/Mention'; // Fixed import path
-
+import defaultStyle from '@/components/defaultStyle'
+import SharedState, { useSharedState, ChatMessage } from '@/sharedState';
+import ChainManager from '@/LLM/chainManager';
+import { useAIState } from '@/aiState';
+import { extractNoteTitles, getNoteFileFromTitle, getFileContent } from '@/utils';
+import { getAIResponse } from '@/langChainStream';
 interface ChatSegmentProps {
   plugin: SRPlugin;
+  sharedState: SharedState;
+  chainManager: ChainManager;
+  debug: boolean
 }
 
-const ChatSegment: React.FC<ChatSegmentProps> = ({ plugin }) => {
+
+const ChatSegment: React.FC<ChatSegmentProps> = ({ 
+  plugin,
+  sharedState,
+  chainManager,
+  debug
+}) => {
+  const [
+    chatHistory, addMessage, clearMessages
+  ] = useSharedState(sharedState);
+  const [
+    currentModel, setModel, clearChatMemory
+  ] = useAIState(chainManager);
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
+  const [currentAiMessage, setCurrentAiMessage] = useState('');
   const [message, setMessage] = useState<string>('');
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [selectedModel, setSelectedModel] = useState<string>(ChatModels.GPT_35_TURBO);
   const [files, setFiles] = useState<TFile[]>([]);
   const [mentionedFiles, setMentionedFiles] = useState<TFile[]>([]);
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const fetchFiles = async () => {
       const filesInVault = await plugin.getFilesInVault();
       setFiles(filesInVault);
-      console.log('DEBUG-Athena', "files in vault", filesInVault);
+      console.log('DEBUG-Athena2', filesInVault);
     };
     fetchFiles();
   }, [plugin]);
@@ -49,6 +71,47 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({ plugin }) => {
     setMentionedFiles(newMentionedFiles);
   };
 
+  // dummy function for now to demonstrate streaming
+  const handleSendMessage = async () => {
+    const inputMessage = "What's the meaning of life?";
+
+    let processedUserMessage = inputMessage;
+
+    const noteTitles = extractNoteTitles(inputMessage);
+    for (const noteTitle of noteTitles) {
+      const noteFile = await getNoteFileFromTitle(plugin.app.vault, noteTitle);
+      if (noteFile) {
+        const noteContent = await getFileContent(noteFile, plugin.app.vault);
+        processedUserMessage = `${processedUserMessage}\n\n[[${noteTitle}]]: \n${noteContent}`;
+      }
+    }
+
+    const userMessage: ChatMessage = {
+      message: inputMessage,
+      sender: USER_SENDER,
+      isVisible: true,
+    };
+
+    const promptMessageHidden: ChatMessage = {
+      message: processedUserMessage,
+      sender: USER_SENDER,
+      isVisible: false,
+    };
+
+    // Add message to chat history
+    addMessage(userMessage);
+    addMessage(promptMessageHidden);
+
+    await getAIResponse(
+      promptMessageHidden,
+      chainManager,
+      addMessage,
+      setCurrentAiMessage,
+      setAbortController,
+      { debug },
+    );
+  }
+
   return (
     <div className="w-full flex flex-col">
       <div>
@@ -62,10 +125,6 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({ plugin }) => {
           <Mention
             trigger="@"
             data={files.map((file) => ({ id: file.path, display: file.path }))}
-            appendSpaceOnAdd={true}
-            style={defaultStyle}
-            markup="@[__display__](__id__)"
-            displayTransform={(id, display) => `@${display}`}
             onAdd={(id) => handleMentionAdd(id)}
           />
         </MentionsInput>
@@ -105,7 +164,8 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({ plugin }) => {
           </ul>
         </div>
       }
-
+      <button onClick={handleSendMessage}>SEND MESSAGE, SEE IN CONSOLE</button>
+      <div>{currentAiMessage}</div>
     </div>
   );
 };

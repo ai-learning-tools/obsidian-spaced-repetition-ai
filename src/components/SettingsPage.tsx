@@ -1,17 +1,19 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import MyPlugin from "@/main";
+import SRPlugin from "@/main";
+import { ChatModels, ChatModelDisplayNames, MODEL_TO_DISPLAY_NAME } from "@/constants";
+
 export interface SRSettings {
-  defaultModel: string;
-  defaultModelDisplayName: string;
+  defaultModel: ChatModels;
+  defaultModelDisplayName: ChatModelDisplayNames;
   openAIApiKey: string;
   anthropicApiKey: string;
   googleApiKey: string;
 }
 
 export class SRSettingTab extends PluginSettingTab {
-  plugin: MyPlugin;
+  plugin: SRPlugin;
 
-  constructor(app: App, plugin: MyPlugin) {
+  constructor(app: App, plugin: SRPlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }
@@ -23,11 +25,13 @@ export class SRSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Default Model')
       .addDropdown(dropdown => dropdown
+				.addOptions(MODEL_TO_DISPLAY_NAME)
 				.setValue(this.plugin.settings.defaultModel)
-				.onChange(async (value) => {
+				.onChange(async (value: ChatModels) => {
 					this.plugin.settings.defaultModel = value;
+					this.plugin.settings.defaultModelDisplayName = MODEL_TO_DISPLAY_NAME[value];
 					await this.plugin.saveSettings();
-      }));
+				}));
 
     new Setting(containerEl)
       .setName('OpenAI API Key')
