@@ -628,6 +628,8 @@ class MentionsInput extends React.Component {
 
   handleKeyDown = (ev) => {
     // do not intercept key events if the suggestions overlay is not shown
+
+    console.log("key down detected")
     const suggestionsCount = countSuggestions(this.state.suggestions)
 
     if (suggestionsCount === 0 || !this.suggestionsElement) {
@@ -758,7 +760,7 @@ class MentionsInput extends React.Component {
       top: caretPosition.top + caretHeight,
     }
 
-    console.log("DEBUG-ATHENA", viewportRelative)
+    // console.log("DEBUG-ATHENA", viewportRelative)
 
     const viewportHeight = Math.max(
       document.documentElement.clientHeight,
@@ -773,7 +775,7 @@ class MentionsInput extends React.Component {
 
     // if suggestions menu is in a portal, update position to be releative to its portal node
     if (suggestionsPortalHost) {
-      console.log("DEEBUG-ATHENA", "suggestion portal")
+      // console.log("DEEBUG-ATHENA", "suggestion portal")
       position.position = 'fixed'
       let left = viewportRelative.left
       let top = viewportRelative.top
