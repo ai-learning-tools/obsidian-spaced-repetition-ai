@@ -1,4 +1,19 @@
-import { SRSettings } from "@/components/SettingsPage";
+import { SRSettings } from "@/settings";
+
+export const PREFERRED_DATE_FORMAT = "YYYY-MM-DD";
+export const ALLOWED_DATE_FORMATS = [PREFERRED_DATE_FORMAT, "DD-MM-YYYY", "ddd MMM DD YYYY"];
+
+export const YAML_FRONT_MATTER_REGEX = /^---\r?\n((?:.*\r?\n)*?)---/;
+
+export const SR_HTML_COMMENT_BEGIN = "<!--SR:";
+export const SR_HTML_COMMENT_END = "-->";
+
+
+export const MULTI_SCHEDULING_EXTRACTOR = /!([\d-]+),(\d+),(\d+)/gm;
+export const LEGACY_SCHEDULING_EXTRACTOR = /<!--SR:([\d-]+),(\d+),(\d+)-->/gm;
+export const OBSIDIAN_TAG_AT_STARTOFLINE_REGEX = /^#[^\s#]+/gi;
+export const OBSIDIAN_BLOCK_ID_ENDOFLINE_REGEX = / (\^[a-zA-Z0-9-]+)$/;
+export const TICKS_PER_DAY = 24 * 3600 * 1000;
 
 export enum ViewTypes {
   CHAT = "sr-chat-view",
@@ -73,6 +88,10 @@ export const DEFAULT_SETTINGS: SRSettings = {
   openAIApiKey: "",
   anthropicApiKey: "",
   googleApiKey: "",
+  convertFoldersToDecks: true,
+	noteFoldersToIgnore: [],
+	flashcardTags: [],
+	tagsToReview: [],
 };
 
 export enum ModelProviders {

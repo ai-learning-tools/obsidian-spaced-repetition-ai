@@ -29,11 +29,30 @@ export default class ReviewView extends ItemView {
     return 'Review';
   }
 
+  toggleAnswer(): void {
+    if (document.getElementById('answer')?.hasClass('hidden')) {
+      document.getElementById('answer')?.removeClass('hidden');
+    } else {
+      document.getElementById('answer')?.addClass('hidden');
+    }
+  }
+
   async onOpen(): Promise<void> {
     const root = createRoot(this.containerEl.children[1]);
     root.render(
       <React.StrictMode>
-        <div>Meowwwww</div>
+        <div onClick={this.toggleAnswer}>
+          <div>Review</div>
+          <p>question</p>
+          <div id="answer" className='hidden'>
+            <p>---</p>
+            <p>answer</p>
+          </div>
+          <button>again</button>
+          <button>hard</button>
+          <button>good</button>
+          <button>easy</button>
+        </div>
       </React.StrictMode>
     )
   }

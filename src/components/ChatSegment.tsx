@@ -8,7 +8,7 @@ import defaultStyle from '@/components/defaultStyle'
 import SharedState, { useSharedState, ChatMessage } from '@/sharedState';
 import ChainManager from '@/LLM/chainManager';
 import { useAIState } from '@/aiState';
-import { extractNoteTitles, getNoteFileFromTitle, getFileContent } from '@/utils';
+import { extractNoteTitles, getNoteFileFromTitle, getFileContent } from '@/utils/utils';
 import { getAIResponse } from '@/langChainStream';
 
 interface ChatSegmentProps {

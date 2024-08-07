@@ -1,7 +1,7 @@
 import { App, Editor, MarkdownView, Modal, Plugin, WorkspaceLeaf} from 'obsidian';
 import { ViewTypes, DEFAULT_SETTINGS, DEFAULT_SYSTEM_PROMPT, PROXY_SERVER_PORT } from '@/constants';
 import ChatView from '@/components/ChatView';
-import ReviewView from '@/components/ReviewView';
+import ReviewView from '@/components/review/ReviewView';
 import { SRSettingTab, SRSettings } from '@/components/SettingsPage';
 import '@/tailwind.css';
 import ChainManager from '@/LLM/chainManager';
@@ -9,6 +9,7 @@ import { LangChainParams, SetChainOptions } from '@/aiParams';
 import EncryptionService from '@/encryptionService';
 import { ProxyServer } from '@/proxyServer';
 import SharedState from '@/sharedState';
+import { Deck } from './sr/deck';
 
 export default class SRPlugin extends Plugin {
 	settings: SRSettings;
@@ -18,6 +19,8 @@ export default class SRPlugin extends Plugin {
 	chainManager: ChainManager;
 	encryptionService: EncryptionService;
 	proxyServer: ProxyServer;
+
+	deckTree: Deck = new Deck("root", null);
 
 	async onload(): Promise<void> {
 		

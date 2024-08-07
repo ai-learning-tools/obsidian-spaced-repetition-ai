@@ -366,11 +366,17 @@ video {
 .relative {
   position: relative;
 }
+.block {
+  display: block;
+}
 .inline-block {
   display: inline-block;
 }
 .flex {
   display: flex;
+}
+.hidden {
+  display: none;
 }
 .h-40 {
   height: 10rem;
