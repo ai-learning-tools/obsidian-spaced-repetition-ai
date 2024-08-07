@@ -64,10 +64,9 @@ export default class ChainManager {
 
   async setChain(options: SetChainOptions = {}): Promise<void> {
     try {
+      // debugger;
       if (
-        !this.chatModelManager.validateChatModel(
-          this.chatModelManager.getChatModel(),
-        )
+        !this.chatModelManager.getChatModel()
       ) {
         throw Error("No chat model set");
       }
@@ -122,10 +121,9 @@ export default class ChainManager {
     } = {},
   ) {
     const { debug = false, ignoreSystemMessage = false } = options;
-
-    if (!this.chatModelManager.validateChatModel(
-      this.chatModelManager.getChatModel(),
-    )) {
+    console.log(this.chatModelManager.getChatModel());
+    // debugger;
+    if (!this.chatModelManager.getChatModel()) {
       const errorMsg = "Chat model is not initialized properly, check your API key and make sure you have API access";
 
       new Notice(errorMsg);

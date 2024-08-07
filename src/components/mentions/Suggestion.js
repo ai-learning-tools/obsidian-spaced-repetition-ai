@@ -67,7 +67,9 @@ function Suggestion({
   }
 
   return (
-    <li id={id} role="option" aria-selected={focused} {...rest} {...style}>
+    <li id={id} role="option" aria-selected={focused} {...rest} {...style}
+      className={`${focused ? 'bg-slate-100' : 'bg-white'} py-1`}
+    >
       {renderContent()}
     </li>
   )
