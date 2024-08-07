@@ -37,19 +37,19 @@ export class SRSettingTab extends PluginSettingTab {
       .setName('OpenAI API Key')
 			.addText(text => text
 				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.openAIApiKey)
+				.setValue(this.plugin.settings.openAIApiKey ? '•'.repeat(16) : '')
 				.onChange(async (value) => {
 					this.plugin.settings.openAIApiKey = value;
 					await this.plugin.saveSettings();
 				}));
-    
+				
     new Setting(containerEl)
       .setName('Anthropic API Key')
 			.addText(text => text
 				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.anthropicApiKey)
+				.setValue(this.plugin.settings.anthropicApiKey ? '•'.repeat(16) : '')
 				.onChange(async (value) => {
-					this.plugin.settings.openAIApiKey = value;
+					this.plugin.settings.anthropicApiKey = value;
 					await this.plugin.saveSettings();
 				}));
 
@@ -57,9 +57,9 @@ export class SRSettingTab extends PluginSettingTab {
       .setName('Google API Key')
 			.addText(text => text
 				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.googleApiKey)
+				.setValue(this.plugin.settings.googleApiKey ? '•'.repeat(16) : '')
 				.onChange(async (value) => {
-					this.plugin.settings.openAIApiKey = value;
+					this.plugin.settings.googleApiKey = value;
 					await this.plugin.saveSettings();
 				}));
   }

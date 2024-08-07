@@ -30,11 +30,13 @@ export default class EncryptionService {
   }
 
   public encryptAllKeys(): void {
-    const keysToEncrypt = Object.keys(this.settings).filter((key) => key.toLowerCase().includes("apikey".toLowerCase()))
+    const keysToEncrypt = Object.keys(this.settings).filter((key) => key.toLowerCase().includes("apikey"));
 
     for (const key of keysToEncrypt) {
       const apiKey = this.settings[key as keyof SRSettings] as string;
-      (this.settings[key as keyof SRSettings] as any)  = this.getEncryptedKey(apiKey);
+      if (apiKey.length > 0) {
+        (this.settings[key as keyof SRSettings] as any)  = this.getEncryptedKey(apiKey);
+      }
     }
   }
 
