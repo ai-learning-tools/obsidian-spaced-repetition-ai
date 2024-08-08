@@ -21,4 +21,9 @@ data.json
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
 
+# Package lock
 package-lock.json
+
+# Auto-generated css
+main.css
+styles.css
