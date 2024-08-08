@@ -1,6 +1,6 @@
 import { TFile, Vault } from "obsidian";
 import { Moment } from "moment";
-import { PREFERRED_DATE_FORMAT, YAML_FRONT_MATTER_REGEX } from "@/constants";
+import { PREFERRED_DATE_FORMAT } from "@/constants";
 
 type Hex = number;
 
@@ -20,6 +20,14 @@ export function stringTrimStart(str: string): [string, string] {
   const wsCount: number = str.length - trimmed.length;
   const ws: string = str.substring(0, wsCount);
   return [ws, trimmed];
+}
+
+export function extractNoteTitles(query: string) {
+  // Use a regular expression to extract note titles wrapped in [[]]
+  const regex = /\[\[(.*?)\]\]/g;
+  const matches = query.match(regex);
+  const uniqueTitles = new Set(matches ? matches.map((match) => match.slice(2, -2)) : []);
+  return Array.from(uniqueTitles);
 }
 
 // 👇️ format as "YYYY-MM-DD"

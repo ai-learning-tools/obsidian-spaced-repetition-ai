@@ -48,6 +48,7 @@ export default class ReviewView extends ItemView {
   }
 
   async onOpen(): Promise<void> {
+    await this.deckTree.updateDeck();
     const root = createRoot(this.containerEl.children[1]);
     root.render(
       <React.StrictMode>
@@ -62,6 +63,24 @@ export default class ReviewView extends ItemView {
           <button>hard</button>
           <button>good</button>
           <button>easy</button>
+        </div>
+        <div>
+          <h2>Deck: {this.deckTree.path}</h2>
+          <p>New cards: {this.deckTree.newCards.length}</p>
+          <p>{JSON.stringify(this.deckTree.newCards)}</p>
+          <p>Learning cards: {this.deckTree.learningCards.length}</p>
+          <p>Due cards: {this.deckTree.dueCards.length}</p>
+          <p>Subdecks: {this.deckTree.subdecks.length}</p>
+          
+          <h3>Subdecks:</h3>
+          {this.deckTree.subdecks.map((subdeck, index) => (
+            <div key={index}>
+              <h4>Subdeck: {subdeck.path}</h4>
+              <p>New cards: {subdeck.newCards.length}</p>
+              <p>Learning cards: {subdeck.learningCards.length}</p>
+              <p>Due cards: {subdeck.dueCards.length}</p>
+            </div>
+          ))}
         </div>
       </React.StrictMode>
     )

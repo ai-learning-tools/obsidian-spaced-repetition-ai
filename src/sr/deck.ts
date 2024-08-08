@@ -39,6 +39,12 @@ export class Deck {
         errorMessage('Deck not initialized properly');
         return;
       }
+      // Reset arrays before updating
+      this.newCards = [];
+      this.learningCards = [];
+      this.dueCards = [];
+      this.subdecks = [];
+
       const folders = await this.vault.getAllFolders();
       this.files = await this.vault.getMarkdownFiles().filter(file => file.path.startsWith(this.path));
       
@@ -83,7 +89,7 @@ export class Deck {
           console.log('New cards:', subdeck.newCards.length);
           console.log('Learning cards:', subdeck.learningCards.length);
           console.log('Due cards:', subdeck.dueCards.length);
-        });
+        }); 
 
       }
     }
