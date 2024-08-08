@@ -10,7 +10,9 @@ import SharedState, { useSharedState, ChatMessage } from '@/sharedState';
 import ChainManager from '@/LLM/chainManager';
 import { useAIState } from '@/aiState';
 import { extractNoteTitles, getNoteFileFromTitle, getFileContent } from '@/utils';
-import { getAIResponse } from '@/langChainStream';
+import { EnterIcon } from '@/components/Icons'
+
+// import { getAIResponse } from '@/langChainStream';
 interface ChatSegmentProps {
   plugin: SRPlugin;
   sharedState: SharedState;
@@ -36,9 +38,11 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
   const [message, setMessage] = useState<string>('');
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [selectedModel, setSelectedModel] = useState<string>(ChatModels.GPT_35_TURBO);
   const [files, setFiles] = useState<TFile[]>([]);
   const [mentionedFiles, setMentionedFiles] = useState<TFile[]>([]);
+
+  // To keep track if LLM is generatingf
+  const [setIsGenerating, isGenerating] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -72,7 +76,12 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
   };
 
   // dummy function for now to demonstrate streaming
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!(event.key === 'Enter' && !event.shiftKey)) {
+      return    
+    }
+    
+    event.preventDefault(); // Prevents adding a newline to the textarea
     const inputMessage = "What's the meaning of life?";
 
     let processedUserMessage = inputMessage;
@@ -102,14 +111,14 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
     addMessage(userMessage);
     addMessage(promptMessageHidden);
 
-    await getAIResponse(
-      promptMessageHidden,
-      chainManager,
-      addMessage,
-      setCurrentAiMessage,
-      setAbortController,
-      { debug },
-    );
+    // await getAIResponse(
+    //   promptMessageHidden,
+    //   chainManager,
+    //   addMessage,
+    //   setCurrentAiMessage,
+    //   setAbortController,
+    //   { debug },
+    // );
   }
 
   return (
@@ -120,6 +129,7 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
           onChange={handleMentionsChange}
           className="w-full resize-none p-2 height-auto overflow-hidden"
           placeholder="Type your message"
+          onKeyDown={handleSendMessage}
           suggestionsPortalHost={containerRef.current}
         >
           <Mention
@@ -129,12 +139,12 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
           />
         </MentionsInput>
       </div>
-      <div className="flex flex-row align-center justify-start space-x-4 text-gray-400">
+      <div className="flex flex-row items-center justify-start space-x-4 text-gray-400">
         <select
-          value={selectedModel}
-          onChange={(e) => setSelectedModel(e.target.value)}
+          value={currentModel}
+          onChange={(e) => setModel(e.target.value)}
           className="text-center"
-          style={{ width: `${selectedModel.length}ch` }}
+          style={{ width: `${currentModel.length}ch` }}
         >
           {Object.entries(ChatModelDisplayNames).map(([key, displayName]) => (
             <option key={key} value={key}>
@@ -144,6 +154,7 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
         </select>
         <p>/ Command</p>
         <p>@ Mention</p>
+        <div className='flex flex-row items-center space-x-2'> <EnterIcon /> <p>Enter</p> </div>
       </div>
 
       <div
@@ -164,6 +175,7 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
           </ul>
         </div>
       }
+      <div>{currentModel}</div>
       <button onClick={handleSendMessage}>SEND MESSAGE, SEE IN CONSOLE</button>
       <div>{currentAiMessage}</div>
     </div>
