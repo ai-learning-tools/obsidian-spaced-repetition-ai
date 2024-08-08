@@ -6,10 +6,10 @@ export default class MemoryManager {
   private memory: BaseChatMemory;
 
   private constructor(
-    private langChainParams: LangChainParams
+    private chatContextTurns: number
   ) {
     this.memory = new BufferWindowMemory({
-      k: this.langChainParams.chatContextTurns * 2,
+      k: chatContextTurns * 2,
       memoryKey: 'history',
       inputKey: 'input',
       returnMessages: true,
@@ -17,11 +17,18 @@ export default class MemoryManager {
   }
 
   static getInstance(
-    langChainParams: LangChainParams
+    chatContextTurns: number
   ): MemoryManager {
     if (!MemoryManager.instance) {
-      MemoryManager.instance = new MemoryManager(langChainParams);
+      MemoryManager.instance = new MemoryManager(chatContextTurns);
     }
+    return MemoryManager.instance;
+  }
+
+  static resetInstance(
+    chatContextTurns: number
+  ): MemoryManager {
+    MemoryManager.instance = new MemoryManager(chatContextTurns);
     return MemoryManager.instance;
   }
 

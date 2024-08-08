@@ -55,7 +55,9 @@ export const OPENAI_MODELS = [
   ChatModelDisplayNames.GPT_35_TURBO,
   ChatModelDisplayNames.GPT_4,
   ChatModelDisplayNames.GPT_4_TURBO,
-  ChatModelDisplayNames.GPT_4_32K
+  ChatModelDisplayNames.GPT_4_32K,
+  ChatModelDisplayNames.GPT_4o,
+  ChatModelDisplayNames.GPT_4o_MINI
 ];
 
 export const GOOGLE_MODELS = [

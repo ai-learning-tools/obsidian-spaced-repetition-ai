@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Plugin, WorkspaceLeaf} from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Plugin, WorkspaceLeaf } from 'obsidian';
 import { ViewTypes, DEFAULT_SETTINGS, DEFAULT_SYSTEM_PROMPT, PROXY_SERVER_PORT } from '@/constants';
 import ChatView from '@/components/ChatView';
 import ReviewView from '@/components/review/ReviewView';
@@ -6,7 +6,7 @@ import { SRSettingTab, SRSettings } from '@/components/SettingsPage';
 import '@/tailwind.css';
 import ChainManager from '@/LLM/chainManager';
 import { LangChainParams, SetChainOptions } from '@/aiParams';
-import EncryptionService from '@/encryptionService';
+import EncryptionService from '@/utils/encryptionService';
 import { ProxyServer } from '@/proxyServer';
 import SharedState from '@/sharedState';
 import { Deck } from './sr/deck';
@@ -17,7 +17,6 @@ export default class SRPlugin extends Plugin {
 	chatIsVisible = false;
 	activateViewPromise: Promise<void> | null = null;
 	chainManager: ChainManager;
-	encryptionService: EncryptionService;
 	proxyServer: ProxyServer;
 
 	deckTree: Deck = new Deck("root", null);
@@ -28,14 +27,10 @@ export default class SRPlugin extends Plugin {
 		this.addSettingTab(new SRSettingTab(this.app, this));
 		this.proxyServer = new ProxyServer(PROXY_SERVER_PORT);
 		this.sharedState = new SharedState();
+		
 		const langChainParams = this.getChainManagerParams();
-		this.encryptionService = new EncryptionService(this.settings);
-
 		this.chainManager = new ChainManager(
-			this.app,
-			langChainParams,
-			this.encryptionService,
-			this.settings
+			langChainParams
 		);
 
 		await this.saveSettings();
@@ -139,7 +134,9 @@ export default class SRPlugin extends Plugin {
 	}
 
 	async saveSettings() {
-		this.encryptionService.encryptAllKeys();
+		this.settings = EncryptionService.encryptAllKeys(this.settings);
+		const langChainParams = this.getChainManagerParams();
+		this.chainManager.resetParams(langChainParams);
 		await this.saveData(this.settings);
 	}
 

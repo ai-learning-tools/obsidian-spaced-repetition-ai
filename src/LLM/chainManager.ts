@@ -1,6 +1,6 @@
 import { LangChainParams, SetChainOptions } from "@/aiParams";
 import { SRSettings } from "@/components/SettingsPage";
-import EncryptionService from "@/encryptionService";
+import EncryptionService from "@/utils/encryptionService";
 import { App, Notice } from "obsidian";
 import ChatModelManager from "./chatModelManager";
 import { RunnableSequence } from "@langchain/core/runnables";
@@ -13,31 +13,32 @@ import ChainFactory from "@/chainFactory";
 export default class ChainManager {
   private static chain: RunnableSequence;
 
-  private app: App;
-  private settings: SRSettings;
-  private encryptionService: EncryptionService;
   public chatModelManager: ChatModelManager;
   public memoryManager: MemoryManager;
   public langChainParams: LangChainParams;
 
   constructor(
-    app: App,
-    langChainParams: LangChainParams,
-    encryptionService: EncryptionService,
-    settings: SRSettings,
+    langChainParams: LangChainParams
   ) {
-    this.app = app;
     this.langChainParams = langChainParams;
-    this.encryptionService = encryptionService;
-    this.settings = settings;
-    this.chatModelManager = ChatModelManager.getInstance(
-      this.langChainParams,
-      encryptionService
+    this.chatModelManager = ChatModelManager.getInstance( 
+      this.langChainParams
     ); 
-    this.memoryManager = MemoryManager.getInstance(this.langChainParams);
+    this.memoryManager = MemoryManager.getInstance(this.langChainParams.chatContextTurns);
 
     this.createChainWithNewModel(this.langChainParams.modelDisplayName);
   }
+
+  resetParams(langChainParams: LangChainParams): void {
+    if (langChainParams !== undefined) {
+      this.langChainParams = langChainParams;
+    }
+    this.chatModelManager = ChatModelManager.resetInstance( 
+      this.langChainParams
+    ); 
+    this.memoryManager = MemoryManager.resetInstance(this.langChainParams.chatContextTurns);
+    this.createChainWithNewModel(this.langChainParams.modelDisplayName);
+  }  
   
   /**
    * Update the active model and create a new chain
@@ -45,6 +46,7 @@ export default class ChainManager {
    */
   createChainWithNewModel(newModelDisplayName: ChatModelDisplayNames): void {
     try {
+      console.log("DEBUG-ATH", newModelDisplayName)
       let newModel = DISPLAY_NAME_TO_MODEL[newModelDisplayName];
       this.langChainParams.model = newModel;
       this.langChainParams.modelDisplayName = newModelDisplayName;
@@ -63,12 +65,11 @@ export default class ChainManager {
 
   async setChain(options: SetChainOptions = {}): Promise<void> {
     try {
-      if (
-        !this.chatModelManager.validateChatModel(
-          this.chatModelManager.getChatModel(),
-        )
-      ) {
-        throw Error("No chat model set");
+      if (!this.chatModelManager.getChatModel()) {
+        const errorMsg = "Chat model is not initialized properly, check your API key and make sure you have API access";
+        new Notice(errorMsg);
+        console.error(errorMsg);
+        return;
       }
       
       const chatModel = this.chatModelManager.getChatModel();
@@ -122,9 +123,7 @@ export default class ChainManager {
   ) {
     const { debug = false, ignoreSystemMessage = false } = options;
 
-    if (!this.chatModelManager.validateChatModel(
-      this.chatModelManager.getChatModel(),
-    )) {
+    if (!this.chatModelManager.getChatModel()) {
       const errorMsg = "Chat model is not initialized properly, check your API key and make sure you have API access";
 
       new Notice(errorMsg);
