@@ -33,8 +33,6 @@
 		"esbuild-plugin-svgr": "^2.1.0",
 		"esbuild-postcss": "^0.0.4",
 		"invariant": "^2.2.4",
-		"autoprefixer": "^10.4.19",
-		"esbuild-postcss": "^0.0.4",
 		"koa": "^2.14.2",
 		"koa-proxies": "^0.12.3",
 		"langchain": "^0.0.212",

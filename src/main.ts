@@ -2,14 +2,16 @@ import { App, Editor, MarkdownView, Modal, Plugin, WorkspaceLeaf } from 'obsidia
 import { ViewTypes, DEFAULT_SETTINGS, DEFAULT_SYSTEM_PROMPT, PROXY_SERVER_PORT } from '@/constants';
 import ChatView from '@/components/ChatView';
 import ReviewView from '@/components/review/ReviewView';
-import { SRSettingTab, SRSettings } from '@/components/SettingsPage';
+import { SRSettingTab } from '@/components/SettingsPage';
+import { SRSettings } from './settings';
 import '@/tailwind.css';
 import ChainManager from '@/LLM/chainManager';
 import { LangChainParams, SetChainOptions } from '@/aiParams';
 import EncryptionService from '@/utils/encryptionService';
 import { ProxyServer } from '@/proxyServer';
 import SharedState from '@/sharedState';
-import { Deck } from './sr/deck';
+import { Deck } from './sr/Deck';
+import { DeckIterator } from './sr/DeckIterator';
 
 export default class SRPlugin extends Plugin {
 	settings: SRSettings;
@@ -19,7 +21,8 @@ export default class SRPlugin extends Plugin {
 	chainManager: ChainManager;
 	proxyServer: ProxyServer;
 
-	deckTree: Deck = new Deck("root", null);
+	deckTree: Deck;
+	deckIterator: DeckIterator;
 
 	async onload(): Promise<void> {
 		
@@ -27,6 +30,9 @@ export default class SRPlugin extends Plugin {
 		this.addSettingTab(new SRSettingTab(this.app, this));
 		this.proxyServer = new ProxyServer(PROXY_SERVER_PORT);
 		this.sharedState = new SharedState();
+
+		this.deckTree = new Deck("", this.app.vault, null);
+		this.deckIterator = new DeckIterator(this.deckTree);
 		
 		const langChainParams = this.getChainManagerParams();
 		this.chainManager = new ChainManager(

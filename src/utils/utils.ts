@@ -28,35 +28,12 @@ export function formatDate_YYYY_MM_DD(ticks: Moment): string {
   return ticks.format(PREFERRED_DATE_FORMAT);
 }
 
-export function literalStringReplace(
-  text: string,
-  searchStr: string,
-  replacementStr: string,
-): string {
-  let result: string = text;
-  const startIdx: number = text.indexOf(searchStr);
-  if (startIdx >= 0) {
-      const startStr: string = text.substring(0, startIdx);
-      const endIdx: number = startIdx + searchStr.length;
-      const endStr: string = text.substring(endIdx);
-      result = startStr + replacementStr + endStr;
+export function genHexString(len: number) {
+  let output = '';
+  for (let i = 0; i < len; ++i) {
+      output += (Math.floor(Math.random() * 16)).toString(16);
   }
-  return result;
-}
-
-
-export function splitTextIntoLineArray(text: string): string[] {
-  return text.replaceAll("\r\n", "\n").split("\n");
-}
-
-export function extractNoteTitles(query: string): string[] {
-  // Use a regular expression to extract note titles wrapped in [[]]
-  const regex = /\[\[(.*?)\]\]/g;
-  const matches = query.match(regex);
-  const uniqueTitles = new Set(
-    matches ? matches.map((match) => match.slice(2, -2)) : []
-  );
-  return Array.from(uniqueTitles);
+  return output;
 }
 
 export async function getNoteFileFromTitle(

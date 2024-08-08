@@ -1,5 +1,5 @@
 import { LangChainParams, SetChainOptions } from "@/aiParams";
-import { SRSettings } from "@/components/SettingsPage";
+import { SRSettings } from "@/settings";
 import EncryptionService from "@/utils/encryptionService";
 import { App, Notice } from "obsidian";
 import ChatModelManager from "./chatModelManager";
