@@ -30,14 +30,40 @@ export default class ChainManager {
     this.langChainParams = langChainParams;
     this.encryptionService = encryptionService;
     this.settings = settings;
-    this.chatModelManager = ChatModelManager.getInstance(
+    this.chatModelManager = ChatModelManager.getInstance( 
       this.langChainParams,
       encryptionService
     ); 
-    this.memoryManager = MemoryManager.getInstance(this.langChainParams);
+    this.memoryManager = MemoryManager.getInstance(this.langChainParams.chatContextTurns);
 
     this.createChainWithNewModel(this.langChainParams.modelDisplayName);
   }
+
+  resetParams(params: {
+    app: App | undefined;
+    langChainParams: LangChainParams | undefined;
+    encryptionService: EncryptionService | undefined;
+    settings: SRSettings | undefined;
+  }): void {
+    if (params.app !== undefined) {
+      this.app = params.app;
+    }
+    if (params.langChainParams !== undefined) {
+      this.langChainParams = params.langChainParams;
+    }
+    if (params.encryptionService !== undefined) {
+      this.encryptionService = params.encryptionService;
+    }
+    if (params.settings !== undefined) {
+      this.settings = params.settings;
+    }
+    this.chatModelManager = ChatModelManager.resetInstance( 
+      this.langChainParams,
+      this.encryptionService
+    ); 
+    this.memoryManager = MemoryManager.resetInstance(this.langChainParams.chatContextTurns);
+    this.createChainWithNewModel(this.langChainParams.modelDisplayName);
+  }  
   
   /**
    * Update the active model and create a new chain
@@ -64,12 +90,11 @@ export default class ChainManager {
 
   async setChain(options: SetChainOptions = {}): Promise<void> {
     try {
-      if (
-        !this.chatModelManager.validateChatModel(
-          this.chatModelManager.getChatModel(),
-        )
-      ) {
-        throw Error("No chat model set");
+      if (!this.chatModelManager.getChatModel()) {
+        const errorMsg = "Chat model is not initialized properly, check your API key and make sure you have API access";
+        new Notice(errorMsg);
+        console.error(errorMsg);
+        return;
       }
       
       const chatModel = this.chatModelManager.getChatModel();
@@ -123,9 +148,7 @@ export default class ChainManager {
   ) {
     const { debug = false, ignoreSystemMessage = false } = options;
 
-    if (!this.chatModelManager.validateChatModel(
-      this.chatModelManager.getChatModel(),
-    )) {
+    if (!this.chatModelManager.getChatModel()) {
       const errorMsg = "Chat model is not initialized properly, check your API key and make sure you have API access";
 
       new Notice(errorMsg);

@@ -25,9 +25,10 @@ export default class SRPlugin extends Plugin {
 		this.addSettingTab(new SRSettingTab(this.app, this));
 		this.proxyServer = new ProxyServer(PROXY_SERVER_PORT);
 		this.sharedState = new SharedState();
-		const langChainParams = this.getChainManagerParams();
-		this.encryptionService = new EncryptionService(this.settings);
 
+		this.encryptionService = new EncryptionService(this.settings);
+		
+		const langChainParams = this.getChainManagerParams();
 		this.chainManager = new ChainManager(
 			this.app,
 			langChainParams,
@@ -123,7 +124,15 @@ export default class SRPlugin extends Plugin {
 	}
 
 	async saveSettings() {
+		this.encryptionService = new EncryptionService(this.settings);
 		this.encryptionService.encryptAllKeys();
+		const langChainParams = this.getChainManagerParams();
+		this.chainManager.resetParams({ 
+			app: this.app,
+			langChainParams: langChainParams, 
+			encryptionService: this.encryptionService, 
+			settings: this.settings 
+		});
 		await this.saveData(this.settings);
 	}
 

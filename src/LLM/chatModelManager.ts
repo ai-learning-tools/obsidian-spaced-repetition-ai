@@ -47,6 +47,14 @@ export default class ChatModelManager {
     return ChatModelManager.instance;
   }
 
+  static resetInstance(
+    langChainParams: LangChainParams,
+    encryptionService: EncryptionService
+  ): ChatModelManager {
+    ChatModelManager.instance = new ChatModelManager(langChainParams, encryptionService);
+    return ChatModelManager.instance;
+  }
+
   private buildModelMap() {
     ChatModelManager.modelMap = {};
     const modelMap = ChatModelManager.modelMap;
@@ -84,6 +92,11 @@ export default class ChatModelManager {
 
   }
 
+  // Reset langchain parameters while maintaining the previously set chat model. This is used to update the model API keys and other settings. 
+  resetlangChainParams(langChainParams: LangChainParams): void {
+    ChatModelManager.instance = new ChatModelManager(langChainParams, this.encryptionService);
+  }
+  
   private getModelConfig(chatModelProvider: ModelProviders): ModelConfig {
     const decrypt  = (key: string) => this.encryptionService.getDecryptedKey(key);
     const params = this.langChainParams;
@@ -144,12 +157,6 @@ export default class ChatModelManager {
     }
   }
 
-  validateChatModel(chatModel: BaseChatModel): boolean {
-    if (chatModel === undefined || chatModel === null) {
-      return false;
-    }
-    return true;
-  }
 
   async countTokens(inputStr: string): Promise<number> {
     return ChatModelManager.chatModel.getNumTokens(inputStr);
