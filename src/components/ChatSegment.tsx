@@ -11,8 +11,8 @@ import ChainManager from '@/LLM/chainManager';
 import { useAIState } from '@/aiState';
 import { extractNoteTitles, getNoteFileFromTitle, getFileContent } from '@/utils';
 import { EnterIcon } from '@/components/Icons'
+import { getAIResponse } from '@/langChainStream';
 
-// import { getAIResponse } from '@/langChainStream';
 interface ChatSegmentProps {
   plugin: SRPlugin;
   sharedState: SharedState;
@@ -111,14 +111,14 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
     addMessage(userMessage);
     addMessage(promptMessageHidden);
 
-    // await getAIResponse(
-    //   promptMessageHidden,
-    //   chainManager,
-    //   addMessage,
-    //   setCurrentAiMessage,
-    //   setAbortController,
-    //   { debug },
-    // );
+    await getAIResponse(
+      promptMessageHidden,
+      chainManager,
+      addMessage,
+      setCurrentAiMessage,
+      setAbortController,
+      { debug },
+    );
   }
 
   return (

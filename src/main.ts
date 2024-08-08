@@ -5,7 +5,7 @@ import { SRSettingTab, SRSettings } from './components/SettingsPage';
 import './tailwind.css';
 import ChainManager from '@/LLM/chainManager';
 import { LangChainParams, SetChainOptions } from '@/aiParams';
-import EncryptionService from '@/encryptionService';
+import EncryptionService from '@/utils/encryptionService';
 import { ProxyServer } from '@/proxyServer';
 import SharedState from '@/sharedState';
 // Remember to rename these classes and interfaces!
@@ -16,7 +16,6 @@ export default class SRPlugin extends Plugin {
 	chatIsVisible = false;
 	activateViewPromise: Promise<void> | null = null;
 	chainManager: ChainManager;
-	encryptionService: EncryptionService;
 	proxyServer: ProxyServer;
 
 	async onload(): Promise<void> {
@@ -25,15 +24,10 @@ export default class SRPlugin extends Plugin {
 		this.addSettingTab(new SRSettingTab(this.app, this));
 		this.proxyServer = new ProxyServer(PROXY_SERVER_PORT);
 		this.sharedState = new SharedState();
-
-		this.encryptionService = new EncryptionService(this.settings);
 		
 		const langChainParams = this.getChainManagerParams();
 		this.chainManager = new ChainManager(
-			this.app,
-			langChainParams,
-			this.encryptionService,
-			this.settings
+			langChainParams
 		);
 
 		await this.saveSettings();
@@ -124,15 +118,9 @@ export default class SRPlugin extends Plugin {
 	}
 
 	async saveSettings() {
-		this.encryptionService = new EncryptionService(this.settings);
-		this.encryptionService.encryptAllKeys();
+		this.settings = EncryptionService.encryptAllKeys(this.settings);
 		const langChainParams = this.getChainManagerParams();
-		this.chainManager.resetParams({ 
-			app: this.app,
-			langChainParams: langChainParams, 
-			encryptionService: this.encryptionService, 
-			settings: this.settings 
-		});
+		this.chainManager.resetParams(langChainParams);
 		await this.saveData(this.settings);
 	}
 

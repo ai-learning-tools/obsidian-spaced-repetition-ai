@@ -1,6 +1,6 @@
 import { LangChainParams, SetChainOptions } from "@/aiParams";
 import { SRSettings } from "@/components/SettingsPage";
-import EncryptionService from "@/encryptionService";
+import EncryptionService from "@/utils/encryptionService";
 import { App, Notice } from "obsidian";
 import ChatModelManager from "./chatModelManager";
 import { RunnableSequence } from "@langchain/core/runnables";
@@ -13,53 +13,28 @@ import ChainFactory from "@/chainFactory";
 export default class ChainManager {
   private static chain: RunnableSequence;
 
-  private app: App;
-  private settings: SRSettings;
-  private encryptionService: EncryptionService;
   public chatModelManager: ChatModelManager;
   public memoryManager: MemoryManager;
   public langChainParams: LangChainParams;
 
   constructor(
-    app: App,
-    langChainParams: LangChainParams,
-    encryptionService: EncryptionService,
-    settings: SRSettings,
+    langChainParams: LangChainParams
   ) {
-    this.app = app;
     this.langChainParams = langChainParams;
-    this.encryptionService = encryptionService;
-    this.settings = settings;
     this.chatModelManager = ChatModelManager.getInstance( 
-      this.langChainParams,
-      encryptionService
+      this.langChainParams
     ); 
     this.memoryManager = MemoryManager.getInstance(this.langChainParams.chatContextTurns);
 
     this.createChainWithNewModel(this.langChainParams.modelDisplayName);
   }
 
-  resetParams(params: {
-    app: App | undefined;
-    langChainParams: LangChainParams | undefined;
-    encryptionService: EncryptionService | undefined;
-    settings: SRSettings | undefined;
-  }): void {
-    if (params.app !== undefined) {
-      this.app = params.app;
-    }
-    if (params.langChainParams !== undefined) {
-      this.langChainParams = params.langChainParams;
-    }
-    if (params.encryptionService !== undefined) {
-      this.encryptionService = params.encryptionService;
-    }
-    if (params.settings !== undefined) {
-      this.settings = params.settings;
+  resetParams(langChainParams: LangChainParams): void {
+    if (langChainParams !== undefined) {
+      this.langChainParams = langChainParams;
     }
     this.chatModelManager = ChatModelManager.resetInstance( 
-      this.langChainParams,
-      this.encryptionService
+      this.langChainParams
     ); 
     this.memoryManager = MemoryManager.resetInstance(this.langChainParams.chatContextTurns);
     this.createChainWithNewModel(this.langChainParams.modelDisplayName);

@@ -1,5 +1,5 @@
 import { LangChainParams, ModelConfig } from "@/aiParams";
-import EncryptionService from "@/encryptionService";
+import EncryptionService from "@/utils/encryptionService";
 import { BaseChatModel } from 'langchain/chat_models/base';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { 
@@ -17,7 +17,6 @@ import { Notice } from "obsidian";
 
 // This follows a singleton pattern. Constructor is private; we use getInstance
 export default class ChatModelManager {
-  private encryptionService: EncryptionService;
   private static instance: ChatModelManager;
   private static chatModel: BaseChatModel;
   private static modelMap: Record<
@@ -30,28 +29,24 @@ export default class ChatModelManager {
   >;
 
   private constructor(
-    private langChainParams: LangChainParams,
-    encryptionService: EncryptionService
+    private langChainParams: LangChainParams
   ) {
-    this.encryptionService = encryptionService;
     this.buildModelMap();
   }
 
   static getInstance(
-    langChainParams: LangChainParams,
-    encryptionService: EncryptionService
+    langChainParams: LangChainParams
   ): ChatModelManager {
     if (!ChatModelManager.instance) {
-      ChatModelManager.instance = new ChatModelManager(langChainParams, encryptionService);
+      ChatModelManager.instance = new ChatModelManager(langChainParams);
     }
     return ChatModelManager.instance;
   }
 
   static resetInstance(
-    langChainParams: LangChainParams,
-    encryptionService: EncryptionService
+    langChainParams: LangChainParams
   ): ChatModelManager {
-    ChatModelManager.instance = new ChatModelManager(langChainParams, encryptionService);
+    ChatModelManager.instance = new ChatModelManager(langChainParams);
     return ChatModelManager.instance;
   }
 
@@ -92,13 +87,8 @@ export default class ChatModelManager {
 
   }
 
-  // Reset langchain parameters while maintaining the previously set chat model. This is used to update the model API keys and other settings. 
-  resetlangChainParams(langChainParams: LangChainParams): void {
-    ChatModelManager.instance = new ChatModelManager(langChainParams, this.encryptionService);
-  }
-  
   private getModelConfig(chatModelProvider: ModelProviders): ModelConfig {
-    const decrypt  = (key: string) => this.encryptionService.getDecryptedKey(key);
+    const decrypt  = (key: string) => EncryptionService.getDecryptedKey(key);
     const params = this.langChainParams;
     const baseConfig: ModelConfig = {
       modelName: params.model,

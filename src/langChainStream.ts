@@ -4,7 +4,7 @@ import { Notice } from 'obsidian';
 
 export type Role = 'assistant' | 'user' | 'system';
 
-export const currentAiMessage = async (
+export const getAIResponse = async (
   userMessage: ChatMessage,
   chainManager: ChainManager,
   addMessage: (message: ChatMessage) => void,
