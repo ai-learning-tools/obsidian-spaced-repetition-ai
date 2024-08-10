@@ -23,7 +23,9 @@ interface ChatSegmentProps {
     updateAIResponse: (aiResponse: string) => void;
     updateErrorMessage: (errorMessage: string) => void;
     updateIsDoneGenerating: (isDoneGenerating: boolean) => void;
+    clearConvoHistory: () => void;
   };
+  addNewMessage: () => void
 }
 
 const ChatSegment: React.FC<ChatSegmentProps> = ({ 
@@ -32,6 +34,7 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
   plugin,
   chainManager,
   debug,
+  addNewMessage
 }) => {
   // LLM
   const [
@@ -103,18 +106,33 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
 
     updateModifiedMessage(processedUserMessage);
 
+    // TODO: If currentMessage is not the last message, ie. user is resending a previousMessage, then we shall clean convo History after this message
+    setAIResponse("")
+
+    const updateConvoHistory = (aiResponse: string) => {
+      updateAIResponse(aiResponse)
+      addNewMessage()
+    }
+
     await getAIResponse(
       userMessage,
       chainManager,
       setAIResponse,
-      updateAIResponse,
+      updateConvoHistory,
       setAbortController,
       { debug }
     )
   }
 
   // Update overall conversation history, this is only done periodically to prevent rapid reloading
-  const { updateUserMessage, updateModifiedMessage, updateAIResponse, updateErrorMessage, updateIsDoneGenerating } = updateFunctions;
+  const { 
+    updateUserMessage, 
+    updateModifiedMessage, 
+    updateAIResponse, 
+    updateErrorMessage, 
+    updateIsDoneGenerating, 
+    clearConvoHistory 
+  } = updateFunctions;
 
   // We create useState in this component for variables that change often, this is used to update overall convo history periodically 
   const [aiResponse, setAIResponse] = useState(segment.aiResponse);

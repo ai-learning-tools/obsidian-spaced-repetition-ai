@@ -16,24 +16,26 @@ const Chat: React.FC<ChatProps> = ({
     chainManager,
     debug
 }) => {
-    const { conversationHistory, createUpdateFunctions } = useConversationHistory([{
-        id: 1,
-        userMessage: 'hello it is me',
-        modifiedMessage: '',
-        aiResponse: '',
-        errorMessage: '',
+    const { conversationHistory, createUpdateFunctions, addNewMessage } = useConversationHistory([{
+        userMessage: "Hello, how can I assist you today?",
+        modifiedMessage: null,
+        aiResponse: null,
+        errorMessage: null,
         isDoneGenerating: false
     }])
+    
 
     return (
         <div className='w-full'>
-        {conversationHistory.map((segment) => {
-            const updateFunctions = createUpdateFunctions(segment.id);
+        {conversationHistory.map((segment, index) => {
+            const updateFunctions = createUpdateFunctions(index);
             return (
             <ChatSegment
-                key={segment.id}
+                key={index}
                 segment={segment}
+                // TODO: rename to updateConvo? 
                 updateFunctions={updateFunctions}
+                addNewMessage={addNewMessage}
                 plugin={plugin}
                 chainManager={chainManager}
                 debug={debug}

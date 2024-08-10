@@ -7,7 +7,7 @@ export const getAIResponse = async (
   userMessage: string,
   chainManager: ChainManager,
   setCurrentAIResponse: (response: string) => void,
-  updateConvoHistory: (response: string) => void,
+  updateConvo: (response: string) => void,
   updateShouldAbort: (abortController: AbortController | null) => void,
   options: {
     debug?: boolean,
@@ -22,7 +22,7 @@ export const getAIResponse = async (
       userMessage,
       abortController,
       setCurrentAIResponse,
-      updateConvoHistory,
+      updateConvo,
       options,
     );
   } catch (error) {
