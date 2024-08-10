@@ -7,7 +7,7 @@ import { RunnableSequence } from "@langchain/core/runnables";
 import { ChatModelDisplayNames, ChatModels, DISPLAY_NAME_TO_MODEL, AI_SENDER } from "@/constants";
 import MemoryManager from "./memoryManager";
 import { ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate, MessagesPlaceholder } from "langchain/prompts";
-import { ChatMessage } from "@/sharedState";
+import { ChatMessage } from "@/chatMessage";
 import ChainFactory from "@/chainFactory";
 
 export default class ChainManager {

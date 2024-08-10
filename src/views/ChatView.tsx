@@ -7,7 +7,6 @@ import SRPlugin from '@/main';
 import Chat from '@/components/Chat'
 
 import ChainManager from '@/LLM/chainManager';
-import { SRSettings } from '../components/SettingsPage';
 
 export default class ChatView extends ItemView {
   private chainManager: ChainManager;

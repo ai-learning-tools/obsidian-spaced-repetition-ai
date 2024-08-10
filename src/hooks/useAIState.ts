@@ -1,8 +1,8 @@
-import ChainManager from "../LLM/chainManager";
-import { SetChainOptions } from "../aiParams";
+import ChainManager from "@/LLM/chainManager";
+import { SetChainOptions } from "@/aiParams";
 import { BaseChatMemory } from "langchain/memory";
 import { useState } from "react";
-import { ChatModelDisplayNames } from "../constants";
+import { ChatModelDisplayNames } from "@/constants";
 
 // React hook to manage state related to model and memory in Chat component.
 export function useAIState(
