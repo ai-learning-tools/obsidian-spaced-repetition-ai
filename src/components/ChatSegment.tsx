@@ -8,7 +8,7 @@ import Mention from '@/components/mentions/Mention'; // Fixed import path
 import { ChatMessage } from '@/chatMessage';
 import ChainManager from '@/LLM/chainManager';
 import { useAIState } from '@/hooks/useAIState';
-import { extractNoteTitles, getNoteFileFromTitle, getFileContent } from '@/utils';
+import { extractNoteTitles, getNoteFileFromTitle, getFileContent } from '@/utils/utils';
 import { EnterIcon } from '@/components/Icons'
 import { getAIResponse } from '@/langChainStream';
 

@@ -1,11 +1,10 @@
 
-import { CHAT_VIEWTYPE } from '@/constants';
+import { ViewTypes } from '@/constants';
 import { ItemView, WorkspaceLeaf } from 'obsidian';
 import * as React from 'react';
 import { Root, createRoot } from 'react-dom/client';
 import SRPlugin from '@/main';
 import Chat from '@/components/Chat'
-
 import ChainManager from '@/LLM/chainManager';
 
 export default class ChatView extends ItemView {
@@ -21,7 +20,7 @@ export default class ChatView extends ItemView {
   }
 
   getViewType(): string {
-    return CHAT_VIEWTYPE;
+    return ViewTypes.CHAT;
   }
 
 // Return an icon for this view
@@ -31,11 +30,11 @@ export default class ChatView extends ItemView {
 
   // Return a title for this view
   getTitle(): string {
-    return 'Copilot Chat';
+    return 'Learning Chat';
   }
 
   getDisplayText(): string {
-    return 'Copilot';
+    return 'Learn';
   }
 
   async getChatVisibility(){

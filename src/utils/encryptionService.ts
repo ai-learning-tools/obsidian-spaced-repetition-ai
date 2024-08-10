@@ -1,4 +1,4 @@
-import { SRSettings } from "@/components/SettingsPage";
+import { SRSettings } from "@/settings";
 import { Platform } from "obsidian";
 
 // @ts-ignore

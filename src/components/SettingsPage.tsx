@@ -2,14 +2,6 @@ import { App, PluginSettingTab, Setting } from "obsidian";
 import SRPlugin from "@/main";
 import { ChatModels, ChatModelDisplayNames, MODEL_TO_DISPLAY_NAME } from "@/constants";
 
-export interface SRSettings {
-  defaultModel: ChatModels;
-  defaultModelDisplayName: ChatModelDisplayNames;
-  openAIApiKey: string;
-  anthropicApiKey: string;
-  googleApiKey: string;
-}
-
 export class SRSettingTab extends PluginSettingTab {
   plugin: SRPlugin;
 
@@ -62,6 +54,47 @@ export class SRSettingTab extends PluginSettingTab {
 					this.plugin.settings.googleApiKey = value;
 					await this.plugin.saveSettings();
 				}));
+		
+		new Setting(containerEl)
+			.setName('Convert folders to decks')
+			.addToggle((toggle) =>
+				toggle
+				.setValue(this.plugin.settings.convertFoldersToDecks)
+				.onChange(async (value) => {
+						this.plugin.settings.convertFoldersToDecks = value;
+						await this.plugin.saveSettings();
+				}),
+		);
+
+    new Setting(containerEl)
+      .setName('Note folders to ignore')
+      .setDesc('Enter folder paths to ignore when reviewing notes, one per line')
+      .addTextArea(text => text
+        .setValue(this.plugin.settings.noteFoldersToIgnore.join('\n'))
+        .onChange(async (value) => {
+          this.plugin.settings.noteFoldersToIgnore = value.split('\n').map(v => v.trim()).filter(v => v);
+          await this.plugin.saveSettings();
+        }));
+        
+    new Setting(containerEl)
+      .setName('Flashcard tags')  
+      .setDesc('Enter tags that denote flashcards, one per line')
+      .addTextArea(text => text
+        .setValue(this.plugin.settings.flashcardTags.join('\n'))
+        .onChange(async (value) => {
+          this.plugin.settings.flashcardTags = value.split('\n').map(v => v.trim()).filter(v => v);
+          await this.plugin.saveSettings();
+        }));
+				
+    new Setting(containerEl)
+      .setName('Tags to review')
+      .setDesc('Enter tags that should be included in note review, one per line') 
+      .addTextArea(text => text
+        .setValue(this.plugin.settings.tagsToReview.join('\n'))
+        .onChange(async (value) => {
+          this.plugin.settings.tagsToReview = value.split('\n').map(v => v.trim()).filter(v => v);
+          await this.plugin.saveSettings();
+        }));
   }
 }
 

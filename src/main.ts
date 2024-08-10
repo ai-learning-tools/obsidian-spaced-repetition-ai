@@ -1,13 +1,16 @@
 import { App, Editor, MarkdownView, Modal, Plugin, TFile, WorkspaceLeaf} from 'obsidian';
-import { CHAT_VIEWTYPE, DEFAULT_SETTINGS, PROXY_SERVER_PORT, DEFAULT_SYSTEM_PROMPT } from '@/constants';
+import { ViewTypes, DEFAULT_SETTINGS, PROXY_SERVER_PORT, DEFAULT_SYSTEM_PROMPT } from '@/constants';
 import ChatView from '@/views/ChatView';
-import { SRSettingTab, SRSettings } from './components/SettingsPage';
-import './tailwind.css';
-import ChainManager from '@/LLM/chainManager';  
+import ReviewView from '@/views/ReviewView';
+import { SRSettingTab } from './components/SettingsPage';
+import { SRSettings } from './settings';
+import '@/tailwind.css';
+import ChainManager from '@/LLM/chainManager';
 import { LangChainParams, SetChainOptions } from '@/aiParams';
 import EncryptionService from '@/utils/encryptionService';
 import { ProxyServer } from '@/proxyServer';
-// Remember to rename these classes and interfaces!
+import { Deck } from './sr/Deck';
+import { DeckIterator } from './sr/DeckIterator';
 
 export default class SRPlugin extends Plugin {
 	settings: SRSettings;
@@ -16,11 +19,16 @@ export default class SRPlugin extends Plugin {
 	chainManager: ChainManager;
 	proxyServer: ProxyServer;
 
+	deckTree: Deck;
+	deckIterator: DeckIterator;
+
 	async onload(): Promise<void> {
 		
 		await this.loadSettings();
 		this.addSettingTab(new SRSettingTab(this.app, this));
 		this.proxyServer = new ProxyServer(PROXY_SERVER_PORT);
+		this.deckTree = new Deck("", this.app.vault, null);
+		this.deckIterator = new DeckIterator(this.deckTree);
 		
 		const langChainParams = this.getChainManagerParams();
 		this.chainManager = new ChainManager(
@@ -31,20 +39,33 @@ export default class SRPlugin extends Plugin {
 
 		this.addCommand({
 			id: "chat-toggle-window",
-			name: "Toggle Copilot Chat Window",
+			name: "Toggle Learning Chat Window",
 			callback: () => {
-			this.toggleView();
+				this.toggleView(ViewTypes.CHAT);
 			},
 		});
 
+		this.addCommand({
+			id: "review-toggle-window",
+			name: "Toggle Learning Review Window",
+			callback: () => {
+				this.toggleView(ViewTypes.REVIEW);
+			}
+		});
+
 		this.registerView(
-			CHAT_VIEWTYPE,
+			ViewTypes.CHAT,
 			(leaf: WorkspaceLeaf) => new ChatView(leaf, this),
+		);
+
+		this.registerView(
+			ViewTypes.REVIEW,
+			(leaf: WorkspaceLeaf) => new ReviewView(leaf, this)
 		);
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			this.toggleView();
+			this.toggleView(ViewTypes.CHAT);
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
@@ -52,43 +73,6 @@ export default class SRPlugin extends Plugin {
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
 		statusBarItemEl.setText('Status Bar Text');
-
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-			}
-		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new SRSettingTab(this.app, this));
@@ -121,29 +105,34 @@ export default class SRPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	toggleView() {
-		const leaves = this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE);
-		leaves.length > 0 ? this.deactivateView() : this.activateView();
+	toggleView(viewType: ViewTypes) {
+		const leaves = this.app.workspace.getLeavesOfType(viewType);
+		leaves.length > 0 ? this.deactivateView(viewType) : this.activateView(viewType);
 	}
 
-	async activateView() {
-		this.app.workspace.detachLeavesOfType(CHAT_VIEWTYPE);
+	async activateView(viewType: ViewTypes) {
+		this.app.workspace.detachLeavesOfType(viewType);
 		this.activateViewPromise = this.app.workspace
 		.getRightLeaf(false)!
 		.setViewState({
-			type: CHAT_VIEWTYPE,
+			type: viewType,
 			active: true,
 		});
-		await this.activateViewPromise;
+		await this.activateViewPromise; // TODO @belinda or @athena: this doesn't look like it does anything lol. remove?
 		this.app.workspace.revealLeaf(
-			this.app.workspace.getLeavesOfType(CHAT_VIEWTYPE)[0],
+			this.app.workspace.getLeavesOfType(viewType)[0],
 		);
-		this.chatIsVisible = true;
+
+		if (viewType === ViewTypes.CHAT) {
+			this.chatIsVisible = true;
+		}
 	}
 	
-	async deactivateView() {
-		this.app.workspace.detachLeavesOfType(CHAT_VIEWTYPE);
-		this.chatIsVisible = false;
+	async deactivateView(viewType: ViewTypes) {
+		this.app.workspace.detachLeavesOfType(viewType);
+		if (viewType === ViewTypes.CHAT) {
+			this.chatIsVisible = false;
+		}
 	}
 
 	getChainManagerParams(): LangChainParams {
