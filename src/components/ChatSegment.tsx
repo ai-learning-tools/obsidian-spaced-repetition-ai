@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { useState, useEffect, useRef, useReducer } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChatModels, ChatModelDisplayNames, USER_SENDER } from '@/constants';
 import SRPlugin from '@/main';
 import { TFile } from 'obsidian';
 import MentionsInput from '@/components/mentions/MentionsInput';
 import Mention from '@/components/mentions/Mention'; // Fixed import path
-import defaultStyle from '@/components/defaultStyle'
-import SharedState, { useSharedState, ChatMessage } from '@/chatMessage';
+import { ChatMessage } from '@/chatMessage';
 import ChainManager from '@/LLM/chainManager';
 import { useAIState } from '@/aiState';
 import { extractNoteTitles, getNoteFileFromTitle, getFileContent } from '@/utils';
@@ -62,7 +61,7 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
   };
 
   const handleMentionsChange = (e: any, newValue: string) => {
-    setUserMessage(newValue);
+    setUserMessage(newValue)
     const mentionRegex = /@\[(.*?)\]\((.*?)\)/g;
     const newMentionedFiles: TFile[] = [];
     let match: RegExpExecArray | null;
@@ -81,7 +80,13 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
     if (!(event.key === 'Enter' && !event.shiftKey)) {
       return    
     }
-    
+    if (userMessage != null) {
+      // Since user pressed send, we shall update the overall conversationHistory
+      updateUserMessage(userMessage)
+    } else {
+      return
+    }
+
     event.preventDefault(); // Prevents adding a newline to the textarea
     const inputMessage = "In one word, say hi";
 
@@ -95,16 +100,26 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
         processedUserMessage = `${processedUserMessage}\n\n[[${noteTitle}]]: \n${noteContent}`;
       }
     }
+
+    updateModifiedMessage(processedUserMessage);
+
+    await getAIResponse(
+      userMessage,
+      chainManager,
+      setAIResponse,
+      updateAIResponse,
+      setAbortController,
+      { debug }
+    )
   }
 
-  // Chat Messages
+  // Update overall conversation history, this is only done periodically to prevent rapid reloading
   const { updateUserMessage, updateModifiedMessage, updateAIResponse, updateErrorMessage, updateIsDoneGenerating } = updateFunctions;
 
+  // We create useState in this component for variables that change often, this is used to update overall convo history periodically 
+  const [aiResponse, setAIResponse] = useState(segment.aiResponse);
   const [userMessage, setUserMessage] = useState(segment.userMessage);
-  const [modifiedMessage, setModifiedMessage] = useState(segment.modifiedMessage);
-  const [aiResponse, setAiResponse] = useState(segment.aiResponse);
-  const [errorMessage, setErrorMessage] = useState(segment.errorMessage);
-  const [isDoneGenerating, setIsDoneGenerating] = useState(segment.isDoneGenerating);
+
 
   return (
     <div className="w-full flex flex-col">

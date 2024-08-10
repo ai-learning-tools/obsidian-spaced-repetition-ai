@@ -1,14 +1,13 @@
 import ChainManager from '@/LLM/chainManager';
-import { ChatMessage } from '@/chatMessage';
 import { Notice } from 'obsidian';
 
 export type Role = 'assistant' | 'user' | 'system';
 
 export const getAIResponse = async (
-  userMessage: ChatMessage,
+  userMessage: string,
   chainManager: ChainManager,
-  addMessage: (message: ChatMessage) => void,
-  updateCurrentAiMessage: (message: string) => void,
+  setCurrentAIResponse: (response: string) => void,
+  updateConvoHistory: (response: string) => void,
   updateShouldAbort: (abortController: AbortController | null) => void,
   options: {
     debug?: boolean,
@@ -20,10 +19,10 @@ export const getAIResponse = async (
   updateShouldAbort(abortController);
   try {
     await chainManager.runChain(
-      userMessage.message,
+      userMessage,
       abortController,
-      updateCurrentAiMessage,
-      addMessage,
+      setCurrentAIResponse,
+      updateConvoHistory,
       options,
     );
   } catch (error) {

@@ -7,7 +7,7 @@ import { RunnableSequence } from "@langchain/core/runnables";
 import { ChatModelDisplayNames, ChatModels, DISPLAY_NAME_TO_MODEL, AI_SENDER } from "@/constants";
 import MemoryManager from "./memoryManager";
 import { ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate, MessagesPlaceholder } from "langchain/prompts";
-import { ChatMessage } from "@/chatMessage";
+import { ChatMessage } from "@/sharedState";
 import ChainFactory from "@/chainFactory";
 
 export default class ChainManager {
@@ -113,8 +113,8 @@ export default class ChainManager {
   async runChain(
     userMessage: string,
     abortController: AbortController,
-    updateCurrentAiMessage: (message: string) => void,
-    addMessage: (message: ChatMessage) => void,
+    setCurrentAIResponse: (response: string) => void,
+    updateConvoHistory: (response: string) => void,
     options: {
       debug?: boolean;
       ignoreSystemMessage?: boolean;
@@ -183,7 +183,7 @@ export default class ChainManager {
       for await (const chunk of chatStream) {
         if (abortController.signal.aborted) break;
         fullAIResponse += chunk.content;
-        updateCurrentAiMessage(fullAIResponse);
+        setCurrentAIResponse(fullAIResponse);
       }
     } catch (error) {
       const errorData = error?.response?.data?.error || error;
@@ -202,11 +202,7 @@ export default class ChainManager {
           { input: userMessage },
           { output: fullAIResponse },
         );
-        addMessage({
-          message: fullAIResponse,
-          sender: AI_SENDER,
-          isVisible: true,
-        });
+        updateConvoHistory(fullAIResponse)
       }
       // TODO @belinda: here currentAIMessage is updated to "" in the original repo. Probably good to keep currentAIMessage and the text that is displayed separate, once UI is implemented.
     }
