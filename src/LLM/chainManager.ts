@@ -114,7 +114,7 @@ export default class ChainManager {
     userMessage: string,
     abortController: AbortController,
     setCurrentAIResponse: (response: string) => void,
-    updateConvoHistory: (response: string) => void,
+    updateChatHistory: (response: string) => void,
     options: {
       debug?: boolean;
       ignoreSystemMessage?: boolean;
@@ -202,7 +202,9 @@ export default class ChainManager {
           { input: userMessage },
           { output: fullAIResponse },
         );
-        updateConvoHistory(fullAIResponse)
+
+        // Update oveall chat history at the very end
+        updateChatHistory(fullAIResponse)
       }
       // TODO @belinda: here currentAIMessage is updated to "" in the original repo. Probably good to keep currentAIMessage and the text that is displayed separate, once UI is implemented.
     }

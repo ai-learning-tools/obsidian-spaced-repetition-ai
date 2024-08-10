@@ -7,30 +7,28 @@ import MentionsInput from '@/components/mentions/MentionsInput';
 import Mention from '@/components/mentions/Mention'; // Fixed import path
 import { ChatMessage } from '@/chatMessage';
 import ChainManager from '@/LLM/chainManager';
-import { useAIState } from '@/aiState';
+import { useAIState } from '@/hooks/useAIState';
 import { extractNoteTitles, getNoteFileFromTitle, getFileContent } from '@/utils';
 import { EnterIcon } from '@/components/Icons'
 import { getAIResponse } from '@/langChainStream';
 
-interface ChatSegmentProps {
+interface MessageSegmentProps {
   segment: ChatMessage
   plugin: SRPlugin;
   chainManager: ChainManager;
   debug: boolean;
-  updateFunctions: {
+  updateHistory: {
     updateUserMessage: (userMessage: string) => void;
     updateModifiedMessage: (modifiedMessage: string) => void;
     updateAIResponse: (aiResponse: string) => void;
-    updateErrorMessage: (errorMessage: string) => void;
-    updateIsDoneGenerating: (isDoneGenerating: boolean) => void;
-    clearConvoHistory: () => void;
+    clearMessageHistory: () => void;
   };
   addNewMessage: () => void
 }
 
-const ChatSegment: React.FC<ChatSegmentProps> = ({ 
+const MessageSegment: React.FC<MessageSegmentProps> = ({ 
   segment,
-  updateFunctions,
+  updateHistory,
   plugin,
   chainManager,
   debug,
@@ -108,9 +106,9 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
 
     // If currentMessage is not the last message, ie. user is overwriiting a message that has already been sent, then we shall clean convo History after this message
     setAIResponse("")
-    clearConvoHistory()
+    clearMessageHistory()
 
-    const updateConvoHistory = (aiResponse: string) => {
+    const updateMessageHistory = (aiResponse: string) => {
       updateAIResponse(aiResponse)
       addNewMessage()
     }
@@ -119,7 +117,7 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
       userMessage,
       chainManager,
       setAIResponse,
-      updateConvoHistory,
+      updateMessageHistory,
       setAbortController,
       { debug }
     )
@@ -130,8 +128,8 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
     updateUserMessage, 
     updateModifiedMessage, 
     updateAIResponse, 
-    clearConvoHistory 
-  } = updateFunctions;
+    clearMessageHistory 
+  } = updateHistory;
 
   // We create useState in this component for variables that change often, this is used to update overall convo history periodically 
   const [aiResponse, setAIResponse] = useState<string | null>(segment.aiResponse);
@@ -197,4 +195,4 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
   );
 };
 
-export default ChatSegment;
+export default MessageSegment;

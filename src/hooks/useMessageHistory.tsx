@@ -1,8 +1,8 @@
-import { ChatMessage, chatReducer } from './chatMessage';
+import { ChatMessage, chatReducer } from '../chatMessage';
 import { useReducer } from 'react';
 
-export const useConversationHistory = (initialHistory: ChatMessage[] = []) => {
-    const [conversationHistory, dispatch] = useReducer(chatReducer, initialHistory);
+export const useMessageHistory = (initialHistory: ChatMessage[] = []) => {
+    const [messageHistory, dispatch] = useReducer(chatReducer, initialHistory);
 
     const createUpdateFunctions = (index: number) => {
       return {
@@ -24,19 +24,7 @@ export const useConversationHistory = (initialHistory: ChatMessage[] = []) => {
             payload: { index, aiResponse },
           });
         },
-        updateErrorMessage: (errorMessage: string) => {
-          dispatch({
-            type: 'UPDATE_ERROR_MESSAGE',
-            payload: { index, errorMessage },
-          });
-        },
-        updateIsDoneGenerating: (isDoneGenerating: boolean) => {
-          dispatch({
-            type: 'UPDATE_IS_DONE_GENERATING',
-            payload: { index, isDoneGenerating },
-          });
-        },
-        clearConvoHistory: () => {
+        clearMessageHistory: () => {
           dispatch({
             type: 'CLEAR_HISTORY_AFTER_INDEX',
             payload: { index }
@@ -52,7 +40,7 @@ export const useConversationHistory = (initialHistory: ChatMessage[] = []) => {
     };
   
     return {
-      conversationHistory,
+      messageHistory,
       createUpdateFunctions,
       addNewMessage,
     };

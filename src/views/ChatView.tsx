@@ -9,7 +9,7 @@ import Chat from '@/components/Chat'
 import ChainManager from '@/LLM/chainManager';
 import { SRSettings } from '../components/SettingsPage';
 
-export default class CopilotView extends ItemView {
+export default class ChatView extends ItemView {
   private chainManager: ChainManager;
   private debug = true;
 

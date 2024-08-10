@@ -1,7 +1,7 @@
-import ChatSegment from '@/components/ChatSegment'
+import MessageSegment from '@/components/ChatSegment'
 import * as React from 'react';
 import ChainManager from '@/LLM/chainManager';
-import { useConversationHistory } from '../conversationHistory';
+import { useMessageHistory } from '../hooks/useMessageHistory';
 import SRPlugin from '@/main';
 
 interface ChatProps {
@@ -16,7 +16,7 @@ const Chat: React.FC<ChatProps> = ({
     chainManager,
     debug
 }) => {
-    const { conversationHistory, createUpdateFunctions, addNewMessage } = useConversationHistory([{
+    const { messageHistory, createUpdateFunctions, addNewMessage } = useMessageHistory([{
         userMessage: null,
         modifiedMessage: null,
         aiResponse: null,
@@ -24,14 +24,13 @@ const Chat: React.FC<ChatProps> = ({
     
     return (
         <div className='w-full'>
-        {conversationHistory.map((segment, index) => {
-            const updateFunctions = createUpdateFunctions(index);
+        {messageHistory.map((segment, index) => {
+            const updateHistory = createUpdateFunctions(index);
             return (
-            <ChatSegment
+            <MessageSegment
                 key={index}
                 segment={segment}
-                // TODO: rename to updateConvo? 
-                updateFunctions={updateFunctions}
+                updateHistory={updateHistory}
                 addNewMessage={addNewMessage}
                 plugin={plugin}
                 chainManager={chainManager}
