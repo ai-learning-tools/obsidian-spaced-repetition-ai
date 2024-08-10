@@ -4,13 +4,12 @@ import { ItemView, WorkspaceLeaf } from 'obsidian';
 import * as React from 'react';
 import { Root, createRoot } from 'react-dom/client';
 import SRPlugin from '@/main';
-import ChatSegment from '@/components/ChatSegment'
-import SharedState from '@/sharedState';
+import Chat from '@/components/Chat'
+
 import ChainManager from '@/LLM/chainManager';
-import { SRSettings } from './SettingsPage';
+import { SRSettings } from '../components/SettingsPage';
 
 export default class CopilotView extends ItemView {
-  private sharedState: SharedState;
   private chainManager: ChainManager;
   private debug = true;
 
@@ -19,7 +18,6 @@ export default class CopilotView extends ItemView {
   constructor(leaf: WorkspaceLeaf, private plugin: SRPlugin) {
     super(leaf);
     this.plugin = plugin;
-    this.sharedState = plugin.sharedState;
     this.chainManager = plugin.chainManager;
   }
 
@@ -56,11 +54,10 @@ export default class CopilotView extends ItemView {
     const root = createRoot(this.containerEl.children[1]);
     root.render(
       <React.StrictMode>
-        <ChatSegment 
-        plugin={this.plugin}
-        sharedState={this.sharedState}
-        chainManager={this.chainManager}
-        debug={this.debug}
+        <Chat 
+          plugin={this.plugin}
+          chainManager={this.chainManager}
+          debug={this.debug}
         />
       </React.StrictMode>
     );

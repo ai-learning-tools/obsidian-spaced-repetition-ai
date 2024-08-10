@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useReducer } from 'react';
 import { ChatModels, ChatModelDisplayNames, USER_SENDER } from '@/constants';
 import SRPlugin from '@/main';
 import { TFile } from 'obsidian';
 import MentionsInput from '@/components/mentions/MentionsInput';
 import Mention from '@/components/mentions/Mention'; // Fixed import path
 import defaultStyle from '@/components/defaultStyle'
-import SharedState, { useSharedState, ChatMessage } from '@/sharedState';
+import SharedState, { useSharedState, ChatMessage } from '@/chatMessage';
 import ChainManager from '@/LLM/chainManager';
 import { useAIState } from '@/aiState';
 import { extractNoteTitles, getNoteFileFromTitle, getFileContent } from '@/utils';
@@ -14,35 +14,36 @@ import { EnterIcon } from '@/components/Icons'
 import { getAIResponse } from '@/langChainStream';
 
 interface ChatSegmentProps {
+  segment: ChatMessage
   plugin: SRPlugin;
-  sharedState: SharedState;
   chainManager: ChainManager;
-  debug: boolean
+  debug: boolean;
+  updateFunctions: {
+    updateUserMessage: (userMessage: string) => void;
+    updateModifiedMessage: (modifiedMessage: string) => void;
+    updateAIResponse: (aiResponse: string) => void;
+    updateErrorMessage: (errorMessage: string) => void;
+    updateIsDoneGenerating: (isDoneGenerating: boolean) => void;
+  };
 }
 
-
 const ChatSegment: React.FC<ChatSegmentProps> = ({ 
+  segment,
+  updateFunctions,
   plugin,
-  sharedState,
   chainManager,
-  debug
+  debug,
 }) => {
-  const [
-    chatHistory, addMessage, clearMessages
-  ] = useSharedState(sharedState);
+  // LLM
   const [
     currentModel, setModel, clearChatMemory
   ] = useAIState(chainManager);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
-  const [currentAiMessage, setCurrentAiMessage] = useState('');
-  const [message, setMessage] = useState<string>('');
 
+  // Mentions 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [files, setFiles] = useState<TFile[]>([]);
   const [mentionedFiles, setMentionedFiles] = useState<TFile[]>([]);
-
-  // To keep track if LLM is generatingf
-  const [setIsGenerating, isGenerating] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -61,10 +62,10 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
   };
 
   const handleMentionsChange = (e: any, newValue: string) => {
-    setMessage(newValue);
+    setUserMessage(newValue);
     const mentionRegex = /@\[(.*?)\]\((.*?)\)/g;
     const newMentionedFiles: TFile[] = [];
-    let match;
+    let match: RegExpExecArray | null;
     while ((match = mentionRegex.exec(newValue)) !== null) {
       console.log(match)
       const mentionedFile = files.find(file => file.path === match[2]);
@@ -82,7 +83,7 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
     }
     
     event.preventDefault(); // Prevents adding a newline to the textarea
-    const inputMessage = "What's the meaning of life?";
+    const inputMessage = "In one word, say hi";
 
     let processedUserMessage = inputMessage;
 
@@ -94,38 +95,22 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
         processedUserMessage = `${processedUserMessage}\n\n[[${noteTitle}]]: \n${noteContent}`;
       }
     }
-
-    const userMessage: ChatMessage = {
-      message: inputMessage,
-      sender: USER_SENDER,
-      isVisible: true,
-    };
-
-    const promptMessageHidden: ChatMessage = {
-      message: processedUserMessage,
-      sender: USER_SENDER,
-      isVisible: false,
-    };
-
-    // Add message to chat history
-    addMessage(userMessage);
-    addMessage(promptMessageHidden);
-
-    await getAIResponse(
-      promptMessageHidden,
-      chainManager,
-      addMessage,
-      setCurrentAiMessage,
-      setAbortController,
-      { debug },
-    );
   }
+
+  // Chat Messages
+  const { updateUserMessage, updateModifiedMessage, updateAIResponse, updateErrorMessage, updateIsDoneGenerating } = updateFunctions;
+
+  const [userMessage, setUserMessage] = useState(segment.userMessage);
+  const [modifiedMessage, setModifiedMessage] = useState(segment.modifiedMessage);
+  const [aiResponse, setAiResponse] = useState(segment.aiResponse);
+  const [errorMessage, setErrorMessage] = useState(segment.errorMessage);
+  const [isDoneGenerating, setIsDoneGenerating] = useState(segment.isDoneGenerating);
 
   return (
     <div className="w-full flex flex-col">
       <div>
         <MentionsInput
-          value={message}
+          value={userMessage}
           onChange={handleMentionsChange}
           className="w-full resize-none p-2 height-auto overflow-hidden"
           placeholder="Type your message"
@@ -176,8 +161,7 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
         </div>
       }
       <div>{currentModel}</div>
-      <button onClick={handleSendMessage}>SEND MESSAGE, SEE IN CONSOLE</button>
-      <div>{currentAiMessage}</div>
+      <div>{aiResponse}</div>
     </div>
   );
 };

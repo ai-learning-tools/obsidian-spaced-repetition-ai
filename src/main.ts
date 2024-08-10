@@ -1,18 +1,16 @@
 import { App, Editor, MarkdownView, Modal, Plugin, TFile, WorkspaceLeaf} from 'obsidian';
 import { CHAT_VIEWTYPE, DEFAULT_SETTINGS, PROXY_SERVER_PORT, DEFAULT_SYSTEM_PROMPT } from '@/constants';
-import ChatView from '@/components/ChatView';
+import ChatView from '@/views/ChatView';
 import { SRSettingTab, SRSettings } from './components/SettingsPage';
 import './tailwind.css';
-import ChainManager from '@/LLM/chainManager';
+import ChainManager from '@/LLM/chainManager';  
 import { LangChainParams, SetChainOptions } from '@/aiParams';
 import EncryptionService from '@/utils/encryptionService';
 import { ProxyServer } from '@/proxyServer';
-import SharedState from '@/sharedState';
 // Remember to rename these classes and interfaces!
 
 export default class SRPlugin extends Plugin {
 	settings: SRSettings;
-	sharedState: SharedState;
 	chatIsVisible = false;
 	activateViewPromise: Promise<void> | null = null;
 	chainManager: ChainManager;
@@ -23,7 +21,6 @@ export default class SRPlugin extends Plugin {
 		await this.loadSettings();
 		this.addSettingTab(new SRSettingTab(this.app, this));
 		this.proxyServer = new ProxyServer(PROXY_SERVER_PORT);
-		this.sharedState = new SharedState();
 		
 		const langChainParams = this.getChainManagerParams();
 		this.chainManager = new ChainManager(
