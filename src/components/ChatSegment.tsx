@@ -106,8 +106,9 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
 
     updateModifiedMessage(processedUserMessage);
 
-    // TODO: If currentMessage is not the last message, ie. user is resending a previousMessage, then we shall clean convo History after this message
+    // If currentMessage is not the last message, ie. user is overwriiting a message that has already been sent, then we shall clean convo History after this message
     setAIResponse("")
+    clearConvoHistory()
 
     const updateConvoHistory = (aiResponse: string) => {
       updateAIResponse(aiResponse)
@@ -129,15 +130,12 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
     updateUserMessage, 
     updateModifiedMessage, 
     updateAIResponse, 
-    updateErrorMessage, 
-    updateIsDoneGenerating, 
     clearConvoHistory 
   } = updateFunctions;
 
   // We create useState in this component for variables that change often, this is used to update overall convo history periodically 
   const [aiResponse, setAIResponse] = useState<string | null>(segment.aiResponse);
   const [userMessage, setUserMessage] = useState<string | null>(segment.userMessage);
-
 
   return (
     <div className="w-full flex flex-col">

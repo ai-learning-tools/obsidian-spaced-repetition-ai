@@ -17,14 +17,11 @@ const Chat: React.FC<ChatProps> = ({
     debug
 }) => {
     const { conversationHistory, createUpdateFunctions, addNewMessage } = useConversationHistory([{
-        userMessage: "Hello, how can I assist you today?",
+        userMessage: null,
         modifiedMessage: null,
         aiResponse: null,
-        errorMessage: null,
-        isDoneGenerating: false
     }])
     
-
     return (
         <div className='w-full'>
         {conversationHistory.map((segment, index) => {
