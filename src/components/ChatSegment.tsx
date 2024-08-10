@@ -135,15 +135,15 @@ const ChatSegment: React.FC<ChatSegmentProps> = ({
   } = updateFunctions;
 
   // We create useState in this component for variables that change often, this is used to update overall convo history periodically 
-  const [aiResponse, setAIResponse] = useState(segment.aiResponse);
-  const [userMessage, setUserMessage] = useState(segment.userMessage);
+  const [aiResponse, setAIResponse] = useState<string | null>(segment.aiResponse);
+  const [userMessage, setUserMessage] = useState<string | null>(segment.userMessage);
 
 
   return (
     <div className="w-full flex flex-col">
       <div>
         <MentionsInput
-          value={userMessage}
+          value={userMessage || ''} //value cannot be null
           onChange={handleMentionsChange}
           className="w-full resize-none p-2 height-auto overflow-hidden"
           placeholder="Type your message"

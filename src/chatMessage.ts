@@ -56,7 +56,7 @@ export const chatReducer = (
       return [
         ...state,
         {
-          userMessage: 'hello',
+          userMessage: null,
           modifiedMessage: null,
           aiResponse: null,
           errorMessage: null,
