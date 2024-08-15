@@ -1,4 +1,4 @@
-import MessageSegment from '@/components/ChatSegment'
+import MessageSegment from '@/components/MessageSegment'
 import * as React from 'react';
 import ChainManager from '@/LLM/chainManager';
 import { useMessageHistory } from '../hooks/useMessageHistory';
