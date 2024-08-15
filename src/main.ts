@@ -2,11 +2,11 @@ import { App, Editor, MarkdownView, Modal, Plugin, TFile, WorkspaceLeaf} from 'o
 import { ViewTypes, DEFAULT_SETTINGS, PROXY_SERVER_PORT, DEFAULT_SYSTEM_PROMPT } from '@/constants';
 import ChatView from '@/views/ChatView';
 import ReviewView from '@/views/ReviewView';
-import { SRSettingTab } from './components/SettingsPage';
-import { SRSettings } from './settings';
+import { SRSettingTab } from '@/components/SettingsPage';
+import { SRSettings } from '@/settings';
 import '@/tailwind.css';
-import ChainManager from '@/LLM/chainManager';
-import { LangChainParams, SetChainOptions } from '@/aiParams';
+import ChainManager from '@/LLM/ChainManager';
+import { LangChainParams, SetChainOptions } from '@/LLM/aiParams';
 import EncryptionService from '@/utils/encryptionService';
 import { ProxyServer } from '@/proxyServer';
 import { Deck } from './sr/Deck';

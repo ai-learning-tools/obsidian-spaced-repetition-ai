@@ -1,10 +1,12 @@
-import ChainManager from '@/LLM/chainManager';
-import { Notice } from 'obsidian';
+import ChainManager from '@/LLM/ChainManager';
+import { Notice, TFile, Vault } from 'obsidian';
 
 export type Role = 'assistant' | 'user' | 'system';
 
 export const getAIResponse = async (
-  userMessage: string,
+  userMessage: string, // todo @bmo
+  // vault: Vault,
+  // contextFiles: TFile[] = [],
   chainManager: ChainManager,
   setCurrentAIResponse: (response: string) => void,
   updateHistory: (response: string) => void,
@@ -20,6 +22,7 @@ export const getAIResponse = async (
   try {
     await chainManager.runChain(
       userMessage,
+      // contextFiles, // todo @bmo
       abortController,
       setCurrentAIResponse,
       updateHistory,

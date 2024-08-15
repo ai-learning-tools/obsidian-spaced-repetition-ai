@@ -1,7 +1,5 @@
-import { LangChainParams, ModelConfig } from "@/aiParams";
+import { LangChainParams, ModelConfig } from "@/LLM/aiParams";
 import EncryptionService from "@/utils/encryptionService";
-import { BaseChatModel } from 'langchain/chat_models/base';
-import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { 
   OPENAI_MODELS,
   ANTHROPIC_MODELS,
@@ -11,19 +9,22 @@ import {
   ChatModelDisplayNames,
   DISPLAY_NAME_TO_MODEL
 } from '@/constants';
+import { ChatModelType } from "@/constants";
+import { Notice } from "obsidian";
+import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatAnthropic } from "@langchain/anthropic";
-import { Notice } from "obsidian";
+
 
 // This follows a singleton pattern. Constructor is private; we use getInstance
 export default class ChatModelManager {
   private static instance: ChatModelManager;
-  private static chatModel: BaseChatModel;
+  private static chatModel: ChatModelType;
   private static modelMap: Record<
     string,
     {
       hasApiKey: boolean;
-      AIConstructor: typeof ChatOpenAI | typeof ChatGoogleGenerativeAI | typeof ChatAnthropic; 
+      AIConstructor: ChatModelType
       vendor: ModelProviders;
     }
   >;
@@ -114,7 +115,7 @@ export default class ChatModelManager {
     return { ...baseConfig, ...(providerConfig[chatModelProvider as keyof typeof providerConfig] || {}) };
   }
 
-  getChatModel(): BaseChatModel {
+  getChatModel(): ChatModelType {
     return ChatModelManager.chatModel;
   }
 
@@ -140,7 +141,7 @@ export default class ChatModelManager {
         ...modelConfig,
       });
 
-      ChatModelManager.chatModel = newModelInstance as BaseChatModel;
+      ChatModelManager.chatModel = newModelInstance;
     } catch (error) {
       console.error(error);
       new Notice(`Error creating model ${modelDisplayName}`);

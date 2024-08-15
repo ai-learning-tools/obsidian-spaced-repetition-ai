@@ -1,4 +1,4 @@
-import ChainManager from "@/LLM/chainManager";
+import ChainManager from "@/LLM/ChainManager";
 import { SetChainOptions } from "@/aiParams";
 import { BaseChatMemory } from "langchain/memory";
 import { useState } from "react";

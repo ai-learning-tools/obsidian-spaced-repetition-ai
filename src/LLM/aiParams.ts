@@ -1,5 +1,5 @@
 import { ChatPromptTemplate } from 'langchain/prompts';
-import { ChatModelDisplayNames, ChatModels } from './constants';
+import { ChatModelDisplayNames, ChatModels } from '../constants';
 
 export interface ModelConfig {
   modelName: ChatModels;
@@ -36,7 +36,7 @@ export interface NoteFile {
 
 export interface SetChainOptions {
   prompt?: ChatPromptTemplate;
-  noteFile?: NoteFile;
+  noteFiles?: NoteFile[];
   forceNewCreation?: boolean;
   abortController?: AbortController;
   debug?: boolean;

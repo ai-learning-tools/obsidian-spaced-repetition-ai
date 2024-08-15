@@ -1,17 +1,18 @@
-import { LangChainParams, SetChainOptions } from "@/aiParams";
-import { SRSettings } from "@/settings";
-import EncryptionService from "@/utils/encryptionService";
-import { App, Notice } from "obsidian";
-import ChatModelManager from "./chatModelManager";
-import { RunnableSequence } from "@langchain/core/runnables";
-import { ChatModelDisplayNames, ChatModels, DISPLAY_NAME_TO_MODEL, AI_SENDER } from "@/constants";
+import { LangChainParams, SetChainOptions } from "@/LLM/aiParams";
+import { Notice } from "obsidian";
+import ChatModelManager from "@/LLM/ChatModelManager";
+import { ChatModelDisplayNames, DISPLAY_NAME_TO_MODEL } from "@/constants";
 import MemoryManager from "./memoryManager";
 import { ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate, MessagesPlaceholder } from "langchain/prompts";
-import { ChatMessage } from "@/chatMessage";
-import ChainFactory from "@/chainFactory";
+import { AIMessage, BaseMessage, HumanMessage } from "@langchain/core/messages";
+import { tool } from '@langchain/core/tools';
+import { z } from 'zod';
+import { StateGraph, StateGraphArgs } from "@langchain/langgraph";
+import { MemorySaver } from "@langchain/langgraph";
+import { Runnable } from "@langchain/core/runnables";
+
 
 export default class ChainManager {
-  private static chain: RunnableSequence;
 
   public chatModelManager: ChatModelManager;
   public memoryManager: MemoryManager;
@@ -61,8 +62,8 @@ export default class ChainManager {
       console.error(`createdChainWithNewModel failed: ${error}`);
       console.log(`Model: ${this.langChainParams.model}`);
     }
-  }
-
+  }  
+  
   async setChain(options: SetChainOptions = {}): Promise<void> {
     try {
       if (!this.chatModelManager.getChatModel()) {
@@ -88,22 +89,6 @@ export default class ChainManager {
         ]);
       }
 
-      if (options.forceNewCreation) {
-        ChainManager.chain = ChainFactory.createNewLLMChain({
-          llm: chatModel,
-          memory,
-          prompt,
-          abortController: options.abortController,
-        }) as RunnableSequence;
-      } else {
-        ChainManager.chain = ChainFactory.getLLMChainFromMap({
-          llm: chatModel,
-          memory,
-          prompt,
-          abortController: options.abortController,
-        }) as RunnableSequence;
-      }
-      
     } catch (error) {
       new Notice(`Error creating chain: ${error}`);
       console.error(`Error creating chain: ${error}`);
@@ -112,6 +97,7 @@ export default class ChainManager {
 
   async runChain(
     userMessage: string,
+    // files: TFile[]  = [], // todo @bmo
     abortController: AbortController,
     setCurrentAIResponse: (response: string) => void,
     updateChatHistory: (response: string) => void,
@@ -137,35 +123,76 @@ export default class ChainManager {
       systemMessage,
       chatContextTurns,
     } = this.langChainParams;
-
     const memory = this.memoryManager.getMemory();
     
-    let prompt;
-    
-    if (ignoreSystemMessage) {
-      const prompt = ChatPromptTemplate.fromMessages([
-        new MessagesPlaceholder("history"),
-        HumanMessagePromptTemplate.fromTemplate("{input}")
-      ]);
-      this.setChain({
-        ...this.langChainParams.options,
-        prompt,
-      });
-
-    } else {
-      // const prompt = ChatPromptTemplate.fromMessages([
-      //   SystemMessagePromptTemplate.fromTemplate(systemMessage),
-      //   new MessagesPlaceholder("history"),
-      //   HumanMessagePromptTemplate.fromTemplate("{input}"),
-      // ])
-      this.setChain(this.langChainParams.options);
+    interface AgentState {
+      messages: BaseMessage[];
     }
 
+    // Define the tools for the agent to use
+    const qaTool = tool(async (res) => {
+      if (res.cards.length > 1) {
+        return res;
+      }
+      throw new Error("No cards generated");
+      }, {
+      name: "flashcard-generator",
+      description: "Call to get spaced repetition cards.",
+      schema: z.object({
+        cards: z.array(z.object({
+          question: z.string().describe("The front side of the card containing the question or prompt"),
+          answer: z.string().describe("The back side of the card containing the answer or explanation")
+        })).describe("An array of question-answer pairs representing spaced repetition cards")
+      }),
+    });
+
+
+    const tools = [qaTool];
+    
+    const graphState: StateGraphArgs<AgentState>['channels'] = {
+      messages: {
+        reducer: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
+      },
+    }    
+
+    const chatModel = this.chatModelManager.getChatModel()
+    const chatRunnable = chatModel.bindTools(tools);
+
+    async function callModel(state: AgentState) {
+      const messages = state.messages;
+      const response = await chatRunnable.invoke(messages);
+
+      return { messages: [response ]};
+    }
+
+    // Define the function that determines whether to continue or not
+    function shouldContinue(state: AgentState) {
+      const messages = state.messages;
+      const lastMessage = messages[messages.length - 1] as AIMessage;
+
+      // If the LLM makes a tool call, then we route to the "tools" node
+      if (lastMessage.tool_calls?.length) {
+        return "tools";
+      }
+      // Otherwise, we stop (reply to the user)
+      return "__end__";
+    }
+
+    const checkpointer = new MemorySaver();
+
+    const workflow = new StateGraph<AgentState>({ channels: graphState })
+      .addNode("agent", callModel)
+      .addEdge("__start__", "agent")
+      .addConditionalEdges("agent", shouldContinue)
+
+    const graph: Runnable = workflow.compile({ checkpointer });
+
     let fullAIResponse = "";
-    const chatModel = (ChainManager.chain as any).last.bound;
-    const chatStream = await ChainManager.chain.stream({
-      input: userMessage,
-    } as any);
+    const eventStream = await graph.streamEvents(
+        { messages: [new HumanMessage(userMessage)] },
+        { version: "v1", configurable: { thread_id: "42 "} } // The thread
+    );
+
 
     try {
       if (debug) {
@@ -180,11 +207,20 @@ export default class ChainManager {
           `chat context turns: ${chatContextTurns}\n`,
         )
       }
-      for await (const chunk of chatStream) {
+      for await (const event of eventStream) {
         if (abortController.signal.aborted) break;
-        fullAIResponse += chunk.content;
-        setCurrentAIResponse(fullAIResponse);
+        
+        // https://js.langchain.com/v0.1/docs/modules/agents/how_to/streaming/
+        if (event.event === 'on_llm_stream') {
+          const content = event.data?.chunk?.message?.content;
+          if (content !== undefined && content !== '') {
+            console.log(content);
+            fullAIResponse += content;
+            setCurrentAIResponse(fullAIResponse);
+          }
+        }
       }
+      
     } catch (error) {
       const errorData = error?.response?.data?.error || error;
       const errorCode = errorData?.code || error;
@@ -203,10 +239,9 @@ export default class ChainManager {
           { output: fullAIResponse },
         );
 
-        // Update oveall chat history at the very end
+        // Update overall chat history at the very end
         updateChatHistory(fullAIResponse)
       }
-      // TODO @belinda: here currentAIMessage is updated to "" in the original repo. Probably good to keep currentAIMessage and the text that is displayed separate, once UI is implemented.
     }
     return fullAIResponse;
   }

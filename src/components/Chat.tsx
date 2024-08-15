@@ -1,6 +1,6 @@
 import MessageSegment from '@/components/MessageSegment'
 import * as React from 'react';
-import ChainManager from '@/LLM/chainManager';
+import ChainManager from '@/LLM/ChainManager';
 import { useMessageHistory } from '../hooks/useMessageHistory';
 import SRPlugin from '@/main';
 

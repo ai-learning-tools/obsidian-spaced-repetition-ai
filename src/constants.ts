@@ -1,4 +1,7 @@
 import { SRSettings } from "@/settings";
+import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatAnthropic } from "@langchain/anthropic";
 
 export const PREFERRED_DATE_FORMAT = "YYYY-MM-DD";
 export const ALLOWED_DATE_FORMATS = [PREFERRED_DATE_FORMAT, "DD-MM-YYYY", "ddd MMM DD YYYY"];
@@ -101,6 +104,9 @@ export enum ModelProviders {
   ANTHROPIC = "anthropic",
   GOOGLE = "google",
 }
+
+export type ChatModelType = ChatOpenAI | ChatGoogleGenerativeAI | ChatAnthropic;
+
 
 // From here https://github.com/open-spaced-repetition/fsrs4anki/blob/main/fsrs4anki_scheduler.js#L108
 export const DEFAULT_FSRS_WEIGHTS = [0.41, 1.18, 3.04, 15.24, 7.14, 0.64, 1.00, 0.06, 1.65, 0.17, 1.11, 2.02, 0.09, 0.30, 2.12, 0.24, 2.94, 0.48, 0.64];

@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Root, createRoot } from 'react-dom/client';
 import SRPlugin from '@/main';
 import Chat from '@/components/Chat'
-import ChainManager from '@/LLM/chainManager';
+import ChainManager from '@/LLM/ChainManager';
 
 export default class ChatView extends ItemView {
   private chainManager: ChainManager;

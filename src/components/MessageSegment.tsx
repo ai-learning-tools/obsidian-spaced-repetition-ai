@@ -6,11 +6,11 @@ import { TFile } from 'obsidian';
 import MentionsInput from '@/components/mentions/MentionsInput';
 import Mention from '@/components/mentions/Mention'; // Fixed import path
 import { ChatMessage } from '@/chatMessage';
-import ChainManager from '@/LLM/chainManager';
+import ChainManager from '@/LLM/ChainManager';
 import { useAIState } from '@/hooks/useAIState';
 import { extractNoteTitles, getNoteFileFromTitle, getFileContent } from '@/utils/utils';
-import { EnterIcon } from '@/components/Icons'
-import { getAIResponse } from '@/langChainStream';
+import { EnterIcon } from '@/components/Icons';
+import { getAIResponse } from '@/LLM/getAIResponse';
 
 interface MessageSegmentProps {
   segment: ChatMessage
@@ -89,11 +89,10 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     }
 
     event.preventDefault(); // Prevents adding a newline to the textarea
-    const inputMessage = "In one word, say hi";
 
-    let processedUserMessage = inputMessage;
+    let processedUserMessage = userMessage;
 
-    const noteTitles = extractNoteTitles(inputMessage);
+    const noteTitles = extractNoteTitles(userMessage);
     for (const noteTitle of noteTitles) {
       const noteFile = await getNoteFileFromTitle(plugin.app.vault, noteTitle);
       if (noteFile) {
@@ -105,22 +104,24 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     updateModifiedMessage(processedUserMessage);
 
     // If currentMessage is not the last message, ie. user is overwriiting a message that has already been sent, then we shall clean convo History after this message
-    setAIResponse("")
-    clearMessageHistory()
+    setAIResponse("");
+    clearMessageHistory();
 
     const updateMessageHistory = (aiResponse: string) => {
-      updateAIResponse(aiResponse)
-      addNewMessage()
+      updateAIResponse(aiResponse);
+      addNewMessage();
     }
 
-    await getAIResponse(
-      userMessage,
+    await getAIResponse( // todo @bmo
+      processedUserMessage,
+      // vault,
+      // mentionedFiles,
       chainManager,
       setAIResponse,
       updateMessageHistory,
       setAbortController,
       { debug }
-    )
+    );
   }
 
   // Update overall conversation history, this is only done periodically to prevent rapid reloading
