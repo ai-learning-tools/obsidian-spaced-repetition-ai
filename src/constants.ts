@@ -51,7 +51,7 @@ export enum ChatModelDisplayNames {
   GPT_4o_MINI = "GPT-4o Mini",
   GEMINI_15_PRO = "Gemini 1.5",
   CLAUDE_3_OPUS = "Claude 3 Opus",
-  CLAUDE_3_SONNET = "Claude 3 Sonnet",
+  CLAUDE_3_SONNET = "Claude 3.5 Sonnet",
 }
 
 export const OPENAI_MODELS = [

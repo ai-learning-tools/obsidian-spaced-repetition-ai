@@ -1127,11 +1127,13 @@ const styled = defaultStyle(
       margin: 0,
       top: 0,
       left: 0,
+      padding: 8,
       boxSizing: 'border-box',
       backgroundColor: 'transparent',
       fontFamily: 'inherit',
       fontSize: 'inherit',
       letterSpacing: 'inherit',
+      borderRadius: 'inherit',
     },
 
     '&multiLine': {
@@ -1140,7 +1142,6 @@ const styled = defaultStyle(
         bottom: 0,
         overflow: 'hidden',
         resize: 'none',
-
         // fix weird textarea padding in mobile Safari (see: http://stackoverflow.com/questions/6890149/remove-3-pixels-in-ios-webkit-textarea)
         ...(isMobileSafari
           ? {

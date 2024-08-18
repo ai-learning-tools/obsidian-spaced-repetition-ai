@@ -10,7 +10,7 @@ interface ChatProps {
     debug: boolean
   }
 
-  // Chat contains conversation history
+// Chat contains conversation history
 const Chat: React.FC<ChatProps> = ({
     plugin, 
     chainManager,
@@ -24,20 +24,20 @@ const Chat: React.FC<ChatProps> = ({
     
     return (
         <div className='w-full'>
-        {messageHistory.map((segment, index) => {
-            const updateHistory = createUpdateFunctions(index);
-            return (
-            <MessageSegment
-                key={index}
-                segment={segment}
-                updateHistory={updateHistory}
-                addNewMessage={addNewMessage}
-                plugin={plugin}
-                chainManager={chainManager}
-                debug={debug}
-            />
-            );
-        })}
+            {messageHistory.map((segment, index) => {
+                const updateHistory = createUpdateFunctions(index);
+                return (
+                <MessageSegment
+                    key={index}
+                    segment={segment}
+                    updateHistory={updateHistory}
+                    addNewMessage={addNewMessage}
+                    plugin={plugin}
+                    chainManager={chainManager}
+                    debug={debug}
+                />
+                );
+            })}
         </div>
     )
 }

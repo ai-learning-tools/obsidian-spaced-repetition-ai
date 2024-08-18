@@ -137,10 +137,10 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   const [userMessage, setUserMessage] = useState<string | null>(segment.userMessage);
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="w-full flex flex-col mb-4">
       <div>
         <MentionsInput
-          value={userMessage || ''} //value cannot be null
+          value={userMessage || ''} 
           onChange={handleMentionsChange}
           className="w-full resize-none p-2 height-auto overflow-hidden"
           placeholder="Type your message"
@@ -150,16 +150,16 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           <Mention
             trigger="@"
             data={files.map((file) => ({ id: file.path, display: file.path }))}
-            onAdd={(id) => handleMentionAdd(id)}
+            onAdd={(id: string) => handleMentionAdd(id)}
           />
         </MentionsInput>
       </div>
-      <div className="flex flex-row items-center justify-start space-x-4 text-gray-400">
+      <div className="flex flex-row items-center justify-start my-2 space-x-4 text-gray-400">
         <select
           value={currentModel}
           onChange={(e) => setModel(e.target.value)}
           className="text-center"
-          style={{ width: `${currentModel.length}ch` }}
+          style={{ width: '150px' }}
         >
           {Object.entries(ChatModelDisplayNames).map(([key, displayName]) => (
             <option key={key} value={key}>
@@ -167,7 +167,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
             </option>
           ))}
         </select>
-        <p>/ Command</p>
         <p>@ Mention</p>
         <div className='flex flex-row items-center space-x-2'> <EnterIcon /> <p>Enter</p> </div>
       </div>
@@ -190,8 +189,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           </ul>
         </div>
       }
-      <div>{currentModel}</div>
-      <div>{aiResponse}</div>
+      <div className='m-4'>{aiResponse}</div>
     </div>
   );
 };
