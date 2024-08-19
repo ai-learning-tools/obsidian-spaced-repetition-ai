@@ -11,6 +11,7 @@ import EncryptionService from '@/utils/encryptionService';
 import { ProxyServer } from '@/proxyServer';
 import { Deck } from './sr/Deck';
 import { DeckIterator } from './sr/DeckIterator';
+import MemoryManager from './memory/memoryManager';
 
 export default class SRPlugin extends Plugin {
 	settings: SRSettings;
@@ -18,6 +19,7 @@ export default class SRPlugin extends Plugin {
 	activateViewPromise: Promise<void> | null = null;
 	chainManager: ChainManager;
 	proxyServer: ProxyServer;
+	memoryManager: MemoryManager;
 
 	deckTree: Deck;
 	deckIterator: DeckIterator;
@@ -29,6 +31,7 @@ export default class SRPlugin extends Plugin {
 		this.proxyServer = new ProxyServer(PROXY_SERVER_PORT);
 		this.deckTree = new Deck("", this.app.vault, null);
 		this.deckIterator = new DeckIterator(this.deckTree);
+		this.memoryManager = new MemoryManager(this.app.vault)
 		
 		const langChainParams = this.getChainManagerParams();
 		this.chainManager = new ChainManager(
