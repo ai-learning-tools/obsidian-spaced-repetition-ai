@@ -65,6 +65,7 @@ export const generatorParameters = (
  * ```
  */
 export function createEmptyCard<R = Card>(
+  id: number = 1,
   now?: DateInput,
   afterHandler?: (card: Card) => R
 ): R {
@@ -79,7 +80,7 @@ export function createEmptyCard<R = Card>(
     state: State.New,
     last_review: undefined,
 
-    id: 1,
+    id: id,
     question: "What's the meaning of life",
     answer: "It's a journey of self"
   }
@@ -89,3 +90,4 @@ export function createEmptyCard<R = Card>(
     return emptyCard as R
   }
 }
+
