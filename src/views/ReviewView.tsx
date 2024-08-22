@@ -5,6 +5,7 @@ import { Root, createRoot } from 'react-dom/client';
 import SRPlugin from '@/main';
 import MemoryManager from '@/memory/memoryManager';
 import { DeckManager } from '@/fsrs/Deck';
+import DeckDisplay from '@/components/DeckDisplay'
 
 export default class ReviewView extends ItemView {
   private memoryManager: MemoryManager;
@@ -55,8 +56,9 @@ export default class ReviewView extends ItemView {
         <React.StrictMode>
           <div>
           {
-           this.deckManager.decks[0].cards.map(card => 
-            <div>{card.id}</div>
+            // TODO: Athena - create review log for top card and updates its value based on selection
+           this.deckManager.decks.map(deck => 
+            <DeckDisplay className="flex w-full h-full flex-col justify-center" deck={deck}/>
            )
           }
           </div>

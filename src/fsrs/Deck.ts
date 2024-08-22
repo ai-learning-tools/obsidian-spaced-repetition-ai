@@ -3,6 +3,7 @@ import { Card, State } from "./models";
 import { Vault } from "obsidian";
 import { DIRECTORY } from "@/constants";
 import { fixDate } from "./help";
+import { fsrs, FSRS } from "./fsrs";
 
 
 export class Deck {
@@ -16,17 +17,24 @@ export class Deck {
         this.sortCards();
     }
 
+    // This should be called everytime the deck is updated
     sortCards() {
         this.cards.sort((a, b) => fixDate(a.due).getTime() - fixDate(b.due).getTime());
     }
 
     getCountForStates(): { [key in State]: number } {
-        const stateCounts = this.cards.reduce((counts, card) => {
-            counts[card.state] = (counts[card.state] || 0) + 1;
-            return counts;
-        }, {} as { [key in State]: number });
+        const count: { [key in State]: number } = {
+            [State.New]: 0,
+            [State.Learning]: 0,
+            [State.Review]: 0,
+            [State.Relearning]: 0,
+        };
 
-        return stateCounts;
+        for (const card of this.cards) {
+            count[card.state]++;
+        }
+
+        return count;
     }
 }
 
@@ -34,6 +42,7 @@ export class DeckManager {
     decks: Deck[]
     memoryManager: MemoryManager
     vault: Vault
+    scheduler: FSRS
 
     constructor(
         memoryManager: MemoryManager,
@@ -41,7 +50,10 @@ export class DeckManager {
     ) {
         this.memoryManager = memoryManager
         this.vault = vault
+        this.scheduler = 
     }
+
+
 
     async syncCardsWithNotes() {
         console.log('not implemented')
