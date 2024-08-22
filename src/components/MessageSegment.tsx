@@ -87,18 +87,14 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     updateUserMessage(userMessage);
 
     let modifiedMessage = userMessage;
-    const noteTitles = extractNoteTitles(userMessage);
-    for (const noteTitle of noteTitles) {
-      const noteFile = await getNoteFileFromTitle(plugin.app.vault, noteTitle);
-      if (noteFile) {
-        const noteContent = await getFileContent(noteFile, plugin.app.vault);
-        modifiedMessage = `${modifiedMessage}\n\n[[${noteTitle}]]: \n${noteContent}`;
-      }
+    for (const file of mentionedFiles) {
+      const fileContent = await getFileContent(file, plugin.app.vault);
+      modifiedMessage = `${modifiedMessage}\n\n[[${file.name}]]: \n${fileContent}`;
     }
 
     updateModifiedMessage(modifiedMessage);
 
-    // // If currentMessage is not the last message, ie. user is overwriting a message that has already been sent, then we shall clean convo History after this message
+    // If currentMessage is not the last message, ie. user is overwriting a message that has already been sent, then we shall clean convo History after this message
     setAIResponse("");
     clearMessageHistory();
 
