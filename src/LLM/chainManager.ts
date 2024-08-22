@@ -43,16 +43,12 @@ export default class ChainManager {
    */
   createChainWithNewModel(newModelDisplayName: ChatModelDisplayNames): void {
     try {
-      console.log("DEBUG-ATH", newModelDisplayName)
+      console.log("DEBUG-ATH", newModelDisplayName);
       let newModel = DISPLAY_NAME_TO_MODEL[newModelDisplayName];
       this.langChainParams.model = newModel;
       this.langChainParams.modelDisplayName = newModelDisplayName;
 
       this.chatModelManager.setChatModel(newModelDisplayName);
-      this.setChain({
-        ...this.langChainParams.options,
-        forceNewCreation: true,
-      });
       console.log(`Setting model to ${newModelDisplayName}: ${newModel}`);
     } catch (error) {
       console.error(`createdChainWithNewModel failed: ${error}`);
@@ -60,36 +56,6 @@ export default class ChainManager {
     }
   }  
   
-  async setChain(options: SetChainOptions = {}): Promise<void> {
-    try {
-      if (!this.chatModelManager.getChatModel()) {
-        const errorMsg = "Chat model is not initialized properly, check your API key and make sure you have API access";
-        new Notice(errorMsg);
-        console.error(errorMsg);
-        return;
-      }
-      
-      const chatModel = this.chatModelManager.getChatModel();
-      
-      let prompt;
-      if (options.prompt) {
-        prompt = options.prompt;
-      } else {
-        prompt = ChatPromptTemplate.fromMessages([
-          SystemMessagePromptTemplate.fromTemplate(
-            this.langChainParams.systemMessage
-          ),
-          new MessagesPlaceholder("history"),
-          HumanMessagePromptTemplate.fromTemplate("{input}"),
-        ]);
-      }
-
-    } catch (error) {
-      new Notice(`Error creating chain: ${error}`);
-      console.error(`Error creating chain: ${error}`);
-    }
-  }
-
   async runChain(
     modifiedMessage: string,
     messageHistory: ChatMessage[],

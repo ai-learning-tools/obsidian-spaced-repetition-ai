@@ -152,7 +152,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           style={{ width: '150px' }}
         >
           {Object.entries(ChatModelDisplayNames).map(([key, displayName]) => (
-            <option key={key} value={key}>
+            <option key={key} value={displayName}>
               {displayName}
             </option>
           ))}
