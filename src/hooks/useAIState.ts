@@ -1,6 +1,4 @@
 import ChainManager from "@/LLM/ChainManager";
-import { SetChainOptions } from "@/aiParams";
-import { BaseChatMemory } from "langchain/memory";
 import { useState } from "react";
 import { ChatModelDisplayNames } from "@/constants";
 
@@ -10,16 +8,9 @@ export function useAIState(
 ): [
   string,
   (model: string) => void,
-  () => void,
 ] {
   const { langChainParams } = chainManager;
   const [currentModel, setCurrentModel] = useState<ChatModelDisplayNames>(langChainParams.modelDisplayName);
-  const [, setChatMemory] = useState<BaseChatMemory | null>(chainManager.memoryManager.getMemory());
-
-  const clearChatMemory = () => {
-    chainManager.memoryManager.clearChatMemory();
-    setChatMemory(chainManager.memoryManager.getMemory());
-  }
 
   const setModel = (newModelDisplayName: ChatModelDisplayNames) => {
     chainManager.createChainWithNewModel(newModelDisplayName);
@@ -29,6 +20,5 @@ export function useAIState(
   return [
     currentModel,
     setModel,
-    clearChatMemory,
   ];
 }

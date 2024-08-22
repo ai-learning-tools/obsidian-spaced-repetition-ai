@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
-import { ChatModels, ChatModelDisplayNames, USER_SENDER } from '@/constants';
+import { ChatModelDisplayNames } from '@/constants';
 import SRPlugin from '@/main';
 import { TFile } from 'obsidian';
 import MentionsInput from '@/components/mentions/MentionsInput';
@@ -23,12 +23,14 @@ interface MessageSegmentProps {
     updateAIResponse: (aiResponse: string) => void;
     clearMessageHistory: () => void;
   };
+  messageHistory: ChatMessage[],
   addNewMessage: () => void
 }
 
 const MessageSegment: React.FC<MessageSegmentProps> = ({ 
   segment,
   updateHistory,
+  messageHistory,
   plugin,
   chainManager,
   debug,
@@ -36,7 +38,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 }) => {
   // LLM
   const [
-    currentModel, setModel, clearChatMemory
+    currentModel, setModel,
   ] = useAIState(chainManager);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
 
@@ -78,32 +80,25 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
   // dummy function for now to demonstrate streaming
   const handleSendMessage = async (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (!(event.key === 'Enter' && !event.shiftKey)) {
-      return    
-    }
-    if (userMessage != null) {
-      // Since user pressed send, we shall update the overall conversationHistory
-      updateUserMessage(userMessage)
-    } else {
-      return
-    }
-
+    if (!(event.key === 'Enter' && !event.shiftKey))  return;
+    if (!userMessage) return;
     event.preventDefault(); // Prevents adding a newline to the textarea
+    
+    updateUserMessage(userMessage);
 
-    let processedUserMessage = userMessage;
-
+    let modifiedMessage = userMessage;
     const noteTitles = extractNoteTitles(userMessage);
     for (const noteTitle of noteTitles) {
       const noteFile = await getNoteFileFromTitle(plugin.app.vault, noteTitle);
       if (noteFile) {
         const noteContent = await getFileContent(noteFile, plugin.app.vault);
-        processedUserMessage = `${processedUserMessage}\n\n[[${noteTitle}]]: \n${noteContent}`;
+        modifiedMessage = `${modifiedMessage}\n\n[[${noteTitle}]]: \n${noteContent}`;
       }
     }
 
-    updateModifiedMessage(processedUserMessage);
+    updateModifiedMessage(modifiedMessage);
 
-    // If currentMessage is not the last message, ie. user is overwriiting a message that has already been sent, then we shall clean convo History after this message
+    // // If currentMessage is not the last message, ie. user is overwriting a message that has already been sent, then we shall clean convo History after this message
     setAIResponse("");
     clearMessageHistory();
 
@@ -112,10 +107,9 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
       addNewMessage();
     }
 
-    await getAIResponse( // todo @bmo
-      processedUserMessage,
-      // vault,
-      // mentionedFiles,
+    await getAIResponse(
+      modifiedMessage,
+      messageHistory,
       chainManager,
       setAIResponse,
       updateMessageHistory,
@@ -180,9 +174,9 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
       
       {
         mentionedFiles.length > 0 && 
-        <div>
+      <div>
         <p>Using:</p>
-          <ul>
+          <ul className=" text-gray-400">
             {mentionedFiles.map(file => (
               <li key={file.path}>{file.path}</li>
             ))}

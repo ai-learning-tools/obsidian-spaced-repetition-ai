@@ -30,6 +30,7 @@ const Chat: React.FC<ChatProps> = ({
                 <MessageSegment
                     key={index}
                     segment={segment}
+                    messageHistory={messageHistory}
                     updateHistory={updateHistory}
                     addNewMessage={addNewMessage}
                     plugin={plugin}

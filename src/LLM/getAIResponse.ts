@@ -1,12 +1,12 @@
 import ChainManager from '@/LLM/ChainManager';
 import { Notice, TFile, Vault } from 'obsidian';
+import { ChatMessage } from '@/chatMessage';
 
 export type Role = 'assistant' | 'user' | 'system';
 
 export const getAIResponse = async (
-  userMessage: string, // todo @bmo
-  // vault: Vault,
-  // contextFiles: TFile[] = [],
+  modifiedMessage: string,
+  messageHistory: ChatMessage[],
   chainManager: ChainManager,
   setCurrentAIResponse: (response: string) => void,
   updateHistory: (response: string) => void,
@@ -21,8 +21,8 @@ export const getAIResponse = async (
   updateShouldAbort(abortController);
   try {
     await chainManager.runChain(
-      userMessage,
-      // contextFiles, // todo @bmo
+      modifiedMessage,
+      messageHistory,
       abortController,
       setCurrentAIResponse,
       updateHistory,
