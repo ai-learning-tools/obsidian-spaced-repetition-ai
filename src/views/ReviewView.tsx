@@ -3,24 +3,24 @@ import { ViewTypes } from '@/constants';
 import * as React from 'react';
 import { Root, createRoot } from 'react-dom/client';
 import SRPlugin from '@/main';
-import { DeckIterator } from '@/sr/DeckIterator';
-import { Deck } from '@/sr/Deck';
+import MemoryManager from '@/memory/memoryManager';
+import { DeckManager } from '@/fsrs/Deck';
 
 export default class ReviewView extends ItemView {
-  private deckIterator: DeckIterator;
-  private deckTree: Deck;
+  private memoryManager: MemoryManager;
+  private deckManager: DeckManager;
 
   private root: Root | null = null;
 
   constructor(leaf: WorkspaceLeaf, private plugin: SRPlugin) {
       super(leaf);
       this.plugin = plugin;
-      this.deckTree = plugin.deckTree;
-      this.deckIterator = plugin.deckIterator;
+      this.memoryManager = plugin.memoryManager;
+      this.deckManager = plugin.deckManager;
   }
 
   async onload(): Promise<void> {
-    await this.deckTree.updateDeck();
+    // TODO: move this else where
   }
 
   getViewType(): string {
@@ -48,42 +48,27 @@ export default class ReviewView extends ItemView {
   }
 
   async onOpen(): Promise<void> {
-    await this.deckTree.updateDeck();
+    await this.deckManager.populateDecks()
     const root = createRoot(this.containerEl.children[1]);
-    root.render(
-      <React.StrictMode>
-        <div onClick={this.toggleAnswer}>
-          <div>Review</div>
-          <p>question</p>
-          <div id="answer" className='hidden'>
-            <p>---</p>
-            <p>answer</p>
+    if (this.deckManager.decks.length) {
+      root.render(   
+        <React.StrictMode>
+          <div>
+          {
+           this.deckManager.decks[0].cards.map(card => 
+            <div>{card.id}</div>
+           )
+          }
           </div>
-          <button>again</button>
-          <button>hard</button>
-          <button>good</button>
-          <button>easy</button>
-        </div>
-        <div>
-          <h2>Deck: {this.deckTree.path}</h2>
-          <p>New cards: {this.deckTree.newCards.length}</p>
-          <p>{JSON.stringify(this.deckTree.newCards)}</p>
-          <p>Learning cards: {this.deckTree.learningCards.length}</p>
-          <p>Due cards: {this.deckTree.dueCards.length}</p>
-          <p>Subdecks: {this.deckTree.subdecks.length}</p>
-          
-          <h3>Subdecks:</h3>
-          {this.deckTree.subdecks.map((subdeck, index) => (
-            <div key={index}>
-              <h4>Subdeck: {subdeck.path}</h4>
-              <p>New cards: {subdeck.newCards.length}</p>
-              <p>Learning cards: {subdeck.learningCards.length}</p>
-              <p>Due cards: {subdeck.dueCards.length}</p>
-            </div>
-          ))}
-        </div>
-      </React.StrictMode>
-    )
+        </React.StrictMode>
+      )
+    } else {
+      root.render(
+        <React.StrictMode>
+          <div>Add some cards man</div>
+        </React.StrictMode>
+      )
+    }
   }
 
   async onClose(): Promise<void> {

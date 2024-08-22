@@ -1,5 +1,6 @@
 import { Card, ReviewLog, createEmptyCard } from "@/fsrs";
 import { Vault, TFolder } from "obsidian";
+import { DIRECTORY } from "@/constants";
 
 interface Memory {
     id: number
@@ -8,7 +9,7 @@ interface Memory {
 }
 
 // Memory manager to read and write cards and review logs into json file {id}.json 
-const directory = "SR" //TODO: move away to settings
+
 class MemoryManager {
     vault: Vault;
     baseFolder: TFolder;
@@ -17,11 +18,19 @@ class MemoryManager {
     constructor(vault: Vault) {
         this.vault = vault;
         this.initializeFolders();
+
+        (async () => {
+            for (let i = 1; i <= 6; i++) {
+                const card = createEmptyCard(i);
+                const memory = { card: card, reviewLogs: [], id: i };
+                await this.writeMemory(memory);
+            }
+        })();
     }
 
     async initializeFolders() {
-        this.baseFolder = await this.ensureFolderExists(directory);
-        this.memoryFolder = await this.ensureFolderExists(`${directory}/memory`);
+        this.baseFolder = await this.ensureFolderExists(DIRECTORY);
+        this.memoryFolder = await this.ensureFolderExists(`${DIRECTORY}/memory`);
     }
 
     async ensureFolderExists(folderPath: string): Promise<TFolder> {
@@ -38,14 +47,25 @@ class MemoryManager {
         
         if (file) {
             const fileContent = await this.vault.read(file);
-            return JSON.parse(fileContent);
+            return JSON.parse(fileContent) as Memory;
+        } else {
+            throw new Error(`Memory file not found: ${filePath}`);
+        }
+    }
+
+    async readMemoryFromPath(filePath: string): Promise<Memory> {
+        const file = this.vault.getFileByPath(filePath);
+        
+        if (file) {
+            const fileContent = await this.vault.read(file);
+            return JSON.parse(fileContent) as Memory;
         } else {
             throw new Error(`Memory file not found: ${filePath}`);
         }
     }
 
     async writeMemory(memory: Memory): Promise<void> {
-        const filePath = `${directory}/memory/${memory.id}.json`;
+        const filePath = `${DIRECTORY}/memory/${memory.id}.json`;
         const fileContent = JSON.stringify(memory, null, 2);
         const file = this.vault.getFileByPath(filePath);
 
@@ -65,6 +85,7 @@ class MemoryManager {
             try {
                 const memory: Memory = JSON.parse(fileContent) as Memory;
                 memory.reviewLogs.unshift(newLog);
+                this.writeMemory(memory);
             } catch (error) {
                 throw new Error(`Cannot insert review log: Invalid memory content in file: ${filePath}`);
             }
@@ -82,12 +103,18 @@ class MemoryManager {
             try {
                 const memory: Memory = JSON.parse(fileContent) as Memory;
                 memory.card = newCard
+                this.writeMemory(memory);
             } catch (error) {
                 throw new Error(`Cannot update card: Invalid memory content in file: ${filePath}`);
             }
         } else {
             throw new Error(`Cannot insert review log: Memory file not found: ${filePath}`);
         }
+    }
+
+    async readCard(id: string): Promise<Card> {
+        const memory = await this.readMemory(id);
+        return memory.card;
     }
 }
 

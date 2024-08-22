@@ -9,9 +9,10 @@ import ChainManager from '@/LLM/ChainManager';
 import { LangChainParams, SetChainOptions } from '@/LLM/aiParams';
 import EncryptionService from '@/utils/encryptionService';
 import { ProxyServer } from '@/proxyServer';
-import { Deck } from './sr/Deck';
-import { DeckIterator } from './sr/DeckIterator';
+// import { Deck } from './sr/Deck';
+// import { DeckIterator } from './sr/DeckIterator';
 import MemoryManager from './memory/memoryManager';
+import { DeckManager } from './fsrs/Deck';
 
 export default class SRPlugin extends Plugin {
 	settings: SRSettings;
@@ -20,18 +21,20 @@ export default class SRPlugin extends Plugin {
 	chainManager: ChainManager;
 	proxyServer: ProxyServer;
 	memoryManager: MemoryManager;
+	deckManager: DeckManager;
 
-	deckTree: Deck;
-	deckIterator: DeckIterator;
+	// deckTree: Deck;
+	// deckIterator: DeckIterator;
 
 	async onload(): Promise<void> {
 		
 		await this.loadSettings();
 		this.addSettingTab(new SRSettingTab(this.app, this));
 		this.proxyServer = new ProxyServer(PROXY_SERVER_PORT);
-		this.deckTree = new Deck("", this.app.vault, null);
-		this.deckIterator = new DeckIterator(this.deckTree);
+		// this.deckTree = new Deck("", this.app.vault, null);
+		// this.deckIterator = new DeckIterator(this.deckTree);
 		this.memoryManager = new MemoryManager(this.app.vault)
+		this.deckManager = new DeckManager(this.memoryManager, this.app.vault)
 		
 		const langChainParams = this.getChainManagerParams();
 		this.chainManager = new ChainManager(
@@ -68,7 +71,7 @@ export default class SRPlugin extends Plugin {
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			this.toggleView(ViewTypes.CHAT);
+			this.toggleView(ViewTypes.REVIEW);
 		});
 		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
