@@ -1,6 +1,6 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import SRPlugin from "@/main";
-import { ChatModels, ChatModelDisplayNames, MODEL_TO_DISPLAY_NAME } from "@/constants";
+import { ChatModels, MODEL_TO_DISPLAY_NAME } from "@/constants";
 
 export class SRSettingTab extends PluginSettingTab {
   plugin: SRPlugin;

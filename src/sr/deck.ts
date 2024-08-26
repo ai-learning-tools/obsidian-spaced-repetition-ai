@@ -1,6 +1,6 @@
 import { Card } from "./Card";
 import { DEFAULT_FSRS_WEIGHTS } from "@/constants";
-import { Vault, TFile, TFolder } from "obsidian";
+import { Vault, TFile } from "obsidian";
 import { errorMessage } from "@/utils/errorMessage";
 
 export class Deck {
@@ -22,8 +22,8 @@ export class Deck {
       vault: Vault,
       parent: Deck | null = null,
       weights: number[] = DEFAULT_FSRS_WEIGHTS,
-      desiredRetention: number = 0.9,
-      maxInterval: number = 36500,
+      desiredRetention = 0.9,
+      maxInterval = 36500,
     ) {
       this.path = path;
       this.vault = vault;

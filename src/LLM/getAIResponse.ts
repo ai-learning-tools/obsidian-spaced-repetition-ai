@@ -1,5 +1,5 @@
 import ChainManager from '@/LLM/ChainManager';
-import { Notice, TFile, Vault } from 'obsidian';
+import { Notice } from 'obsidian';
 import { ChatMessage } from '@/chatMessage';
 
 export type Role = 'assistant' | 'user' | 'system';

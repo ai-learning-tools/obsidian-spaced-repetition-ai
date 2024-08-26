@@ -1,4 +1,3 @@
-import { ChatPromptTemplate } from 'langchain/prompts';
 import { ChatModelDisplayNames, ChatModels } from '../constants';
 
 export interface ModelConfig {
@@ -23,7 +22,6 @@ export interface LangChainParams {
   googleApiKey: string;
   systemMessage: string;
   chatContextTurns: number; // The number of previous conversation turns to include in the context. Default is 15 turns, i.e. 30 messages
-  options: SetChainOptions;
 }
 
 export interface NoteFile {
@@ -32,12 +30,4 @@ export interface NoteFile {
   mtime: number;
   content: string;
   metadata: Record<string, any>;
-}
-
-export interface SetChainOptions {
-  prompt?: ChatPromptTemplate;
-  noteFiles?: NoteFile[];
-  forceNewCreation?: boolean;
-  abortController?: AbortController;
-  debug?: boolean;
 }

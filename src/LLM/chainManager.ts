@@ -1,8 +1,7 @@
-import { LangChainParams, SetChainOptions } from "@/LLM/aiParams";
+import { LangChainParams } from "@/LLM/aiParams";
 import { Notice } from "obsidian";
 import ChatModelManager from "@/LLM/ChatModelManager";
 import { ChatModelDisplayNames, DISPLAY_NAME_TO_MODEL } from "@/constants";
-import { ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate, MessagesPlaceholder } from "langchain/prompts";
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
@@ -43,7 +42,7 @@ export default class ChainManager {
    */
   setModel(newModelDisplayName: ChatModelDisplayNames): void {
     try {
-      let newModel = DISPLAY_NAME_TO_MODEL[newModelDisplayName];
+      const newModel = DISPLAY_NAME_TO_MODEL[newModelDisplayName];
       this.langChainParams.model = newModel;
       this.langChainParams.modelDisplayName = newModelDisplayName;
 
@@ -222,7 +221,6 @@ export default class ChainManager {
       }
     } finally {
       if (fullAIResponse) {
-        debugger;
         // Update overall chat history at the very end
         updateMessageHistory(fullAIResponse)
       }

@@ -5,7 +5,8 @@ import { Platform } from "obsidian";
 let safeStorage: Electron.SafeStorage;
 
 if (Platform.isDesktop) {
-  safeStorage = require("electron")?.remote?.safeStorage;
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  safeStorage = (require("electron") as any)?.remote?.safeStorage;
 }
 
 const EncryptionService = {
