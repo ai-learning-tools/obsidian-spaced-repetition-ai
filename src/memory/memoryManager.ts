@@ -103,7 +103,7 @@ class MemoryManager {
             try {
                 const memory: Memory = JSON.parse(fileContent) as Memory;
                 memory.card = newCard
-                this.writeMemory(memory);
+                await this.writeMemory(memory);
             } catch (error) {
                 throw new Error(`Cannot update card: Invalid memory content in file: ${filePath}`);
             }

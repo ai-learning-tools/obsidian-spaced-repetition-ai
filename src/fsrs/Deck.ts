@@ -48,18 +48,19 @@ export class Deck {
 
     // Find card with the same id, and copy the fields over
     // We don't overwrite the card since these cards are also used in other decks
-    updateCard(recordLog: RecordLogItem, updateMemory = true) {
+    async updateCard(recordLog: RecordLogItem, updateMemory = true) {
         const index = this.cards.findIndex(c => c.id === recordLog.card.id);
         if (index == -1 ) {
             console.error("trying to update a card that doesn't exists ind deck")
         }
-        const card = this.cards[index]
-        Object.assign(card, recordLog.card);
+        
+        console.log('ATHENA-DEBUG', 'new card', recordLog.card)
+        const card = Object.assign(this.cards[index], recordLog.card);
 
         if (updateMemory) {
             console.log("ATHENA-DEBUG", 'updating card')
-            this.memoryManager.updateCard(card)
-            this.memoryManager.insertReviewLog(recordLog.log, card.id)
+            await this.memoryManager.updateCard(card)
+            await this.memoryManager.insertReviewLog(recordLog.log, card.id)
         }
 
     }

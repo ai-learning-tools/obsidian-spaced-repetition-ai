@@ -11,10 +11,10 @@ const DeckDisplay: React.FC<DeckDisplayProps> = ({ deck }: DeckDisplayProps) => 
     const stateCounts = deck.getCountForStates();
     const [topCard, setTopCard] = useState<Card>(deck.cards[0]);
 
-    const onCardReview = (cardId: number, rating: Rating) => {
+    const onCardReview = async (cardId: number, rating: Rating) => {
         console.log('ATHENA-DEBUG', 'reviewing cards', cardId, rating)
         const record: RecordLogItem = deck.scheduler.next(topCard, new Date(), rating as Grade)
-        deck.updateCard(record)
+        await deck.updateCard(record)
         deck.sortCards()
         setTopCard(deck.cards[0])
     }
