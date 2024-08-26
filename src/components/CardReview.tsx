@@ -6,7 +6,7 @@ interface CardReviewProps {
     onReview: (cardId: number, rating: Rating) => void;
 }
 
-const CardReview: React.FC<CardReviewProps> = ({ card, onReview }) => {
+const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewProps) => {
     const handleReview = (rating: Rating) => {
         onReview(card.id, rating);
     };

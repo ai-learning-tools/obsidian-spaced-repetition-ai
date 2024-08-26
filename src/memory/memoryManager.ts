@@ -19,13 +19,13 @@ class MemoryManager {
         this.vault = vault;
         this.initializeFolders();
 
-        (async () => {
-            for (let i = 1; i <= 6; i++) {
-                const card = createEmptyCard(i);
-                const memory = { card: card, reviewLogs: [], id: i };
-                await this.writeMemory(memory);
-            }
-        })();
+        // (async () => {
+        //     for (let i = 1; i <= 6; i++) {
+        //         const card = createEmptyCard(i);
+        //         const memory = { card: card, reviewLogs: [], id: i };
+        //         await this.writeMemory(memory);
+        //     }
+        // })();
     }
 
     async initializeFolders() {
@@ -42,7 +42,7 @@ class MemoryManager {
     }
 
     async readMemory(id: string): Promise<Memory> {
-        const filePath = `~SR/memory/${id}.json`;
+        const filePath = `${DIRECTORY}/memory/${id}.json`;
         const file = this.vault.getFileByPath(filePath);
         
         if (file) {
@@ -76,8 +76,8 @@ class MemoryManager {
         }
     }
 
-    async insertReviewLog(newLog: ReviewLog): Promise<void> {
-        const filePath = `~SR/memory/${newLog.id}.json`;
+    async insertReviewLog(newLog: ReviewLog, id: number): Promise<void> {
+        const filePath = `${DIRECTORY}/memory/${id}.json`;
         const file = this.vault.getFileByPath(filePath);
         
         if (file) {
@@ -95,7 +95,7 @@ class MemoryManager {
     }
 
     async updateCard(newCard: Card): Promise<void> {
-        const filePath = `~SR/memory/${newCard.id}.json`;
+        const filePath = `${DIRECTORY}/memory/${newCard.id}.json`;
         const file = this.vault.getFileByPath(filePath);
         
         if (file) {

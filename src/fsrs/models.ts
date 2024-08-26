@@ -31,9 +31,6 @@ export interface ReviewLog {
   last_elapsed_days: number // Number of days between the last two reviews
   scheduled_days: number // Number of days until the next review
   review: Date // Date of the review
-
-  // additional variables to make compatible with plugin
-  id: number
 }
 
 export type RecordLogItem = {
