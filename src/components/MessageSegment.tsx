@@ -94,7 +94,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
     updateModifiedMessage(modifiedMessage);
 
-    // If currentMessage is not the last message, ie. user is overwriting a message that has already been sent, then we shall clean convo History after this message
+    // If currentMessage is not the last message, ie. user is overwriting a message that has already been sent, then we clean conversation history after this message
     setAIResponse("");
     clearMessageHistory();
 
@@ -110,7 +110,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
       setAIResponse,
       updateMessageHistory,
       setAbortController,
-      { debug }
     );
   }
 
@@ -125,6 +124,13 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   // We create useState in this component for variables that change often, this is used to update overall convo history periodically 
   const [aiResponse, setAIResponse] = useState<string | null>(segment.aiResponse);
   const [userMessage, setUserMessage] = useState<string | null>(segment.userMessage);
+
+  const handleStopGenerating = () => {
+    if (abortController) {
+      console.log("User stopping generation...");
+      abortController.abort();
+    }
+  }
 
   return (
     <div className="w-full flex flex-col mb-4">
@@ -179,6 +185,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           </ul>
         </div>
       }
+      <button onClick={handleStopGenerating}>Stop generating</button>
       <div className='m-4'>{aiResponse}</div>
     </div>
   );

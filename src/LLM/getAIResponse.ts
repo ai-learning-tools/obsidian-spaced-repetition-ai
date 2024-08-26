@@ -11,11 +11,6 @@ export const getAIResponse = async (
   setCurrentAIResponse: (response: string) => void,
   updateHistory: (response: string) => void,
   updateShouldAbort: (abortController: AbortController | null) => void,
-  options: {
-    debug?: boolean,
-    ignoreSystemMessage?: boolean,
-    updateLoading?: (loading: boolean) => void
-  } = {},
 ) => {
   const abortController = new AbortController();
   updateShouldAbort(abortController);
@@ -26,7 +21,6 @@ export const getAIResponse = async (
       abortController,
       setCurrentAIResponse,
       updateHistory,
-      options,
     );
   } catch (error) {
     new Notice('Model request failed: ', error);

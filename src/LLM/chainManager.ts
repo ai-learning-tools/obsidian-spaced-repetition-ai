@@ -24,7 +24,7 @@ export default class ChainManager {
     this.chatModelManager = ChatModelManager.getInstance( 
       this.langChainParams
     ); 
-    this.createChainWithNewModel(this.langChainParams.modelDisplayName);
+    this.setModel(this.langChainParams.modelDisplayName);
   }
 
   resetParams(langChainParams: LangChainParams): void {
@@ -34,16 +34,15 @@ export default class ChainManager {
     this.chatModelManager = ChatModelManager.resetInstance( 
       this.langChainParams
     ); 
-    this.createChainWithNewModel(this.langChainParams.modelDisplayName);
+    this.setModel(this.langChainParams.modelDisplayName);
   }  
   
   /**
    * Update the active model and create a new chain
    * with the specified model display name.
    */
-  createChainWithNewModel(newModelDisplayName: ChatModelDisplayNames): void {
+  setModel(newModelDisplayName: ChatModelDisplayNames): void {
     try {
-      console.log("DEBUG-ATH", newModelDisplayName);
       let newModel = DISPLAY_NAME_TO_MODEL[newModelDisplayName];
       this.langChainParams.model = newModel;
       this.langChainParams.modelDisplayName = newModelDisplayName;
@@ -51,7 +50,7 @@ export default class ChainManager {
       this.chatModelManager.setChatModel(newModelDisplayName);
       console.log(`Setting model to ${newModelDisplayName}: ${newModel}`);
     } catch (error) {
-      console.error(`createdChainWithNewModel failed: ${error}`);
+      console.error(`setModel failed: ${error}`);
       console.log(`Model: ${this.langChainParams.model}`);
     }
   }  
@@ -62,13 +61,7 @@ export default class ChainManager {
     abortController: AbortController,
     setCurrentAIResponse: (response: string) => void,
     updateMessageHistory: (response: string) => void,
-    options: {
-      debug?: boolean;
-      ignoreSystemMessage?: boolean;
-      updateLoading?: (loading: boolean) => void;
-    } = {},
   ) {
-    const { debug = false, ignoreSystemMessage = false } = options;
 
     if (!this.chatModelManager.getChatModel()) {
       const errorMsg = "Chat model is not initialized properly, check your API key and make sure you have API access";
@@ -171,26 +164,30 @@ export default class ChainManager {
 
     console.log(allMessages);
 
+    // TODO: abort stream upon abort controller https://github.com/langchain-ai/langgraphjs/issues/319
     const eventStream = await graph.streamEvents(
         { messages: allMessages },
-        { version: "v1", configurable: { thread_id: "42"} } // TODO @bmo: Thread id must be specified. Right now it isn't saved. We'll want to save unique threads at some point.
+        { 
+          version: "v1", 
+          configurable: { thread_id: "42"}        
+        } // TODO @bmo: Thread id must be specified. Right now it isn't saved. We'll want to save unique threads at some point.
     );
 
     try {
-      if (debug) {
-        console.log(
-          `*** DEBUG INFO ***\n` +
-          `messages: ${JSON.stringify(messageHistory)}\n` +
-          // ChatOpenAI has modelName, some other ChatModels like ChatOllama have model
-          `model: ${chatModel.modelName || chatModel.model}\n` +
-          `temperature: ${temperature}\n` +
-          `maxTokens: ${maxTokens}\n` +
-          `system message: ${systemMessage}\n` +
-          `chat context turns: ${chatContextTurns}\n`,
-        )
-      }
+      console.log(
+        `*** DEBUG INFO ***\n` +
+        `messages: ${JSON.stringify(messageHistory)}\n` +
+        // ChatOpenAI has modelName, some other ChatModels like ChatOllama have model
+        `model: ${chatModel.modelName || chatModel.model}\n` +
+        `temperature: ${temperature}\n` +
+        `maxTokens: ${maxTokens}\n` +
+        `system message: ${systemMessage}\n` +
+        `chat context turns: ${chatContextTurns}\n`,
+      );
       for await (const event of eventStream) {
-        if (abortController.signal.aborted) break;
+        if (abortController.signal.aborted) {
+          return;
+        }
         
         // https://js.langchain.com/v0.1/docs/modules/agents/how_to/streaming/
         if (event.event === 'on_llm_stream') {
@@ -225,6 +222,7 @@ export default class ChainManager {
       }
     } finally {
       if (fullAIResponse) {
+        debugger;
         // Update overall chat history at the very end
         updateMessageHistory(fullAIResponse)
       }

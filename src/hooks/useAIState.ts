@@ -13,7 +13,7 @@ export function useAIState(
   const [currentModel, setCurrentModel] = useState<ChatModelDisplayNames>(langChainParams.modelDisplayName);
 
   const setModel = (newModelDisplayName: ChatModelDisplayNames) => {
-    chainManager.createChainWithNewModel(newModelDisplayName);
+    chainManager.setModel(newModelDisplayName);
     setCurrentModel(newModelDisplayName);
   }
 
