@@ -16,7 +16,6 @@ interface MessageSegmentProps {
   segment: ChatMessage
   plugin: SRPlugin;
   chainManager: ChainManager;
-  debug: boolean;
   updateHistory: {
     updateUserMessage: (userMessage: string) => void;
     updateModifiedMessage: (modifiedMessage: string) => void;
@@ -24,16 +23,17 @@ interface MessageSegmentProps {
     clearMessageHistory: () => void;
   };
   messageHistory: ChatMessage[],
-  addNewMessage: () => void
+  addNewMessage: () => void,
+  index: number
 }
 
 const MessageSegment: React.FC<MessageSegmentProps> = ({ 
+  index,
   segment,
   updateHistory,
   messageHistory,
   plugin,
   chainManager,
-  debug,
   addNewMessage
 }) => {
   // LLM
@@ -78,12 +78,14 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     setMentionedFiles(newMentionedFiles);
   };
 
-  // dummy function for now to demonstrate streaming
   const handleSendMessage = async (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (!(event.key === 'Enter' && !event.shiftKey))  return;
     if (!userMessage) return;
+
     event.preventDefault(); // Prevents adding a newline to the textarea
     
+    clearMessageHistory(); // Clear message history from current index
+
     updateUserMessage(userMessage);
 
     let modifiedMessage = userMessage;
@@ -96,7 +98,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
     // If currentMessage is not the last message, ie. user is overwriting a message that has already been sent, then we clean conversation history after this message
     setAIResponse("");
-    clearMessageHistory();
 
     const updateMessageHistory = (aiResponse: string) => {
       updateAIResponse(aiResponse);
@@ -105,7 +106,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
     await getAIResponse(
       modifiedMessage,
-      messageHistory,
+      messageHistory.slice(0, index), // this needs to be sliced because we have access to the old messageHistory
       chainManager,
       setAIResponse,
       updateMessageHistory,

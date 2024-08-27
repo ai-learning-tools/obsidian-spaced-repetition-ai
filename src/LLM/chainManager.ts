@@ -56,7 +56,7 @@ export default class ChainManager {
   
   async runChain(
     modifiedMessage: string,
-    messageHistory: ChatMessage[],
+    messageHistory: ChatMessage[], // all messages not including newest user message
     abortController: AbortController,
     setCurrentAIResponse: (response: string) => void,
     updateMessageHistory: (response: string) => void,
@@ -142,7 +142,7 @@ export default class ChainManager {
     let fullAIResponse = "";
 
     // Convert messageHistory into an array of AIMessage and HumanMessage
-    const convertedMessages = messageHistory.slice(0, -1).flatMap((message) => {
+    const convertedMessages = messageHistory.flatMap((message) => {
       const messages: BaseMessage[] = [];
       if (message.userMessage) {
         messages.push(new HumanMessage(message.userMessage));
@@ -161,7 +161,7 @@ export default class ChainManager {
       new HumanMessage(modifiedMessage),
     ];
 
-    console.log(allMessages);
+    console.log('ALL MESSAGES, CHAIN MANAGER:', allMessages);
 
     // TODO: abort stream upon abort controller https://github.com/langchain-ai/langgraphjs/issues/319
     const eventStream = await graph.streamEvents(
