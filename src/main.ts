@@ -31,7 +31,7 @@ export default class SRPlugin extends Plugin {
 		this.deckIterator = new DeckIterator(this.deckTree);
 		
 		const langChainParams = this.getChainManagerParams();
-		this.chainManager = new ChainManager(
+		this.chainManager = ChainManager.getInstance(
 			langChainParams
 		);
 

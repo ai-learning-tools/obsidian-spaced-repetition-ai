@@ -12,7 +12,7 @@ import { ChatMessage } from "@/chatMessage";
 
 
 export default class ChainManager {
-
+  private static instance: ChainManager;
   public chatModelManager: ChatModelManager;
   public langChainParams: LangChainParams;
 
@@ -25,6 +25,16 @@ export default class ChainManager {
     ); 
     this.setModel(this.langChainParams.modelDisplayName);
   }
+
+  static getInstance(
+    langChainParams: LangChainParams
+  ): ChainManager {
+    if (!ChainManager.instance) {
+      ChainManager.instance = new ChainManager(langChainParams);
+    }
+    return ChainManager.instance;
+  }
+
 
   resetParams(langChainParams: LangChainParams): void {
     if (langChainParams !== undefined) {
