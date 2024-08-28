@@ -3,7 +3,6 @@ import EncryptionService from "@/utils/encryptionService";
 import { 
   OPENAI_MODELS,
   ANTHROPIC_MODELS,
-  GOOGLE_MODELS,
   ModelProviders,
   PROXY_SERVER_PORT,
   ChatModelDisplayNames,
@@ -12,7 +11,6 @@ import {
 import { ChatModelType } from "@/constants";
 import { Notice } from "obsidian";
 import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatAnthropic } from "@langchain/anthropic";
 
 
@@ -61,12 +59,6 @@ export default class ChatModelManager {
         apiKey: this.langChainParams.openAIApiKey,
         constructor: ChatOpenAI,
         vendor: ModelProviders.OPENAI,
-      },
-      {
-        models: GOOGLE_MODELS,
-        apiKey: this.langChainParams.googleApiKey,
-        constructor: ChatGoogleGenerativeAI,
-        vendor: ModelProviders.GOOGLE,
       },
       {
         models: ANTHROPIC_MODELS,

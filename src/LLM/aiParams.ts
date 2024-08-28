@@ -9,7 +9,6 @@ export interface ModelConfig {
   maxTokens?: number; 
   openAIApiKey?: string;
   anthropicApiKey?: string;
-  googleApiKey?: string;
 }
 
 export interface LangChainParams {
@@ -19,7 +18,6 @@ export interface LangChainParams {
   maxTokens: number; // Max number of output tokens to generate. This number plus the length of your prompt (input tokens) must be smaller than the context window of the model
   openAIApiKey: string;
   anthropicApiKey:  string;
-  googleApiKey: string;
   systemMessage: string;
   chatContextTurns: number; // The number of previous conversation turns to include in the context. Default is 15 turns, i.e. 30 messages
 }

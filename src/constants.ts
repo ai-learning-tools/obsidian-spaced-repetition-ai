@@ -37,7 +37,6 @@ export enum ChatModels {
   GPT_4_32K = "gpt-4-32k",
   GPT_4o = "gpt-4o",
   GPT_4o_MINI = "gpt-4o-mini",
-  GEMINI_15_PRO = "gemini-pro",
   CLAUDE_3_SONNET = "claude-3-5-sonnet-20240620",
   CLAUDE_3_OPUS = "claude-3-opus-20240229"
 }
@@ -49,7 +48,6 @@ export enum ChatModelDisplayNames {
   GPT_4_32K = "GPT-4 32k",
   GPT_4o = "GPT-4o",
   GPT_4o_MINI = "GPT-4o Mini",
-  GEMINI_15_PRO = "Gemini 1.5",
   CLAUDE_3_OPUS = "Claude 3 Opus",
   CLAUDE_3_SONNET = "Claude 3.5 Sonnet",
 }
@@ -63,10 +61,6 @@ export const OPENAI_MODELS = [
   ChatModelDisplayNames.GPT_4o_MINI
 ];
 
-export const GOOGLE_MODELS = [
-  ChatModelDisplayNames.GEMINI_15_PRO
-];
-
 export const ANTHROPIC_MODELS = [
   ChatModelDisplayNames.CLAUDE_3_OPUS,
   ChatModelDisplayNames.CLAUDE_3_SONNET
@@ -78,7 +72,6 @@ export const DISPLAY_NAME_TO_MODEL: Record<ChatModelDisplayNames, ChatModels> = 
   [ChatModelDisplayNames.GPT_4_32K]: ChatModels.GPT_4_32K,
   [ChatModelDisplayNames.GPT_4o]: ChatModels.GPT_4o,
   [ChatModelDisplayNames.GPT_4o_MINI]: ChatModels.GPT_4o_MINI,
-  [ChatModelDisplayNames.GEMINI_15_PRO]: ChatModels.GEMINI_15_PRO,
   [ChatModelDisplayNames.CLAUDE_3_OPUS]: ChatModels.CLAUDE_3_OPUS,
   [ChatModelDisplayNames.CLAUDE_3_SONNET]: ChatModels.CLAUDE_3_SONNET,
 };
@@ -102,10 +95,9 @@ export const DEFAULT_SETTINGS: SRSettings = {
 export enum ModelProviders {
   OPENAI = "openai",
   ANTHROPIC = "anthropic",
-  GOOGLE = "google",
 }
 
-export type ChatModelType = ChatOpenAI | ChatGoogleGenerativeAI | ChatAnthropic;
+export type ChatModelType = ChatOpenAI | ChatAnthropic;
 
 
 // From here https://github.com/open-spaced-repetition/fsrs4anki/blob/main/fsrs4anki_scheduler.js#L108

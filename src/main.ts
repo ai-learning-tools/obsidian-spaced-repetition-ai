@@ -141,7 +141,6 @@ export default class SRPlugin extends Plugin {
 			defaultModelDisplayName,
 			openAIApiKey,
 			anthropicApiKey,
-			googleApiKey
 		} = this.settings;
 		return {
 			model: defaultModel,
@@ -151,7 +150,6 @@ export default class SRPlugin extends Plugin {
 			chatContextTurns: 15,
 			openAIApiKey,
 			anthropicApiKey,
-			googleApiKey,
 			systemMessage: DEFAULT_SYSTEM_PROMPT,
 		};
 	}

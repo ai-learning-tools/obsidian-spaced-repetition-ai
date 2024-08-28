@@ -44,16 +44,6 @@ export class SRSettingTab extends PluginSettingTab {
 					this.plugin.settings.anthropicApiKey = value;
 					await this.plugin.saveSettings();
 				}));
-
-    new Setting(containerEl)
-      .setName('Google API Key')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.googleApiKey ? '•'.repeat(16) : '')
-				.onChange(async (value) => {
-					this.plugin.settings.googleApiKey = value;
-					await this.plugin.saveSettings();
-				}));
 		
 		new Setting(containerEl)
 			.setName('Convert folders to decks')
