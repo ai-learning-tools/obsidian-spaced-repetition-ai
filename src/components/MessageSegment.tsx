@@ -1,20 +1,20 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
-import { ChatModelDisplayNames } from '@/constants';
+import { ChatModelDisplayNames, ANTHROPIC_MODELS } from '@/constants';
 import SRPlugin from '@/main';
-import { TFile } from 'obsidian';
+import { TFile, Vault } from 'obsidian';
 import MentionsInput from '@/components/mentions/MentionsInput';
 import Mention from '@/components/mentions/Mention'; // Fixed import path
 import { ChatMessage } from '@/chatMessage';
 import ChainManager from '@/LLM/ChainManager';
 import { useAIState } from '@/hooks/useAIState';
-import { getFileContent } from '@/utils/utils';
+import { getFileContent, getSortedFiles } from '@/utils/utils';
 import { EnterIcon } from '@/components/Icons';
 import { getAIResponse } from '@/LLM/getAIResponse';
+import { ProxyServer } from '@/proxyServer';
 
 interface MessageSegmentProps {
   segment: ChatMessage
-  plugin: SRPlugin;
   chainManager: ChainManager;
   updateHistory: {
     updateUserMessage: (userMessage: string) => void;
@@ -24,7 +24,9 @@ interface MessageSegmentProps {
   };
   messageHistory: ChatMessage[],
   addNewMessage: () => void,
-  index: number
+  index: number,
+  proxyServer: ProxyServer,
+  vault: Vault
 }
 
 const MessageSegment: React.FC<MessageSegmentProps> = ({ 
@@ -32,9 +34,10 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   segment,
   updateHistory,
   messageHistory,
-  plugin,
   chainManager,
-  addNewMessage
+  addNewMessage,
+  proxyServer, 
+  vault,
 }) => {
   // LLM
   const [
@@ -49,12 +52,12 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
   useEffect(() => {
     const fetchFiles = async () => {
-      const filesInVault = await plugin.getFilesInVault();
+      const filesInVault = await getSortedFiles(vault);
       setFiles(filesInVault);
       console.log('DEBUG-Athena2', filesInVault);
     };
     fetchFiles();
-  }, [plugin]);
+  }, [vault]);
 
   const handleMentionAdd = (id: string) => {
     const mentionedFile = files.find(file => file.path === id);
@@ -133,6 +136,34 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     }
   }
 
+  const handleModelChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const model = event.target.value as ChatModelDisplayNames;
+    setModel(model);
+    
+    if (ANTHROPIC_MODELS.includes(model)) {
+      await proxyServer.startProxyServer('https://api.anthropic.com/');
+    } else {
+      await proxyServer.stopProxyServer();
+    }
+  }
+
+  useEffect(() => {
+    // If Claude is the default, start the proxy server
+    const startProxyServerForClaude = async () => {
+      if (ANTHROPIC_MODELS.includes(currentModel)) {
+        await proxyServer.startProxyServer('https://api.anthropic.com/');
+      }
+    };
+
+    // Call the function on component mount
+    startProxyServerForClaude();
+
+    // Cleanup function to stop the proxy server when the component unmounts
+    return () => {
+      proxyServer.stopProxyServer().catch(console.error);
+    };
+  }, [currentModel, proxyServer]);
+
   return (
     <div className="w-full flex flex-col mb-4">
       <div>
@@ -154,7 +185,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
       <div className="flex flex-row items-center justify-start my-2 space-x-4 text-gray-400">
         <select
           value={currentModel}
-          onChange={(e) => setModel(e.target.value)}
+          onChange={handleModelChange}
           className="text-center"
           style={{ width: '150px' }}
         >

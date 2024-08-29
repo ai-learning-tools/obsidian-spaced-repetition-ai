@@ -198,6 +198,8 @@ export default class ChainManager {
           return;
         }
         
+        console.log(event)
+
         // https://js.langchain.com/v0.1/docs/modules/agents/how_to/streaming/
         if (event.event === 'on_llm_stream') {
 

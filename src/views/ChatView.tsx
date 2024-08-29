@@ -44,10 +44,6 @@ export default class ChatView extends ItemView {
     return this.plugin.chatIsVisible;
   }
 
-  getFilesInVault() {
-    return this.plugin.getFilesInVault
-  }
-
   async onOpen(): Promise<void> {
     const root = createRoot(this.containerEl.children[1]);
     root.render(
@@ -55,7 +51,6 @@ export default class ChatView extends ItemView {
         <Chat 
           plugin={this.plugin}
           chainManager={this.chainManager}
-          debug={this.debug}
         />
       </React.StrictMode>
     );

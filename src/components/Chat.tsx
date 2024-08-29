@@ -32,7 +32,8 @@ const Chat: React.FC<ChatProps> = ({
                     messageHistory={messageHistory}
                     updateHistory={updateHistory}
                     addNewMessage={addNewMessage}
-                    plugin={plugin}
+                    vault={plugin.app.vault}
+                    proxyServer={plugin.proxyServer}
                     chainManager={chainManager}
                 />
                 );

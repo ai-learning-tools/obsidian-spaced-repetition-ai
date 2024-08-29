@@ -86,8 +86,6 @@ export default class SRPlugin extends Plugin {
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 
-		// Get list of files in vault
-		this.getFilesInVault();
 	}
 
 	onunload() {
@@ -154,11 +152,6 @@ export default class SRPlugin extends Plugin {
 		};
 	}
 
-	async getFilesInVault() {
-		const files = this.app.vault.getFiles();
-		console.log("DEBUG-Athena", files)
-		files.sort((a, b) => b.stat.mtime - a.stat.mtime);
-		return files;
-	}	
+
 }
 

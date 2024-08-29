@@ -6,8 +6,8 @@ import { ChatModelDisplayNames } from "@/constants";
 export function useAIState(
   chainManager: ChainManager,
 ): [
-  string,
-  (model: string) => void,
+  ChatModelDisplayNames,
+  (model: ChatModelDisplayNames) => void,
 ] {
   const { langChainParams } = chainManager;
   const [currentModel, setCurrentModel] = useState<ChatModelDisplayNames>(langChainParams.modelDisplayName);

@@ -85,7 +85,6 @@ export const DEFAULT_SETTINGS: SRSettings = {
   defaultModelDisplayName: ChatModelDisplayNames.GPT_4,
   openAIApiKey: "",
   anthropicApiKey: "",
-  googleApiKey: "",
   convertFoldersToDecks: true,
 	noteFoldersToIgnore: [],
 	flashcardTags: [],

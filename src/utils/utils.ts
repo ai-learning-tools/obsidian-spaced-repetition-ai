@@ -15,49 +15,12 @@ export function getTypedObjectEntries<OBJ_T extends ObjectType>(obj: OBJ_T): Obj
   return Object.entries(obj) as ObjectEntries<OBJ_T>;
 }
 
-export function stringTrimStart(str: string): [string, string] {
-  const trimmed: string = str.trimStart();
-  const wsCount: number = str.length - trimmed.length;
-  const ws: string = str.substring(0, wsCount);
-  return [ws, trimmed];
-}
-
-export function extractNoteTitles(query: string) {
-  // Use a regular expression to extract note titles wrapped in [[]]
-  const regex = /\[\[(.*?)\]\]/g;
-  const matches = query.match(regex);
-  const uniqueTitles = new Set(matches ? matches.map((match) => match.slice(2, -2)) : []);
-  return Array.from(uniqueTitles);
-}
-
-// 👇️ format as "YYYY-MM-DD"
-// https://bobbyhadz.com/blog/typescript-date-format
-export function formatDate_YYYY_MM_DD(ticks: Moment): string {
-  return ticks.format(PREFERRED_DATE_FORMAT);
-}
-
-export function genHexString(len: number) {
-  let output = '';
-  for (let i = 0; i < len; ++i) {
-      output += (Math.floor(Math.random() * 16)).toString(16);
-  }
-  return output;
-}
-
-export async function getNoteFileFromTitle(
-  vault: Vault,
-  noteTitle: string,
-): Promise<TFile | null> {
-  // Get all markdown files in the vault
-  const files = vault.getMarkdownFiles();
-
-  for (const file of files) {
-    const title = file.basename;
-    if (title === noteTitle) {
-      return file;
-    }
-  }
-  return null;
+export async function getSortedFiles(
+  vault: Vault
+): Promise<TFile[]> {
+  const files = vault.getFiles();
+  files.sort((a, b) => b.stat.mtime - a.stat.mtime);
+  return files;
 }
 
 export async function getFileContent(

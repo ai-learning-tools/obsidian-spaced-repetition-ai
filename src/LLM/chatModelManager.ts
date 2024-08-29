@@ -98,9 +98,6 @@ export default class ChatModelManager {
       [ModelProviders.ANTHROPIC]: {
         anthropicApiUrl: `http://localhost:${PROXY_SERVER_PORT}`,
         anthropicApiKey: decrypt(params.anthropicApiKey),
-      },
-      [ModelProviders.GOOGLE]: {
-        apiKey: decrypt(params.googleApiKey),
       }
     };
 

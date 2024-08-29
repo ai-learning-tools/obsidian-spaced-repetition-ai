@@ -11,7 +11,7 @@ export class ProxyServer {
     this.port = port;
   }
 
-  startProxyServer(proxyBaseUrl: string) {
+  async startProxyServer(proxyBaseUrl: string) {
     console.log("Attempting to start proxy server...");
 
     const app = new Koa();
@@ -33,7 +33,7 @@ export class ProxyServer {
 
   }
 
-  stopProxyServer() {
+  async stopProxyServer() {
     if (this.server) {
       this.server.close();
     }
