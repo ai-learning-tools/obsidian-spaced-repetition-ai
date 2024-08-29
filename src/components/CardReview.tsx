@@ -14,6 +14,8 @@ const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewPro
     return (
         <div className="bg-gray-100 h-64 w-96 flex-col flex space-y-5">
             <p>{card.id}</p>
+            <p>{`State ${card.state}`}</p>
+            <p>{`Reps ${card.reps}`}</p>
             <div className="text-black">
                 <p>{card.question}</p>
             </div>

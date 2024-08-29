@@ -24,7 +24,7 @@ export type Grade = ExcludeManual<Rating>
 export interface ReviewLog {
   rating: Rating // Rating of the review (Again, Hard, Good, Easy)
   state: State // State of the review (New, Learning, Review, Relearning)
-  due: Date // Date of the last scheduling
+  due: Date // Date of the last scheduling, this means a different thing from Card's due which can be confusing
   stability: number // Memory stability during the review
   difficulty: number // Difficulty of the card during the review
   elapsed_days: number // Number of days elapsed since the last review
@@ -55,7 +55,8 @@ export interface Card {
   // additional variables to make compatible with plugin
   question: string
   answer: string
-  id: number
+  hash: string
+  id: string
 }
 
 export interface CardInput extends Omit<Card, 'state' | 'due' | 'last_review'> {

@@ -1,5 +1,6 @@
 import { Card, DateInput, FSRSParameters, State } from './models'
 import { TypeConvert } from './convert'
+import { Placeholder } from './Deck'
 
 export const default_request_retention = 0.9
 export const default_maximum_interval = 36500
@@ -65,7 +66,7 @@ export const generatorParameters = (
  * ```
  */
 export function createEmptyCard<R = Card>(
-  id: number = 1,
+  card: Placeholder,
   now?: DateInput,
   afterHandler?: (card: Card) => R
 ): R {
@@ -80,9 +81,10 @@ export function createEmptyCard<R = Card>(
     state: State.New,
     last_review: undefined,
 
-    id: id,
-    question: "What's the meaning of life",
-    answer: "It's a journey of self"
+    id: card.id,
+    hash: card.hash,
+    question: card.question,
+    answer: card.answer
   }
   if (afterHandler && typeof afterHandler === 'function') {
     return afterHandler(emptyCard)

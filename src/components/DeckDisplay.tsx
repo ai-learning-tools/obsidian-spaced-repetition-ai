@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Deck } from '@/fsrs/Deck';
 import { State, Card, Rating, Grade, RecordLogItem } from '@/fsrs';
 import CardReview from '@/components/CardReview'
@@ -8,15 +8,20 @@ interface DeckDisplayProps {
 }
 
 const DeckDisplay: React.FC<DeckDisplayProps> = ({ deck }: DeckDisplayProps) => {
-    const stateCounts = deck.getCountForStates();
+    const [stateCounts, setStateCounts] = useState(deck.getCountForStates());
     const [topCard, setTopCard] = useState<Card>(deck.cards[0]);
+
+    useEffect(() => {
+        setStateCounts(deck.getCountForStates());
+    }, [deck.cards]);
 
     const onCardReview = async (cardId: number, rating: Rating) => {
         console.log('ATHENA-DEBUG', 'reviewing cards', cardId, rating)
-        const record: RecordLogItem = deck.scheduler.next(topCard, new Date(), rating as Grade)
+        const record: RecordLogItem = Deck.scheduleNext(topCard, rating as Grade)
         await deck.updateCard(record)
         deck.sortCards()
         setTopCard(deck.cards[0])
+        setStateCounts(deck.getCountForStates());
     }
 
     return (

@@ -60,7 +60,8 @@ export default class ReviewView extends ItemView {
            this.deckManager.decks.map(deck => 
             <DeckDisplay className="flex w-full h-full flex-col justify-center" deck={deck}/>
            )
-          }
+          } 
+          <button className="bg-indigo-400" onClick={this.memoryManager._resetMemory}>Reset Memory</button>
           </div>
         </React.StrictMode>
       )
