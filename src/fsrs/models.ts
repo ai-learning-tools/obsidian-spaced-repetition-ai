@@ -53,10 +53,11 @@ export interface Card {
   last_review?: Date // Date of the last review (optional)
 
   // additional variables to make compatible with plugin
-  question: string
-  answer: string
+  front: string
+  back: string
   hash: string
   id: string
+  path: string
 }
 
 export interface CardInput extends Omit<Card, 'state' | 'due' | 'last_review'> {

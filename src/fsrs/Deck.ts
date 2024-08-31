@@ -9,7 +9,9 @@ import { createEmptyCard } from "./default";
 
 export class Deck {
     cards: Card[];
+    name: string;
     memoryManager: MemoryManager //TODO: Athena - make memory manager a singleton
+
 
     static basicScheduler: FSRS = new FSRS({
         request_retention: 0.90,
@@ -23,10 +25,12 @@ export class Deck {
 
     constructor(
         cards: Card[],
+        name: string, 
         memoryManager: MemoryManager
     ) {
      // create shallow copy +sort card 
         this.cards = [...cards];
+        this.name = name;
         this.memoryManager = memoryManager
         this.sortCards();
     }
@@ -34,8 +38,6 @@ export class Deck {
     // This should be called everytime the deck is updated
     sortCards() {
         this.cards.sort((a, b) => fixDate(a.due).getTime() - fixDate(b.due).getTime());
-        console.log('ATHENA-DEBUG', 'sorted cards', this.cards.map(card => card.id))
-
     }
 
     getCountForStates(): { [key in State]: number } {
@@ -76,11 +78,17 @@ export class Deck {
     }
 }
 
-export interface Placeholder {
-    question: string, 
-    answer: string, 
+export interface Entry {
+    front: string, 
+    back: string, 
     id: string,
     hash: string,
+    path: string, 
+}
+
+export interface DeckMetaData {
+    rootPath: string, 
+    name: string,
 }
 
 export class DeckManager {
@@ -95,7 +103,7 @@ export class DeckManager {
         this.memoryManager = memoryManager;
         this.vault = vault;
         (async() => {
-            this.syncMemoryWithNotes()
+            await this.syncMemoryWithNotes()
         })();
     }
 
@@ -105,14 +113,13 @@ export class DeckManager {
 
         // Part 1: Extract cards from notes
         const files = this.vault.getFiles();
-        const newEntries: {[key: string]: Placeholder} = {}
+        const newEntries: {[key: string]: Entry} = {}
         for (const file of files) {
             if (file.extension === 'md') {
                 const content = await this.vault.read(file);
-                console.log(content)
-                const newCards = this.extractCardDetailsFromContent(content);
-                for (const newCard of newCards) {
-                    newEntries[newCard.id] = newCard;
+                const extractedEntries = this.extractEntriesFromContent(content, file.path);
+                for (const newEntry of extractedEntries) {
+                    newEntries[newEntry.id] = newEntry;
                 }
             }
         }
@@ -126,25 +133,27 @@ export class DeckManager {
             } else {
                 // card doesn't exists in memory, we will create one
                 const card = createEmptyCard(entry)
-                
-                
+                const memory = {card: card, reviewLogs: [], id: card.id}
+                await this.memoryManager.writeMemory(memory)      
             }
         }
+
+        // Part 3: move untracked memory files to trash
+        // TODO: Athena
     }
 
 
-    extractCardDetailsFromContent(content: string): Placeholder[] {
-        // Implement the logic to extract card details from the content
-        // This is a placeholder implementation
+    extractEntriesFromContent(content: string, filePath: string): Entry[] {
+        // Implement the logic to extract entry details from the content
 
-        const cardRegex = /\[!card\](.*?)<!--SR:(\w+)-(\w+)-->/gms;
+        const entryRegex = /\[!card\](.*?)<!--SR:(\w+)-(\w+)-->/gms;
 
         // Create an array to store the extracted cards
-        const cards = [];
+        const entries = [];
     
         // Use the regex to find matches in the text
         let match;
-        while ((match = cardRegex.exec(content)) !== null) {
+        while ((match = entryRegex.exec(content)) !== null) {
             // Extract the card content (everything between [!card] and <!--SR)
             const cardContent = match[1].trim();
             const id = match[2]
@@ -154,31 +163,46 @@ export class DeckManager {
             const parts = cardContent.split('\n');
             const question = parts[0].trim(); // First line is the question
             const answer = parts.slice(1).join('\n').trim(); // Rest is the answer
+
+            const formattedAnswer = answer.replace(/(^|\n)(>\s?)+/g, '$1');
     
             // Add the extracted card to the array
-            cards.push({
-                'question': question,
-                'answer': answer,
+            entries.push({
+                'front': question,
+                'back': formattedAnswer,
                 'id': id,
-                'hash': hash
+                'hash': hash,
+                'path': filePath
             });
         }
     
-        return cards;
+        return entries;
     }
 
     async populateDecks() {
+        // Get all files
         const directory = `${DIRECTORY}/memory`
         const files = this.vault.getFiles().filter(file => file.path.startsWith(directory) && file.extension === 'json');
         
+        // Get all cards
         const allCards: Card[] = [];
         for (const file of files) {
             const memory = await this.memoryManager.readMemoryFromPath(file.path);
             allCards.push(memory.card);
         }
 
-        console.log('ATHENA-DEBUG', 'DECK', allCards)
-        // TODO: Athena - make deck changes here, for now we assume all cards are in one deck
-         this.decks = [new Deck(allCards, this.memoryManager)]
+        // Get Deck
+        const decksMetaData = await this.memoryManager.getAllDeckMetaData()
+        console.log("DBEUG-ATHENA", decksMetaData)
+        const allDecks : Deck[] = []
+
+        for (const currData of decksMetaData) {
+            const cards = allCards.filter(card => card.path.includes(currData.rootPath));
+            allDecks.push(new Deck(cards, currData.name, this.memoryManager));
+        }
+
+        allDecks.push(new Deck(allCards, 'Root Deck', this.memoryManager))
+        this.decks = allDecks
+
     }
 }

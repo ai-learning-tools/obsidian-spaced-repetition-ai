@@ -49,6 +49,7 @@ export default class ReviewView extends ItemView {
   }
 
   async onOpen(): Promise<void> {
+    await this.deckManager.syncMemoryWithNotes()
     await this.deckManager.populateDecks()
     const root = createRoot(this.containerEl.children[1]);
     if (this.deckManager.decks.length) {

@@ -1,10 +1,10 @@
 import { Card, ReviewLog, createEmptyCard } from "@/fsrs";
 import { Vault, TFolder, TFile } from "obsidian";
 import { DIRECTORY } from "@/constants";
-import { Placeholder } from "@/fsrs/Deck";
+import { Entry, DeckMetaData } from "@/fsrs/Deck";
 
 interface Memory {
-    id: number
+    id: string
     card: Card,
     reviewLogs: ReviewLog[]
 }
@@ -19,10 +19,18 @@ class MemoryManager {
     constructor(vault: Vault) {
         this.vault = vault;
         this.initializeFolders();
+        const deckFilePath = `${DIRECTORY}/deck.json`;
+        const deckFile = this.vault.getFileByPath(deckFilePath);
 
-        // (async () => {
-        //     await this._resetMemory()
-        // })();
+        (async() => {
+            if (!deckFile) {
+                await this.vault.create(deckFilePath, JSON.stringify({ decks: [] }, null, 2));
+            }
+        })();
+
+        (async () => {
+            await this._resetMemory()
+        })();
     }
 
     async initializeFolders() {
@@ -105,19 +113,35 @@ class MemoryManager {
     }
 
     // Used when syncing memory files with .md notes
-    async updateCardContent(content: Placeholder): Promise<void> {
+    async updateCardContent(content: Entry): Promise<void> {
         const file = this.getFile(content.id)
         if (file) {
             const fileContent = await this.vault.read(file);
             try {
                 const memory: Memory = JSON.parse(fileContent) as Memory;
-                memory.card.answer = content.answer
-                memory.card.question = content.question
+                memory.card.front = content.front
+                memory.card.back = content.back
                 memory.card.hash = content.hash
+                memory.card.path = content.path
                 await this.writeMemory(memory);
             } catch (error) {
                 throw new Error(`Cannot update card: Invalid memory content in file: ${DIRECTORY}/memory/${newCard.id}.json`);
             }
+        }
+    }
+
+    async getAllDeckMetaData(): Promise<DeckMetaData[]> {
+        const filePath = `${DIRECTORY}/deck.json`;
+        const file = this.vault.getFileByPath(filePath);
+        if (file) {
+            try {
+                const fileContent = await this.vault.read(file);
+                return JSON.parse(fileContent)['decks'] as DeckMetaData[]
+            } catch {
+                throw new Error(`Enable to parse deck from deck.json`);
+            }
+        } else {
+            throw new Error(`Cannot get deck meta data: deck.json does not exists`);
         }
     }
 
@@ -126,11 +150,12 @@ class MemoryManager {
             const entry = {
                 'id': i.toString(),
                 'hash': i.toString(), 
-                'question': "what's the meaning of life",
-                'answer': "to love and be loved"
+                'front': "what's the meaning of life",
+                'back': "to love and be loved",
+                'path': "/"
             }
             const card = createEmptyCard(entry);
-            const memory = { card: card, reviewLogs: [], id: i, hash: i};
+            const memory = { card: card, reviewLogs: [], id: i.toString()};
             await this.writeMemory(memory);
         }
     }

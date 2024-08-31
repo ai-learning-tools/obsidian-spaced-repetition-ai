@@ -17,10 +17,10 @@ const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewPro
             <p>{`State ${card.state}`}</p>
             <p>{`Reps ${card.reps}`}</p>
             <div className="text-black">
-                <p>{card.question}</p>
+                <p>{card.front}</p>
             </div>
             <div className="text-black" id="answer">
-                <p>{card.answer}</p>
+                <p>{card.back}</p>
             </div>
             <div>
                 <button className='p-2' onClick={() => handleReview(1)}>Again</button>
