@@ -10,6 +10,7 @@ import { createEmptyCard } from "./default";
 export class Deck {
     cards: Card[];
     name: string;
+    rootPath: string;
     memoryManager: MemoryManager //TODO: Athena - make memory manager a singleton
 
 
@@ -26,11 +27,13 @@ export class Deck {
     constructor(
         cards: Card[],
         name: string, 
+        rootPath: string,
         memoryManager: MemoryManager
     ) {
      // create shallow copy +sort card 
         this.cards = [...cards];
         this.name = name;
+        this.rootPath = rootPath
         this.memoryManager = memoryManager
         this.sortCards();
     }
@@ -53,6 +56,10 @@ export class Deck {
         }
 
         return count;
+    }
+
+    getDue() : Card[] {
+        return this.cards.filter(card => card.due && new Date(card.due) <= new Date())
     }
 
     // Find card with the same id in the deck, and copy the new values over
@@ -198,10 +205,10 @@ export class DeckManager {
 
         for (const currData of decksMetaData) {
             const cards = allCards.filter(card => card.path.includes(currData.rootPath));
-            allDecks.push(new Deck(cards, currData.name, this.memoryManager));
+            allDecks.push(new Deck(cards, currData.name, currData.rootPath, this.memoryManager));
         }
 
-        allDecks.push(new Deck(allCards, 'Root Deck', this.memoryManager))
+        allDecks.push(new Deck(allCards, 'Root Deck', '', this.memoryManager))
         this.decks = allDecks
 
     }

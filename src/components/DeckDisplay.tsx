@@ -15,8 +15,7 @@ const DeckDisplay: React.FC<DeckDisplayProps> = ({ deck }: DeckDisplayProps) => 
         setStateCounts(deck.getCountForStates());
     }, [deck.cards]);
 
-    const onCardReview = async (cardId: number, rating: Rating) => {
-        console.log('ATHENA-DEBUG', 'reviewing cards', cardId, rating)
+    const onCardReview = async (cardId: string, rating: Rating) => {
         const record: RecordLogItem = Deck.scheduleNext(topCard, rating as Grade)
         await deck.updateCard(record)
         deck.sortCards()

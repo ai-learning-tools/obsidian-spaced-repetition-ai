@@ -3,7 +3,7 @@ import { Card, Rating } from '@/fsrs/models';
 
 interface CardReviewProps {
     card: Card;
-    onReview: (cardId: number, rating: Rating) => Promise<void>;
+    onReview: (cardId: string, rating: Rating) => Promise<void>;
 }
 
 const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewProps) => {
