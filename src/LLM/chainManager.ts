@@ -1,6 +1,8 @@
-import { LangChainParams } from "@/LLM/aiParams";
+// NOTE: THIS IS NO LONGER BEING USED
+
+// import { LangChainParams } from "@/LLM/aiParams";
 import { Notice } from "obsidian";
-import ChatModelManager from "@/LLM/ChatModelManager";
+// import ChatModelManager from "@/LLM/ChatModelManager";
 import { ChatModelDisplayNames, DISPLAY_NAME_TO_MODEL } from "@/constants";
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { tool } from '@langchain/core/tools';
@@ -9,7 +11,7 @@ import { StateGraph, MemorySaver, Annotation } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { Runnable } from "@langchain/core/runnables";
 import { ChatMessage } from "@/chatMessage";
-
+import OpenAI from "openai";
 
 export default class ChainManager {
   private static instance: ChainManager;
@@ -69,15 +71,14 @@ export default class ChainManager {
     messageHistory: ChatMessage[], // all messages not including newest user message
     abortController: AbortController,
     setCurrentAIResponse: (response: string) => void,
-    updateMessageHistory: (response: string) => void,
-  ) {
+  ): Promise<string> {
 
     if (!this.chatModelManager.getChatModel()) {
       const errorMsg = "Chat model is not initialized properly, check your API key and make sure you have API access";
 
       new Notice(errorMsg);
       console.error(errorMsg);
-      return;
+      return '';
     }
 
     const { 
@@ -185,7 +186,7 @@ export default class ChainManager {
     try {
       console.log(
         `*** DEBUG INFO ***\n` +
-        `messages: ${JSON.stringify(messageHistory)}\n` +
+        `messages: ${JSON.stringify(allMessages)}\n` +
         // ChatOpenAI has modelName, some other ChatModels like ChatOllama have model
         `model: ${chatModel.modelName || chatModel.model}\n` +
         `temperature: ${temperature}\n` +
@@ -195,7 +196,7 @@ export default class ChainManager {
       );
       for await (const event of eventStream) {
         if (abortController.signal.aborted) {
-          return;
+          return fullAIResponse;
         }
         
         console.log(event)
@@ -219,7 +220,8 @@ export default class ChainManager {
 
         }
       }
-      
+      return fullAIResponse;
+
     } catch (error) {
       const errorData = error?.response?.data?.error || error;
       const errorCode = errorData?.code || error;
@@ -231,13 +233,8 @@ export default class ChainManager {
         new Notice(`Langchain error: ${errorCode}`);
         console.error(errorData);
       }
-    } finally {
-      if (fullAIResponse) {
-        // Update overall chat history at the very end
-        updateMessageHistory(fullAIResponse)
-      }
     }
-    return fullAIResponse;
+    return '';
   }
 
 }

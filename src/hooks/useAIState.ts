@@ -1,19 +1,18 @@
-import ChainManager from "@/LLM/ChainManager";
+import AIManager from "@/LLM/AIManager";
 import { useState } from "react";
-import { ChatModelDisplayNames } from "@/constants";
+import { ChatModelDisplayNames, DISPLAY_NAME_TO_MODEL, MODEL_TO_DISPLAY_NAME } from "@/constants";
 
 // React hook to manage state related to model and memory in Chat component.
 export function useAIState(
-  chainManager: ChainManager,
+  aiManager: AIManager,
 ): [
   ChatModelDisplayNames,
   (model: ChatModelDisplayNames) => void,
 ] {
-  const { langChainParams } = chainManager;
-  const [currentModel, setCurrentModel] = useState<ChatModelDisplayNames>(langChainParams.modelDisplayName);
+  const [currentModel, setCurrentModel] = useState<ChatModelDisplayNames>(MODEL_TO_DISPLAY_NAME[aiManager.chatModel]);
 
   const setModel = (newModelDisplayName: ChatModelDisplayNames) => {
-    chainManager.setModel(newModelDisplayName);
+    aiManager.setModel(DISPLAY_NAME_TO_MODEL[newModelDisplayName]);
     setCurrentModel(newModelDisplayName);
   }
 

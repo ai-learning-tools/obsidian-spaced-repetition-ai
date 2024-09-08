@@ -1,23 +1,20 @@
 import { Plugin, WorkspaceLeaf} from 'obsidian';
-import { ViewTypes, DEFAULT_SETTINGS, PROXY_SERVER_PORT, DEFAULT_SYSTEM_PROMPT } from '@/constants';
+import { ViewTypes, DEFAULT_SETTINGS } from '@/constants';
 import ChatView from '@/views/ChatView';
 import ReviewView from '@/views/ReviewView';
 import { SRSettingTab } from '@/components/SettingsPage';
 import { SRSettings } from '@/settings';
 import '@/tailwind.css';
-import ChainManager from '@/LLM/ChainManager';
-import { LangChainParams } from '@/LLM/aiParams';
 import EncryptionService from '@/utils/encryptionService';
-import { ProxyServer } from '@/proxyServer';
 import { Deck } from './sr/Deck';
 import { DeckIterator } from './sr/DeckIterator';
+import AIManager from './LLM/AIManager';
 
 export default class SRPlugin extends Plugin {
 	settings: SRSettings;
 	chatIsVisible = false;
 	activateViewPromise: Promise<void> | null = null;
-	chainManager: ChainManager;
-	proxyServer: ProxyServer;
+	aiManager: AIManager;
 
 	deckTree: Deck;
 	deckIterator: DeckIterator;
@@ -26,14 +23,10 @@ export default class SRPlugin extends Plugin {
 		
 		await this.loadSettings();
 		this.addSettingTab(new SRSettingTab(this.app, this));
-		this.proxyServer = new ProxyServer(PROXY_SERVER_PORT);
 		this.deckTree = new Deck("", this.app.vault, null);
 		this.deckIterator = new DeckIterator(this.deckTree);
 		
-		const langChainParams = this.getChainManagerParams();
-		this.chainManager = ChainManager.getInstance(
-			langChainParams
-		);
+		this.aiManager = AIManager.getInstance(this.settings.defaultModel);
 
 		await this.saveSettings();
 
@@ -64,31 +57,12 @@ export default class SRPlugin extends Plugin {
 		);
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
+		this.addRibbonIcon('documents', 'Learn with flashcards', (evt: MouseEvent) => {
 			this.toggleView(ViewTypes.CHAT);
 		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
-
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new SRSettingTab(this.app, this));
-
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			// console.log('click', evt);
-		});
-
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
-
-	}
-
-	onunload() {
 
 	}
 
@@ -98,8 +72,7 @@ export default class SRPlugin extends Plugin {
 
 	async saveSettings() {
 		this.settings = EncryptionService.encryptAllKeys(this.settings);
-		const langChainParams = this.getChainManagerParams();
-		this.chainManager.resetParams(langChainParams);
+		this.aiManager.setModel(this.settings.defaultModel);
 		await this.saveData(this.settings);
 	}
 
@@ -131,25 +104,6 @@ export default class SRPlugin extends Plugin {
 		if (viewType === ViewTypes.CHAT) {
 			this.chatIsVisible = false;
 		}
-	}
-
-	getChainManagerParams(): LangChainParams {
-		const {
-			defaultModel,
-			defaultModelDisplayName,
-			openAIApiKey,
-			anthropicApiKey,
-		} = this.settings;
-		return {
-			model: defaultModel,
-			modelDisplayName: defaultModelDisplayName,
-			temperature: 0.1,
-			maxTokens: 3000,
-			chatContextTurns: 15,
-			openAIApiKey,
-			anthropicApiKey,
-			systemMessage: DEFAULT_SYSTEM_PROMPT,
-		};
 	}
 
 

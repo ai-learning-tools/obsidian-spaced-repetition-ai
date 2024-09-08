@@ -1,18 +1,18 @@
 import MessageSegment from '@/components/MessageSegment'
 import * as React from 'react';
-import ChainManager from '@/LLM/ChainManager';
+import AIManager from '@/LLM/AIManager';
 import { useMessageHistory } from '../hooks/useMessageHistory';
 import SRPlugin from '@/main';
 
 interface ChatProps {
     plugin: SRPlugin;
-    chainManager: ChainManager;
+    aiManager: AIManager;
   }
 
 // Chat contains conversation history
 const Chat: React.FC<ChatProps> = ({
     plugin, 
-    chainManager,
+    aiManager,
 }) => {
     const { messageHistory, createUpdateFunctions, addNewMessage } = useMessageHistory([{
         userMessage: null,
@@ -33,8 +33,7 @@ const Chat: React.FC<ChatProps> = ({
                     updateHistory={updateHistory}
                     addNewMessage={addNewMessage}
                     vault={plugin.app.vault}
-                    proxyServer={plugin.proxyServer}
-                    chainManager={chainManager}
+                    aiManager={aiManager}
                 />
                 );
             })}

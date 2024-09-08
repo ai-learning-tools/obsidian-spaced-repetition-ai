@@ -5,18 +5,17 @@ import * as React from 'react';
 import { Root, createRoot } from 'react-dom/client';
 import SRPlugin from '@/main';
 import Chat from '@/components/Chat'
-import ChainManager from '@/LLM/ChainManager';
+import AIManager from '@/LLM/AIManager';
 
 export default class ChatView extends ItemView {
-  private chainManager: ChainManager;
-  private debug = true;
+  private aiManager: AIManager;
 
   private root: Root | null = null;
 
   constructor(leaf: WorkspaceLeaf, private plugin: SRPlugin) {
     super(leaf);
     this.plugin = plugin;
-    this.chainManager = plugin.chainManager;
+    this.aiManager = plugin.aiManager;
   }
 
   getViewType(): string {
@@ -50,7 +49,7 @@ export default class ChatView extends ItemView {
       <React.StrictMode>
         <Chat 
           plugin={this.plugin}
-          chainManager={this.chainManager}
+          aiManager={this.aiManager}
         />
       </React.StrictMode>
     );

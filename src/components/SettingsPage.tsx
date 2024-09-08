@@ -34,16 +34,6 @@ export class SRSettingTab extends PluginSettingTab {
 					this.plugin.settings.openAIApiKey = value;
 					await this.plugin.saveSettings();
 				}));
-				
-    new Setting(containerEl)
-      .setName('Anthropic API Key')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.anthropicApiKey ? '•'.repeat(16) : '')
-				.onChange(async (value) => {
-					this.plugin.settings.anthropicApiKey = value;
-					await this.plugin.saveSettings();
-				}));
 		
 		new Setting(containerEl)
 			.setName('Convert folders to decks')
