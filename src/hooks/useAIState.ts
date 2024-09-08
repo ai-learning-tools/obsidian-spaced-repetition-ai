@@ -1,4 +1,4 @@
-import AIManager from "@/LLM/AIManager";
+import AIManager from "@/llm/AIManager";
 import { useState } from "react";
 import { ChatModelDisplayNames, DISPLAY_NAME_TO_MODEL, MODEL_TO_DISPLAY_NAME } from "@/constants";
 

@@ -8,7 +8,7 @@ import '@/tailwind.css';
 import EncryptionService from '@/utils/encryptionService';
 import { Deck } from './sr/Deck';
 import { DeckIterator } from './sr/DeckIterator';
-import AIManager from './LLM/AIManager';
+import AIManager from './llm/AIManager';
 
 export default class SRPlugin extends Plugin {
 	settings: SRSettings;

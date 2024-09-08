@@ -5,7 +5,7 @@ import { TFile, Vault } from 'obsidian';
 import MentionsInput from '@/components/mentions/MentionsInput';
 import Mention from '@/components/mentions/Mention'; // Fixed import path
 import { ChatMessage } from '@/chatMessage';
-import AIManager from '@/LLM/AIManager';
+import AIManager from '@/llm/AIManager';
 import { useAIState } from '@/hooks/useAIState';
 import { getFileContent, getSortedFiles } from '@/utils/utils';
 import { EnterIcon } from '@/components/Icons';

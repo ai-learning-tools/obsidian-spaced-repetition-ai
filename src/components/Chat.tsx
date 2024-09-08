@@ -1,6 +1,6 @@
 import MessageSegment from '@/components/MessageSegment'
 import * as React from 'react';
-import AIManager from '@/LLM/AIManager';
+import AIManager from '@/llm/AIManager';
 import { useMessageHistory } from '../hooks/useMessageHistory';
 import SRPlugin from '@/main';
 

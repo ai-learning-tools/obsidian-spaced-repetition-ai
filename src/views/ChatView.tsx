@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Root, createRoot } from 'react-dom/client';
 import SRPlugin from '@/main';
 import Chat from '@/components/Chat'
-import AIManager from '@/LLM/AIManager';
+import AIManager from '@/llm/AIManager';
 
 export default class ChatView extends ItemView {
   private aiManager: AIManager;
