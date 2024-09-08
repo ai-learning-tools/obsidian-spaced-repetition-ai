@@ -18,7 +18,6 @@ import {
   omit,
   getSuggestionHtmlId,
 } from './utils'
-import Mention from '@/components/mentions/Mention'; 
 
 import Highlighter from './Highlighter'
 import PropTypes from 'prop-types'
@@ -185,7 +184,7 @@ class MentionsInput extends React.Component {
 
   render() {
     return (
-      <div ref={this.setContainerElement} {...this.props.style}>
+      <div ref={this.setContainerElement} className='bg-neutral-50 py-2' {...this.props.style} >
         {this.renderControl()}
         {this.renderSuggestionsOverlay()}
       </div>
@@ -285,7 +284,6 @@ class MentionsInput extends React.Component {
     const suggestionsNode = (
       <SuggestionsOverlay
         id={this.uuidSuggestionsOverlay}
-        style={this.props.style('suggestions')}
         position={position}
         left={left}
         top={top}
@@ -759,8 +757,6 @@ class MentionsInput extends React.Component {
       left: caretPosition.left,
       top: caretPosition.top + caretHeight,
     }
-
-    // console.log("DEBUG-ATHENA", viewportRelative)
 
     const viewportHeight = Math.max(
       document.documentElement.clientHeight,
