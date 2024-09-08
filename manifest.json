@@ -1,11 +1,11 @@
 {
-	"id": "learning-plugin",
-	"name": "Learning Plugin",
+	"id": "obsidian-learn",
+	"name": "Obsidian Learn",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "We love cards!",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "A clean learning interface for spaced repetition in Obsidian.",
+	"author": "Belinda Mo <justanexperimentpark@gmail.com>, Athena Leong <athenaleong619@gmail.com>",
+	"authorUrl": "https://justanexperiment.com/obsidianlearn",
+	"fundingUrl": "https://buymeacoffee.com/obsidianlearn",
 	"isDesktopOnly": false
 }
