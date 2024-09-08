@@ -1,18 +1,21 @@
 import { SRSettings } from "@/settings";
+import { z } from 'zod';
 
-export const PREFERRED_DATE_FORMAT = "YYYY-MM-DD";
-export const ALLOWED_DATE_FORMATS = [PREFERRED_DATE_FORMAT, "DD-MM-YYYY", "ddd MMM DD YYYY"];
 
-export const YAML_FRONT_MATTER_REGEX = /^---\r?\n((?:.*\r?\n)*?)---/;
+const entryItem = z.object({
+  front: z.string().describe("The front side of the card containing the question or prompt"),
+  back: z.string().describe("The back side of the card containing the answer or explanation")
+});
 
-export const SR_HTML_COMMENT_BEGIN = "<!--SR:";
-export const SR_HTML_COMMENT_END = "-->";
+const entriesGeneration = z.object({
+  cardsSummary: z.string().describe("Let the user know what the cards cover, don't cover, and how they relate to the source material."),
+  cards: z.array(entryItem).describe("An array of question-answer pairs representing spaced repetition cards")
+});
 
-export const MULTI_SCHEDULING_EXTRACTOR = /!([\d-]+),(\d+),(\d+)/gm;
-export const LEGACY_SCHEDULING_EXTRACTOR = /<!--SR:([\d-]+),(\d+),(\d+)-->/gm;
-export const OBSIDIAN_TAG_AT_STARTOFLINE_REGEX = /^#[^\s#]+/gi;
-export const OBSIDIAN_BLOCK_ID_ENDOFLINE_REGEX = / (\^[a-zA-Z0-9-]+)$/;
-export const TICKS_PER_DAY = 24 * 3600 * 1000;
+export type EntriesGeneration = z.infer<typeof entriesGeneration>;
+
+export type EntryItemGeneration = z.infer<typeof entryItem>;
+
 
 export enum ViewTypes {
   CHAT = "sr-chat-view",

@@ -1,3 +1,4 @@
+import { EntryItemGeneration } from '@/constants';
 import { ChatMessage, chatReducer } from '../chatMessage';
 import { useReducer } from 'react';
 
@@ -18,16 +19,16 @@ export const useMessageHistory = (initialHistory: ChatMessage[] = []) => {
             payload: { index, modifiedMessage },
           });
         },
-        updateAIResponse: (aiResponse: string) => {
+        updateAIResponse: (aiString: string | null, aiEntries: EntryItemGeneration[] | null = null) => {
           dispatch({
             type: 'UPDATE_AI_RESPONSE',
-            payload: { index, aiResponse },
+            payload: { index, aiString, aiEntries },
           });
         },
-        clearMessageHistory: () => {
+        clearMessageHistory: (clearAll: boolean = false) => {
           dispatch({
             type: 'CLEAR_HISTORY_AFTER_INDEX',
-            payload: { index }
+            payload: { index: clearAll ? -1 : index}
           })
         }
       };

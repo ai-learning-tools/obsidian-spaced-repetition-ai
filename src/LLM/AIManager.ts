@@ -1,6 +1,7 @@
-import { ChatModels } from "@/constants";
+import { ChatModels, EntriesGeneration, EntryItemGeneration } from "@/constants";
 import { ChatMessage } from "@/chatMessage";
 import { errorMessage } from "@/utils/errorMessage";
+import { dummyEntriesGeneration } from "@/utils/dummyData";
 
 export default class AIManager {
   private static instance: AIManager;
@@ -21,19 +22,23 @@ export default class AIManager {
     this.chatModel = newModel;
   }
 
-  async getAIResponse(
-    modifiedMessage: string,
+  async streamAIResponse(
+    newMessageModded: string,
     messages: ChatMessage[],
     abortController: AbortController,
-    setAIResponse: (response: string) => void,
-  ): Promise<string> {
-    try {
-      setAIResponse('meowwwwwwww');
-      return 'meowww';
-    } catch (e) {
-      errorMessage(`Error in getAIResponse: ${e}`);
+    setAIString: (response: string) => void,
+    setAIEntries: (response: EntryItemGeneration[]) => void
+  ): Promise<void> {
+    const entriesGeneration: EntriesGeneration = {
+      cardsSummary: '',
+      cards: [],
     }
-    return '';
+    try {
+      setAIString(dummyEntriesGeneration.cardsSummary);
+      setAIEntries(dummyEntriesGeneration.cards);
+    } catch (e) {
+      errorMessage(`Error in streamAIResponse: ${e}`);
+    }
   }
 
 }
