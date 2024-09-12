@@ -24,7 +24,7 @@ export default class ChatView extends ItemView {
 
 // Return an icon for this view
   getIcon(): string {
-    return 'message-square';
+    return 'documents';
   }
 
   // Return a title for this view
