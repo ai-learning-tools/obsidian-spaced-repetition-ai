@@ -6,7 +6,8 @@ import { useMessageHistory } from '../hooks/useMessageHistory';
 import SRPlugin from '@/main';
 import { dummyUserMessage, dummyEntriesGeneration } from '@/utils/dummyData';
 import { TFile, WorkspaceLeaf } from 'obsidian';
-import { getSortedFiles } from '@/utils/obsidianFiles';
+import { getFileCards, getSortedFiles } from '@/utils/obsidianFiles';
+import { EntryItemGeneration } from '@/constants';
 
 interface ChatProps {
     plugin: SRPlugin;
@@ -19,29 +20,35 @@ const Chat: React.FC<ChatProps> = ({
     aiManager,
 }) => {
     const { messageHistory, createUpdateFunctions, addNewMessage } = useMessageHistory([{ 
-        // userMessage: null,
-        // modifiedMessage: null,
-        // aiString: null,
-        // aiEntries: null
+        userMessage: null,
+        modifiedMessage: null,
+        aiString: null,
+        aiEntries: null
         // FOR TESTING
         // Make sure to change this before committing
-        userMessage: dummyUserMessage,
-        modifiedMessage: dummyUserMessage,
-        aiString: dummyEntriesGeneration.cardsSummary,
-        aiEntries: dummyEntriesGeneration.cards
+        // userMessage: dummyUserMessage,
+        // modifiedMessage: dummyUserMessage,
+        // aiString: dummyEntriesGeneration.cardsSummary,
+        // aiEntries: dummyEntriesGeneration.cards
     }])
 
     const { workspace, vault } = plugin.app;
 
-    const [activeFile, setActiveFile] = useState<TFile|null>(workspace.getActiveFile());
+    const updateActiveFileAndCards = async () => {
+        const newActiveFile = workspace.getActiveFile();
+        setActiveFile(newActiveFile);
+        if (newActiveFile && newActiveFile.extension === 'md') {
+            const cards = await getFileCards(newActiveFile, vault);
+            setActiveFileCards(cards);
+        }
+    };
+
+    const [activeFile, setActiveFile] = useState<TFile|null>(null);
+    const [activeFileCards, setActiveFileCards] = useState<EntryItemGeneration[]>([]); // TODO @belinda - change the type later once we have the card class
     const [files, setFiles] = useState<TFile[]>([]);
 
-    workspace.on('active-leaf-change', (leaf: WorkspaceLeaf | null) => {
-        const newActiveFile = workspace.getActiveFile();
-        if (newActiveFile === null || newActiveFile.extension === 'md') {
-            setActiveFile(newActiveFile);
-        }
-    });
+
+    workspace.on('active-leaf-change', updateActiveFileAndCards);
 
     const updateFiles = async () => {
         const files = await getSortedFiles(vault);
@@ -52,11 +59,12 @@ const Chat: React.FC<ChatProps> = ({
     vault.on('create', updateFiles);
     vault.on('delete', updateFiles);
     vault.on('rename', updateFiles);
-
+ 
     useEffect(() => {
         getSortedFiles(vault).then((files) => {
             setFiles(files);
         });
+        updateActiveFileAndCards();
     }, [vault]);
 
     return (
@@ -74,6 +82,7 @@ const Chat: React.FC<ChatProps> = ({
                     app={plugin.app}
                     aiManager={aiManager}
                     activeFile={activeFile}
+                    activeFileCards={activeFileCards}
                     files={files}
                 />
                 );

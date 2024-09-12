@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 // This is a placeholder component for the card view in the chat flow. It is simple and meant to be replaced. 
 
 export default function Entry({ front, back, handleFeedback, handleFocus, focused }: { 
@@ -21,13 +23,13 @@ export default function Entry({ front, back, handleFeedback, handleFocus, focuse
           className="mr-2 px-2 py-1 rounded !bg-red-300 text-neutral-600"
           onClick={ async (e) => {await handleFeedback('n')}}
         >
-          ⌘N
+          Remove
         </button>
         <button
           className="px-2 py-1 rounded !bg-green-300 text-neutral-600"
           onClick={ async (e) => {await handleFeedback('y')}}
         >
-          ⌘Y
+          Add
         </button>
 
       </div>

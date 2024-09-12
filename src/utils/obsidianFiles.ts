@@ -1,5 +1,6 @@
 import { Editor, TFile, Vault, MarkdownView, App } from "obsidian";
 import { EntryItemGeneration } from "@/constants";
+import { errorMessage } from "./errorMessage";
 
 export async function getSortedFiles(
   vault: Vault
@@ -33,4 +34,19 @@ export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, v
     card
   );
 
+}
+
+export async function getFileCards(file: TFile, vault: Vault): Promise<EntryItemGeneration[]> {
+  try {
+    // const content = await getFileContent(file, vault);
+    // TODO @belindamo: retrieve card using regex. 
+    return [{
+      front: 'This is the front',
+      back: 'This is the back'
+    }];
+
+  } catch (e) {
+    errorMessage(`Error getting flashcards from file ${file.name}: ${e}`);
+  }
+  return [];
 }
