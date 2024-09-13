@@ -34,38 +34,49 @@ const Chat: React.FC<ChatProps> = ({
 
     const { workspace, vault } = plugin.app;
 
-    const updateActiveFileAndCards = async () => {
-        const newActiveFile = workspace.getActiveFile();
-        setActiveFile(newActiveFile);
-        if (newActiveFile && newActiveFile.extension === 'md') {
-            const cards = await getFileCards(newActiveFile, vault);
-            setActiveFileCards(cards);
-        }
-    };
-
     const [activeFile, setActiveFile] = useState<TFile|null>(null);
     const [activeFileCards, setActiveFileCards] = useState<EntryItemGeneration[]>([]); // TODO @belinda - change the type later once we have the card class
     const [files, setFiles] = useState<TFile[]>([]);
-
-
-    workspace.on('active-leaf-change', updateActiveFileAndCards);
-
-    const updateFiles = async () => {
-        const files = await getSortedFiles(vault);
-        setFiles(files);
-    }
-
-    // this may be compute intensive if user has many files
-    vault.on('create', updateFiles);
-    vault.on('delete', updateFiles);
-    vault.on('rename', updateFiles);
- 
+    
     useEffect(() => {
-        getSortedFiles(vault).then((files) => {
-            setFiles(files);
+        const updateFileCards = (newActiveFile: TFile) => {
+            getFileCards(newActiveFile, vault)
+            .then((cards) => {
+                setActiveFileCards(cards);
+            })
+            .catch((error) => {
+                console.error("Error fetching file cards:", error);
+                setActiveFileCards([]);
+            });
+        };
+
+        const updateAll = () => {
+            const newActiveFile = workspace.getActiveFile();
+            if (newActiveFile && (!activeFile || activeFile.path !== newActiveFile.path) && newActiveFile.extension === 'md') {
+                getSortedFiles(vault).then((files) => {
+                    setFiles(files);
+                });
+                setActiveFile(newActiveFile);
+                updateFileCards(newActiveFile)
+            }
+        };
+
+        updateAll();
+
+        const onActiveLeafChange = () => {
+            updateAll();
+        };
+
+        workspace.on('active-leaf-change', onActiveLeafChange);
+        
+        workspace.on('editor-change', () => {
+            if (activeFile) updateFileCards(activeFile);
         });
-        updateActiveFileAndCards();
-    }, [vault]);
+
+        return () => {
+            workspace.off('active-leaf-change', onActiveLeafChange);
+        };
+    }, [vault, workspace, activeFile]);
 
     return (
         <div className='w-full'>

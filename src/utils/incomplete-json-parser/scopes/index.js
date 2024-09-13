@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Scope = exports.ObjectScope = exports.LiteralScope = exports.ArrayScope = void 0;
+const array_scope_1 = require("./array.scope");
+Object.defineProperty(exports, "ArrayScope", { enumerable: true, get: function () { return array_scope_1.ArrayScope; } });
+const literal_scope_1 = require("./literal.scope");
+Object.defineProperty(exports, "LiteralScope", { enumerable: true, get: function () { return literal_scope_1.LiteralScope; } });
+const object_scope_1 = require("./object.scope");
+Object.defineProperty(exports, "ObjectScope", { enumerable: true, get: function () { return object_scope_1.ObjectScope; } });
+const scope_interface_1 = require("./scope.interface");
+Object.defineProperty(exports, "Scope", { enumerable: true, get: function () { return scope_interface_1.Scope; } });

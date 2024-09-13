@@ -71,16 +71,13 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   } = updateHistory;
   
   useEffect(() => {
-    let cards = activeFileCards;
-    if (cardsToEdit.length > 0) {
-      cards = activeFileCards.filter((c) => {
-        cardsToEdit.forEach((e) => {
-          if (e.front === c.front) return true;
-        });
-        return false;
+    const newActiveCards = activeFileCards.filter((c) => {
+      mentionedCards.forEach((e) => {
+        if (e.front === c.front) return false;
       });
-    }
-    setRemainingActiveCards(cards);
+      return true;
+    });
+    setRemainingActiveCards(newActiveCards);
   }, [activeFileCards]);
 
   const handleFileAdd = (id: string) => {
@@ -100,7 +97,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
   const handleMentionsChange = (e: any, newValue: string) => {
     const fileRegex = /\[\[(.*?)\]\((.*?)\)/g;
-    const cardRegex = /@\[(.*?)\]\((.*?)\)/g;
+    const cardRegex = /@\[([\s\S]*?)\]\(([\s\S]*?)\)/g;
     const newUserMessage = newValue.replace(cardRegex, '').replace(fileRegex, '');
     setUserMessage(newUserMessage);
   };
@@ -116,16 +113,21 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
     updateUserMessage(userMessage);
 
-    let modifiedMessage = userMessage;
-    modifiedMessage += `\n\n--- REFERENCE FILES ---\n\n`
-    for (const file of mentionedFiles) {
-      const fileContent = await getFileContent(file, app.vault);
-      modifiedMessage += `\n\n[[${file.name}]]: \n${fileContent}`;
+
+    let modifiedMessage = `----- USER MESSAGE -----\n\n${userMessage}`;
+    if (mentionedFiles.length > 0) {
+      modifiedMessage += `\n\n----- REFERENCE FILES -----\n\n`
+      for (const [index, file] of mentionedFiles.entries()) {
+        const fileContent = await getFileContent(file, app.vault);
+        modifiedMessage += `\n\n--REFERENCE #${index + 1}: [[${file.name}]]--\n\n${fileContent}`;
+      }
     }
 
-    modifiedMessage += `\n\n--- REFERENCE CARDS ---\n\nUse these as context but avoid repeating content.`
-    for (const card of mentionedCards) {
-      modifiedMessage += `\n\nfront:${card.front}\nback:${card.back}\n\n`
+    if (mentionedCards.length > 0) {
+      modifiedMessage += `\n\n--- REFERENCE CARDS ---\n\nUse these as context. They are existing flashcards in the user's deck.`
+      for (const card of mentionedCards) {
+        modifiedMessage += `\n\nfront:${card.front}\nback:${card.back}\n\n`
+      }
     }
 
     updateModifiedMessage(modifiedMessage);
@@ -135,12 +137,13 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     setAIEntries(null);
     setFocusedIndex(0);
 
-    setAbortController(new AbortController());
+    const controller = new AbortController();
+    setAbortController(controller);
     
     await aiManager.streamAIResponse(
       modifiedMessage,
       messageHistory.slice(0, index),
-      abortController as AbortController,
+      controller,
       setAIString,
       setAIEntries,
     );
@@ -210,7 +213,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           inputRef={inputRef}
           onChange={handleMentionsChange}
           className="w-full resize-none p-2 height-auto overflow-hidden"
-          placeholder={index === 0 ? 'Remember anything, @ or [[ to include your notes' : 'Follow-up with questions or edits'}
+          placeholder={index === 0 ? 'Remember anything, @ or [[ to include your notes' : 'Request an edit or ask a follow-up question'}
           onKeyDown={handleSendMessage}
           suggestionsPortalHost={portalRef.current}
         >
@@ -310,7 +313,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
             {mentionedCards.map((card, index) => (
               <ChatTag 
                 key={`${card.front}-${index}`} 
-                name={`${card.front} Card`} 
+                name={`${card.front}`} 
                 handleRemove={() => {
                   const newCards = mentionedCards.filter((_, i) => i !== index);
                   setMentionedCards([...newCards]);
@@ -321,7 +324,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
         </div>
       }
 
-      {(!aiString && activeFile && Array.isArray(remainingActiveCards) && remainingActiveCards.length > 0) && (
+      {(index === 0 && !aiString && activeFile) && (
       <div className='m-4'>
         <div className='mb-2'> 
           Add references from the current file:
@@ -334,7 +337,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           {remainingActiveCards.map((c, i) => (
             <ChatTag 
               key={`active-${c.front}-${i}`}
-              name={`${c.front}, ${c.back}`}
+              name={c.front}
               handleClick={() => {
                 if (!mentionedCards.includes(c)) {
                   setMentionedCards([c, ...mentionedCards]);
@@ -376,6 +379,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
             focused={i === focusedIndex}
             front={entry.front} 
             back={entry.back} 
+            references={entry.references}
             key={`entry-${i}-length-${aiEntries.length}`}
           />
         ))}
@@ -383,7 +387,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           <>
             <div className='float-right'>
               {activeFile ? (
-                  <span>File: {activeFile.name}</span>
+                  <span>Adding to {activeFile.name}</span>
               ) : (
                   <span>Open a file to add cards</span>
               )}

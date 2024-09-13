@@ -7,7 +7,7 @@ export default function ChatTag({ name, handleRemove, handleClick }: { name: str
       className={`bg-white px-4 py-1 m-2 border rounded-lg  inline-flex items-center justify-between ${handleClick && 'cursor-pointer'}`}
       onClick={() => {handleClick && handleClick()}}
     >
-      <span>{name}</span>
+      <span className="whitespace-pre-wrap">{name}</span>
       {handleRemove && (
         <span className="ml-2 float-right cursor-pointer" onClick={handleRemove}><CloseIcon /></span>
       )}

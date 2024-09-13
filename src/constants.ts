@@ -1,20 +1,73 @@
 import { SRSettings } from "@/settings";
 import { z } from 'zod';
 
+// Regex to capture multiline flashcards in the format:
+// > [!card]+ frontLine1<br>frontLine2<br>frontLine3...
+// > backLine1
+// > backLine2
+// > backLine3...
+export const FRONT_CARD_REGEX = /^>\s*\[!card\][\+\-]?\s*((?:.*(?:<br>|$))+?)/gm;
+export const BACK_CARD_REGEX = /(?:^>\s*((?:.*\n?)+?)(?=(?:^[^>]|\s*$)))/gm;
 
+
+// Optional front and back due to streaming
 const entryItem = z.object({
-  front: z.string().describe("The front side of the card containing the question or prompt"),
-  back: z.string().describe("The back side of the card containing the answer or explanation")
+  front: z.string().optional().describe("The front side of the card containing the question or prompt"),
+  back: z.string().optional().describe("The back side of the card containing the answer or explanation"),
+  references: z.array(
+    z.string()
+  ).optional().describe("List of the names of the files or flashcards that was referenced")
 });
 
 const entriesGeneration = z.object({
-  cardsSummary: z.string().describe("Let the user know what the cards cover, don't cover, and how they relate to the source material."),
+  cardsSummary: z.string().describe("Let the user know what the cards cover, don't cover, and how they relate to the reference material."),
   cards: z.array(entryItem).describe("An array of question-answer pairs representing spaced repetition cards")
 });
 
 export type EntriesGeneration = z.infer<typeof entriesGeneration>;
 
 export type EntryItemGeneration = z.infer<typeof entryItem>;
+
+export const entriesGenerationSchema = {
+  type: "object",
+  properties: {
+    cardsSummary: {
+      type: "string",
+      description: entriesGeneration.shape.cardsSummary.description,
+    },
+    cards: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          front: {
+            type: "string",
+            description: entryItem.shape.front.description,
+          },
+          back: {
+            type: "string",
+            description: entryItem.shape.back.description,
+          },
+          references: {
+            type: "array",
+            description: entryItem.shape.references.description,
+            items: {
+              type: "string",
+              properties: {
+                referenceName: {
+                  type: "string",
+                }
+              },
+              required: ["referenceName"],
+            }
+          },
+        },
+        required: ["front", "back"],
+      },
+      description: entriesGeneration.shape.cards.description,
+    },
+  },
+};
 
 
 export enum ViewTypes {

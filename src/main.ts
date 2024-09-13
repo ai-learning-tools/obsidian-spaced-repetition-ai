@@ -26,7 +26,9 @@ export default class SRPlugin extends Plugin {
 		this.deckTree = new Deck("", this.app.vault, null);
 		this.deckIterator = new DeckIterator(this.deckTree);
 		
-		this.aiManager = AIManager.getInstance(this.settings.defaultModel);
+		const key = this.settings.openAIApiKey
+		const decryptedKey = EncryptionService.isDecrypted(key) ? key : EncryptionService.getDecryptedKey(key);
+		this.aiManager = AIManager.getInstance(this.settings.defaultModel, decryptedKey);
 
 		await this.saveSettings();
 
