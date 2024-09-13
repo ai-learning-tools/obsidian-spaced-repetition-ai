@@ -12,6 +12,7 @@ import { EnterIcon } from '@/components/Icons';
 import Entry from '@/components/chat/Entry';
 import ChatTag from '@/components/chat/ChatTag';
 import { errorMessage } from '@/utils/errorMessage';
+import Markdown from 'react-markdown';
 
 interface MessageSegmentProps {
   segment: ChatMessage
@@ -365,7 +366,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
       <div className='m-4'>
         {aiString && (
           <div className='pb-4'>
-            {aiString}
+            <Markdown>{aiString}</Markdown>
           </div>
         )}
         {aiEntries?.map((entry, i) => (

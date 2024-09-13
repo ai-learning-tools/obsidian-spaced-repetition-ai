@@ -1,5 +1,6 @@
 import * as React from 'react';
 import ChatTag from '@/components/chat/ChatTag';
+import Markdown from 'react-markdown';
 
 // This is a placeholder component for the card view in the chat flow. It is simple and meant to be replaced. 
 
@@ -35,9 +36,9 @@ export default function Entry({ front = '', back = '', references, handleFeedbac
         </button>
 
       </div>
-      <p>{front}</p>
+      <Markdown>{front}</Markdown>
       <p>---</p>
-      <p>{back}</p>
+      <Markdown>{back}</Markdown>
       <div>{references && (
         references.map((r) => (
           <ChatTag name={r} />
