@@ -59,14 +59,18 @@ export const entriesGenerationSchema = {
                 }
               },
               required: ["referenceName"],
+              // additionalProperties: false
             }
           },
         },
         required: ["front", "back"],
+        // additionalProperties: false
       },
       description: entriesGeneration.shape.cards.description,
     },
   },
+  required: ['cardsSummary', 'cards'],
+  // additionalProperties: false
 };
 
 

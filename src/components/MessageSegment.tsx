@@ -53,9 +53,8 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   const [aiEntries, setAIEntries] = useState<EntryItemGeneration[] | null>(segment.aiEntries);
   const [focusedIndex, setFocusedIndex] = useState<number>(0);
   const [userMessage, setUserMessage] = useState<string | null>(segment.userMessage);
-  const [cardsToEdit, setCardsToEdit] = useState<EntryItemGeneration[]>([]); // TODO @belindamo: update this once there is a Card class. Card ids in this component also need to be updated to card.id rather than card.front for robustness
 
-  const [remainingActiveCards, setRemainingActiveCards] = useState<EntryItemGeneration[]>(activeFileCards);
+  const [remainingActiveCards, setRemainingActiveCards] = useState<EntryItemGeneration[]>(activeFileCards); // TODO @belindamo: update this once there is a Card class. Card ids in this component also need to be updated to card.id rather than card.front for robustness
 
   // Mentions 
   const inputRef = useRef<HTMLDivElement | null>(null);
@@ -116,6 +115,10 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
 
     let modifiedMessage = `----- USER MESSAGE -----\n\n${userMessage}`;
+    const entriesToEdit = messageHistory[index-1]?.aiEntries;
+    if (index !== 0 && entriesToEdit && entriesToEdit.length > 0) {
+      modifiedMessage += `----- FLASHCARDS FOR YOU TO EDIT -----\n\n${entriesToEdit!.join('\n\n')}`
+    }
     if (mentionedFiles.length > 0) {
       modifiedMessage += `\n\n----- REFERENCE FILES -----\n\n`
       for (const [index, file] of mentionedFiles.entries()) {
@@ -138,12 +141,15 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     setAIEntries(null);
     setFocusedIndex(0);
 
+    if (index < messageHistory.length - 1) {
+      await aiManager.setNewThread(messageHistory.slice(0, index));
+    } 
+
     const controller = new AbortController();
     setAbortController(controller);
     
     await aiManager.streamAIResponse(
       modifiedMessage,
-      messageHistory.slice(0, index),
       controller,
       setAIString,
       setAIEntries,
@@ -214,7 +220,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           inputRef={inputRef}
           onChange={handleMentionsChange}
           className="w-full resize-none p-2 height-auto overflow-hidden"
-          placeholder={index === 0 ? 'Remember anything, @ or [[ to include your notes' : 'Request an edit or ask a follow-up question'}
+          placeholder={index === 0 ? 'Remember anything, @ or [[ to include your notes' : 'Ask a follow-up question'}
           onKeyDown={handleSendMessage}
           suggestionsPortalHost={portalRef.current}
         >
@@ -246,7 +252,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
         </select>
         <div 
           className='cursor-pointer' 
-          onClick={() => {
+          onClick={async () => {
             clearMessageHistory(true);
             if (index === 0) {
               setUserMessage(null);
@@ -256,6 +262,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
               setMentionedFiles([]);
               setAbortController(null);
             }
+            await aiManager.setNewThread();
           }}
         >
           + New
@@ -347,17 +354,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
                 setRemainingActiveCards(remaining);
               }} 
             />
-          ))}
-        </div>
-      </div>
-      )}
-
-      {!aiString && cardsToEdit.length > 0 && (
-      <div className='m-4'>
-        <p>These cards from the previous message will be edited:</p>
-        <div>
-          {cardsToEdit.map((c, i) => (
-            <ChatTag key={`active-card-${i}`} name={`${c.front}, ${c.back}`} />
           ))}
         </div>
       </div>
