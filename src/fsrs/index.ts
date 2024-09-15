@@ -16,6 +16,8 @@ export type {
   CardInput,
   ReviewLogInput,
   DateInput,
+  Entry,
+  DeckMetaData
 } from './models'
 export { State, Rating } from './models'
 

@@ -1,5 +1,5 @@
 import MemoryManager from "@/memory/memoryManager";
-import { Card, RecordLog, RecordLogItem, ReviewLog, State, Grade } from "./models";
+import { Card, RecordLog, RecordLogItem, ReviewLog, State, Grade, Entry } from "./models";
 import { Vault } from "obsidian";
 import { DIRECTORY } from "@/constants";
 import { fixDate } from "./help";
@@ -85,19 +85,6 @@ export class Deck {
     }
 }
 
-export interface Entry {
-    front: string, 
-    back: string, 
-    id: string,
-    hash: string,
-    path: string, 
-}
-
-export interface DeckMetaData {
-    rootPath: string, 
-    name: string,
-}
-
 export class DeckManager {
     decks: Deck[]
     memoryManager: MemoryManager
@@ -146,7 +133,18 @@ export class DeckManager {
         }
 
         // Part 3: move untracked memory files to trash
-        // TODO: Athena
+        const trackedIds = new Set(Object.keys(newEntries));
+        const memoryFiles = this.memoryManager.getAllMemoryFiles();
+
+        console.log('DEBUG-ATHENA', memoryFiles)
+        console.log('DEBUG-track-ids', trackedIds)
+
+        for (const file of memoryFiles) {
+            const id = file.basename;
+            if (!trackedIds.has(id)) {
+                await this.vault.trash(file, true);
+            }
+        }
     }
 
 

@@ -1,7 +1,6 @@
-import { Card, ReviewLog, createEmptyCard } from "@/fsrs";
+import { Card, ReviewLog, createEmptyCard, DeckMetaData, Entry } from "@/fsrs";
 import { Vault, TFolder, TFile } from "obsidian";
 import { DIRECTORY } from "@/constants";
-import { Entry, DeckMetaData } from "@/fsrs/Deck";
 
 interface Memory {
     id: string
@@ -76,6 +75,10 @@ class MemoryManager {
         } else {
             await this.vault.create(`${DIRECTORY}/memory/${memory.id}.json`, fileContent);
         }
+    }
+
+    getAllMemoryFiles(): TFile[] {
+        return this.vault.getFiles().filter(file => file.path.startsWith(`${DIRECTORY}/memory`) && file.extension === 'json');
     }
 
     async insertReviewLog(newLog: ReviewLog, id: number): Promise<void> {

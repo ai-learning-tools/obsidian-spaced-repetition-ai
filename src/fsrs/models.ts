@@ -41,7 +41,21 @@ export type RecordLog = {
   [key in Grade]: RecordLogItem
 }
 
-export interface Card {
+export interface DeckMetaData {
+  rootPath: string, 
+  name: string,
+}
+
+export interface Entry {
+  front: string, 
+  back: string, 
+  id: string,
+  hash: string,
+  path: string, 
+}
+
+// Card is entry + space repetition data
+export interface Card extends Entry {
   due: Date // Due date
   stability: number // Stability
   difficulty: number // Difficulty level
@@ -51,13 +65,6 @@ export interface Card {
   lapses: number // Number of lapses or mistakes
   state: State // Card's state (New, Learning, Review, Relearning)
   last_review?: Date // Date of the last review (optional)
-
-  // additional variables to make compatible with plugin
-  front: string
-  back: string
-  hash: string
-  id: string
-  path: string
 }
 
 export interface CardInput extends Omit<Card, 'state' | 'due' | 'last_review'> {
