@@ -128,7 +128,7 @@ class MemoryManager {
                 memory.card.path = content.path
                 await this.writeMemory(memory);
             } catch (error) {
-                throw new Error(`Cannot update card: Invalid memory content in file: ${DIRECTORY}/memory/${newCard.id}.json`);
+                throw new Error(`Cannot update card: Invalid memory content in file: ${DIRECTORY}/memory/${content.id}.json`);
             }
         }
     }
@@ -145,6 +145,23 @@ class MemoryManager {
             }
         } else {
             throw new Error(`Cannot get deck meta data: deck.json does not exists`);
+        }
+    }
+
+    async addDeck(newDeck: DeckMetaData): Promise<void> {
+        const filePath = `${DIRECTORY}/deck.json`;
+        const file = this.vault.getFileByPath(filePath);
+        if (file) {
+            try {
+                const fileContent = await this.vault.read(file);
+                const decks = JSON.parse(fileContent)['decks'] as DeckMetaData[];
+                decks.push(newDeck);
+                await this.vault.modify(file, JSON.stringify({ decks: decks }, null, 2));
+            } catch (error) {
+                throw new Error(`Cannot add deck: Invalid content in deck.json`);
+            }
+        } else {
+            throw new Error(`Cannot add deck: deck.json does not exist`);
         }
     }
 

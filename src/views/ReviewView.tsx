@@ -6,7 +6,8 @@ import SRPlugin from '@/main';
 import MemoryManager from '@/memory/memoryManager';
 import { DeckManager, Deck } from '@/fsrs/Deck';
 import DeckDisplay from '@/components/DeckDisplay'
-import { State } from '@/fsrs';
+import { DeckMetaData, State } from '@/fsrs';
+import NewDeckModel from '@/components/NewDeckModal';
 
 export default class ReviewView extends ItemView {
   private memoryManager: MemoryManager;
@@ -69,6 +70,15 @@ export default class ReviewView extends ItemView {
     this.renderDeckSelection();
   }
 
+  addDeck(): void {
+    const onDeckSubmit = async (metaData: DeckMetaData) => {
+      this.memoryManager.addDeck(metaData)
+      await this.refresh()
+    }
+    new NewDeckModel(this.app, onDeckSubmit).open()
+
+  }
+
   renderDeckSelection(): void {
     if (this.deckManager.decks.length) {
       this.root?.render(   
@@ -109,7 +119,7 @@ export default class ReviewView extends ItemView {
               <button className="p-2 flex items-center" onClick={this.refresh.bind(this)}>
                 refresh
               </button>
-              <button className="p-2">Add deck</button>
+              <button className="p-2" onClick={this.addDeck.bind(this)}>Add deck</button>
             </div>
           </div>
           </div>
