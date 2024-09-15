@@ -165,7 +165,6 @@ export default class SRPlugin extends Plugin {
 
 	async getFilesInVault() {
 		const files = this.app.vault.getFiles();
-		console.log("DEBUG-Athena", files)
 		files.sort((a, b) => b.stat.mtime - a.stat.mtime);
 		return files;
 	}	

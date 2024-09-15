@@ -60,8 +60,12 @@ export default class ReviewView extends ItemView {
     this.renderDeckSelection();
   }
 
-  setSyncing(isSyncing: boolean): void {
-    this.isSyncing = isSyncing;
+  async refresh(): Promise<void> {
+    this.isSyncing = true;
+    this.renderDeckSelection();
+    await this.deckManager.syncMemoryWithNotes();
+    await this.deckManager.populateDecks();
+    this.isSyncing = false;
     this.renderDeckSelection();
   }
 
@@ -82,6 +86,8 @@ export default class ReviewView extends ItemView {
                 const count = deck.getCountForStates()
                 const due = deck.getDue()
 
+
+
                 return (
                   <div className='grid grid-cols-5 gap-4 bg-gray-100 rounded-lg p-2 mb-2'>
                   <p className="col-span-2 hover:underline"
@@ -100,11 +106,7 @@ export default class ReviewView extends ItemView {
             } 
             <div className="flex justify-end w-full pt-4 space-x-2">
               {this.isSyncing && <div className="spinner ml-2">Syncing</div>}
-              <button className="p-2 flex items-center" onClick={async() => {
-                this.setSyncing(true);
-                await this.deckManager.syncMemoryWithNotes();
-                this.setSyncing(false);
-              }}>
+              <button className="p-2 flex items-center" onClick={this.refresh.bind(this)}>
                 refresh
               </button>
               <button className="p-2">Add deck</button>

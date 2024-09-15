@@ -49,7 +49,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     const fetchFiles = async () => {
       const filesInVault = await plugin.getFilesInVault();
       setFiles(filesInVault);
-      console.log('DEBUG-Athena2', filesInVault);
     };
     fetchFiles();
   }, [plugin]);

@@ -136,9 +136,6 @@ export class DeckManager {
         const trackedIds = new Set(Object.keys(newEntries));
         const memoryFiles = this.memoryManager.getAllMemoryFiles();
 
-        console.log('DEBUG-ATHENA', memoryFiles)
-        console.log('DEBUG-track-ids', trackedIds)
-
         for (const file of memoryFiles) {
             const id = file.basename;
             if (!trackedIds.has(id)) {
