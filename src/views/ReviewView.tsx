@@ -14,6 +14,7 @@ export default class ReviewView extends ItemView {
 
   private root: Root | null = null;
   private selectedDeck: Deck | null = null;
+  private isSyncing = false;
 
   constructor(leaf: WorkspaceLeaf, private plugin: SRPlugin) {
       super(leaf);
@@ -56,8 +57,12 @@ export default class ReviewView extends ItemView {
     await this.deckManager.populateDecks()
     const root = createRoot(this.containerEl.children[1]);
     this.root = root;
-    // this.renderDeckSelection();
-    this.showDeck(this.deckManager.decks[0])
+    this.renderDeckSelection();
+  }
+
+  setSyncing(isSyncing: boolean): void {
+    this.isSyncing = isSyncing;
+    this.renderDeckSelection();
   }
 
   renderDeckSelection(): void {
@@ -94,7 +99,14 @@ export default class ReviewView extends ItemView {
               })
             } 
             <div className="flex justify-end w-full pt-4 space-x-2">
-              <button className="p-2">refresh</button>
+              {this.isSyncing && <div className="spinner ml-2">Syncing</div>}
+              <button className="p-2 flex items-center" onClick={async() => {
+                this.setSyncing(true);
+                await this.deckManager.syncMemoryWithNotes();
+                this.setSyncing(false);
+              }}>
+                refresh
+              </button>
               <button className="p-2">Add deck</button>
             </div>
           </div>
