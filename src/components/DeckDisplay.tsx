@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Deck } from '@/fsrs/Deck';
 import { State, Card, Rating, Grade, RecordLogItem } from '@/fsrs';
-import CardReview from '@/components/CardReview'
+import CardView from '@/components/CardView'
 
 interface DeckDisplayProps {
     deck: Deck;
@@ -15,7 +15,7 @@ const DeckDisplay: React.FC<DeckDisplayProps> = ({ deck }: DeckDisplayProps) => 
         setStateCounts(deck.getCountForStates());
     }, [deck.cards]);
 
-    const onCardReview = async (cardId: string, rating: Rating) => {
+    const onTopCardReview = async (rating: Rating) => {
         const record: RecordLogItem = Deck.scheduleNext(topCard, rating as Grade)
         await deck.updateCard(record)
         deck.sortCards()
@@ -24,7 +24,7 @@ const DeckDisplay: React.FC<DeckDisplayProps> = ({ deck }: DeckDisplayProps) => 
     }
 
     return (
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col justify-center space-y-5">
             <div className="flex flex-row space-x-3 justify-center">
                 {Object.entries(stateCounts).map(([state, count]) => (
                     <div className="flex flex-col text-center" key={state}>
@@ -33,9 +33,43 @@ const DeckDisplay: React.FC<DeckDisplayProps> = ({ deck }: DeckDisplayProps) => 
                     </div>
                 ))}
             </div>
-            <CardReview card={topCard} onReview={onCardReview} />
+
+            <CardReview card={topCard} onReview={onTopCardReview} />
         </div>
     );
 }
+
+interface CardReviewProps {
+    card: Card;
+    onReview: (rating: Rating) => Promise<void>;
+}
+
+const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewProps) => {
+    const [showBack, setShowBack] = useState(false)
+
+    const handleReview = async (rating: Rating) => {
+        await onReview(rating);
+    };
+
+    return (
+        <div className="h-64 w-full flex-col flex space-y-5 items-center">
+            <CardView front={card.front} back={card.back} showBack={showBack}></CardView>
+            {
+                showBack &&
+                <div>
+                    <button className='p-2' onClick={() => handleReview(1)}>Again</button>
+                    <button className='p-2' onClick={() => handleReview(2)}>Hard</button>
+                    <button className='p-2' onClick={() => handleReview(3)}>Good</button>
+                    <button className='p-2' onClick={() => handleReview(4)}>Easy</button>
+                </div>
+            }
+            {
+                !showBack &&
+                <button className='p-2' onClick={()=> setShowBack(true)}>Show Answer</button>
+            }
+
+        </div>
+    );
+};
 
 export default DeckDisplay

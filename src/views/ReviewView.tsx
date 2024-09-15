@@ -20,7 +20,7 @@ export default class ReviewView extends ItemView {
       this.plugin = plugin;
       this.memoryManager = plugin.memoryManager;
       this.deckManager = plugin.deckManager;
-      this.navigation = true; // Set navigation to true
+      this.navigation = false; // Set navigation to true
   }
 
   async onload(): Promise<void> {
@@ -56,7 +56,8 @@ export default class ReviewView extends ItemView {
     await this.deckManager.populateDecks()
     const root = createRoot(this.containerEl.children[1]);
     this.root = root;
-    this.renderDeckSelection();
+    // this.renderDeckSelection();
+    this.showDeck(this.deckManager.decks[0])
   }
 
   renderDeckSelection(): void {

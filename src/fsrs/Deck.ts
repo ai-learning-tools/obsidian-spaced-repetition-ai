@@ -69,7 +69,7 @@ export class Deck {
             console.error("trying to update a card that doesn't exists ind deck")
         }
         
-    // We don't overwrite the card since these cards are also used in other decks
+    // We update the card instead of overwriting it since other decks may carry a reference to this card
         console.log('ATHENA-DEBUG', 'new card', recordLog.card)
         const card = Object.assign(this.cards[index], recordLog.card);
 
