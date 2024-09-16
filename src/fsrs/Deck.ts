@@ -1,5 +1,5 @@
 import MemoryManager from "@/memory/memoryManager";
-import { Card, RecordLog, RecordLogItem, ReviewLog, State, Grade, Entry } from "./models";
+import { Card, RecordLog, RecordLogItem, ReviewLog, State, Grade, Entry, DeckMetaData } from "./models";
 import { Vault } from "obsidian";
 import { DIRECTORY } from "@/constants";
 import { fixDate } from "./help";
@@ -9,8 +9,7 @@ import { createEmptyCard } from "./default";
 
 export class Deck {
     cards: Card[];
-    name: string;
-    rootPath: string;
+    metaData: DeckMetaData;
     memoryManager: MemoryManager //TODO: Athena - make memory manager a singleton
 
 
@@ -26,14 +25,12 @@ export class Deck {
 
     constructor(
         cards: Card[],
-        name: string, 
-        rootPath: string,
+        metaData: DeckMetaData,
         memoryManager: MemoryManager
     ) {
      // create shallow copy +sort card 
         this.cards = [...cards];
-        this.name = name;
-        this.rootPath = rootPath
+        this.metaData = metaData;
         this.memoryManager = memoryManager
         this.sortCards();
     }
@@ -200,10 +197,10 @@ export class DeckManager {
 
         for (const currData of decksMetaData) {
             const cards = allCards.filter(card => card.path.includes(currData.rootPath));
-            allDecks.push(new Deck(cards, currData.name, currData.rootPath, this.memoryManager));
+            allDecks.push(new Deck(cards, currData, this.memoryManager));
         }
 
-        allDecks.push(new Deck(allCards, 'Root Deck', '', this.memoryManager))
+        allDecks.push(new Deck(allCards, { "name": "All Cards", "rootPath": " "} , this.memoryManager))
         this.decks = allDecks
 
     }
