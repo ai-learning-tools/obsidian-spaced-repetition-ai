@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Deck } from '@/fsrs/Deck';
 import { State, Card, Rating, Grade, RecordLogItem } from '@/fsrs';
 import CardView from '@/components/CardView'
@@ -45,14 +45,43 @@ interface CardReviewProps {
 }
 
 const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewProps) => {
-    const [showBack, setShowBack] = useState(false)
+    const [showBack, setShowBack] = useState(false);
+    const cardReviewRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        cardReviewRef.current?.focus();
+    }, []);
 
     const handleReview = async (rating: Rating) => {
+        setShowBack(false)
         await onReview(rating);
     };
 
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (!showBack && event.key === 'Enter') {
+            setShowBack(true);
+        } else if (showBack) {
+            switch (event.key) {
+                case '1':
+                    handleReview(1);
+                    break;
+                case '2':
+                    handleReview(2);
+                    break;
+                case '3':
+                    handleReview(3);
+                    break;
+                case '4':
+                    handleReview(4);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
     return (
-        <div className="h-64 w-full flex-col flex space-y-5 items-center">
+        <div ref={cardReviewRef} className="h-64 w-full flex-col flex space-y-5 items-center" onKeyDown={handleKeyDown} tabIndex={0}>
             <CardView front={card.front} back={card.back} showBack={showBack}></CardView>
             {
                 showBack &&
@@ -65,9 +94,8 @@ const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewPro
             }
             {
                 !showBack &&
-                <button className='p-2' onClick={()=> setShowBack(true)}>Show Answer</button>
+                <button className='p-2' onClick={() => setShowBack(true)}>Show Answer</button>
             }
-
         </div>
     );
 };
