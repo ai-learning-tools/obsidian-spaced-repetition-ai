@@ -1,8 +1,6 @@
 // TODO @review
 // https://github.com/open-spaced-repetition/fsrs4anki/blob/main/fsrs4anki_scheduler.js#L115
 
-import { genHexString } from "@/utils/utils";
-
 interface FSRSData {
     again: { d: number; s: number; v: string; seed: number };
     hard: { d: number; s: number; v: string; seed: number };

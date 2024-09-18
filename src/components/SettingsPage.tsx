@@ -1,6 +1,6 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import SRPlugin from "@/main";
-import { ChatModels, ChatModelDisplayNames, MODEL_TO_DISPLAY_NAME } from "@/constants";
+import { ChatModels, MODEL_TO_DISPLAY_NAME } from "@/constants";
 
 export class SRSettingTab extends PluginSettingTab {
   plugin: SRPlugin;
@@ -32,26 +32,6 @@ export class SRSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.openAIApiKey ? '•'.repeat(16) : '')
 				.onChange(async (value) => {
 					this.plugin.settings.openAIApiKey = value;
-					await this.plugin.saveSettings();
-				}));
-				
-    new Setting(containerEl)
-      .setName('Anthropic API Key')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.anthropicApiKey ? '•'.repeat(16) : '')
-				.onChange(async (value) => {
-					this.plugin.settings.anthropicApiKey = value;
-					await this.plugin.saveSettings();
-				}));
-
-    new Setting(containerEl)
-      .setName('Google API Key')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.googleApiKey ? '•'.repeat(16) : '')
-				.onChange(async (value) => {
-					this.plugin.settings.googleApiKey = value;
 					await this.plugin.saveSettings();
 				}));
 		

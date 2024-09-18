@@ -1,6 +1,5 @@
 import React, { Children, useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
-import { defaultStyle } from './utils'
 
 import { getSuggestionHtmlId } from './utils'
 import Suggestion from './Suggestion'
@@ -18,7 +17,6 @@ function SuggestionsOverlay({
   ignoreAccents,
   containerRef,
   children,
-  style,
   customSuggestionsContainer,
   onMouseDown,
   onMouseEnter,
@@ -54,7 +52,6 @@ function SuggestionsOverlay({
         id={id}
         role="listbox"
         aria-label={a11ySuggestionsListLabel}
-        {...style('list')}
       >
         {Object.values(suggestions).reduce(
           (accResults, { results, queryInfo }) => [
@@ -80,7 +77,6 @@ function SuggestionsOverlay({
 
     return (
       <Suggestion
-        style={style('item')}
         key={`${childIndex}-${getID(result)}`}
         id={getSuggestionHtmlId(id, index)}
         query={query}
@@ -100,7 +96,7 @@ function SuggestionsOverlay({
       return
     }
 
-    return <LoadingIndicator style={style('loadingIndicator')} />
+    return <LoadingIndicator />
   }
 
   const handleMouseEnter = (index, ev) => {
@@ -127,8 +123,7 @@ function SuggestionsOverlay({
   return (
     // TODO: Athena - remove this 
     <div
-      { ...style }
-      className='w-full'
+      className='w-full border'
       onMouseDown={onMouseDown}
       ref={containerRef}
     >
@@ -164,17 +159,4 @@ SuggestionsOverlay.propTypes = {
   ]),
 }
 
-const styled = defaultStyle({
-  zIndex: 1,
-  backgroundColor: 'white',
-  marginTop: 14,
-  minWidth: 100,
-
-  list: {
-    margin: 0,
-    padding: 0,
-    listStyleType: 'none',
-  },
-})
-
-export default styled(SuggestionsOverlay)
+export default SuggestionsOverlay;

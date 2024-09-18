@@ -1,13 +1,16 @@
+import { EntryItemGeneration } from "./constants";
+
 export interface ChatMessage {
   userMessage: string | null;
   modifiedMessage: string | null;
-  aiResponse: string | null;
+  aiString: string | null;
+  aiEntries: EntryItemGeneration[] | null;
 }
 
 type ChatAction =
   | { type: 'UPDATE_USER_MESSAGE'; payload: { index: number; userMessage: string } }
   | { type: 'UPDATE_MODIFIED_MESSAGE'; payload: { index: number; modifiedMessage: string } }
-  | { type: 'UPDATE_AI_RESPONSE'; payload: { index: number; aiResponse: string } }
+  | { type: 'UPDATE_AI_RESPONSE'; payload: { index: number; aiString: string | null, aiEntries: EntryItemGeneration[] | null } }
   | { type: 'CLEAR_HISTORY_AFTER_INDEX'; payload: { index: number } }
   | { type: 'ADD_NEW_MESSAGE' };
 
@@ -31,10 +34,22 @@ export const chatReducer = (
     case 'UPDATE_AI_RESPONSE':
       return state.map((segment, idx) =>
         idx === action.payload.index
-          ? { ...segment, aiResponse: action.payload.aiResponse }
+          ? { 
+            ...segment, 
+            aiString: action.payload.aiString || segment.aiString,  
+            aiEntries: action.payload.aiEntries || segment.aiEntries
+          }
           : segment
       );
     case 'CLEAR_HISTORY_AFTER_INDEX':
+      if (action.payload.index === -1) {
+        return [{
+          userMessage: null,
+          modifiedMessage: null,
+          aiString: null,
+          aiEntries: null,
+        }]
+      }
       return state.slice(0, action.payload.index + 1);
     case 'ADD_NEW_MESSAGE':
       return [
@@ -42,7 +57,8 @@ export const chatReducer = (
         {
           userMessage: null,
           modifiedMessage: null,
-          aiResponse: null,
+          aiString: null,
+          aiEntries: null,
         },
       ];
     default:

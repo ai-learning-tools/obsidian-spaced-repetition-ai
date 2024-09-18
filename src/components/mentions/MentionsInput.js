@@ -18,7 +18,6 @@ import {
   omit,
   getSuggestionHtmlId,
 } from './utils'
-import Mention from '@/components/mentions/Mention'; 
 
 import Highlighter from './Highlighter'
 import PropTypes from 'prop-types'
@@ -185,7 +184,7 @@ class MentionsInput extends React.Component {
 
   render() {
     return (
-      <div ref={this.setContainerElement} {...this.props.style}>
+      <div ref={this.setContainerElement} className='bg-neutral-50 py-2' {...this.props.style} >
         {this.renderControl()}
         {this.renderSuggestionsOverlay()}
       </div>
@@ -285,7 +284,6 @@ class MentionsInput extends React.Component {
     const suggestionsNode = (
       <SuggestionsOverlay
         id={this.uuidSuggestionsOverlay}
-        style={this.props.style('suggestions')}
         position={position}
         left={left}
         top={top}
@@ -760,8 +758,6 @@ class MentionsInput extends React.Component {
       top: caretPosition.top + caretHeight,
     }
 
-    // console.log("DEBUG-ATHENA", viewportRelative)
-
     const viewportHeight = Math.max(
       document.documentElement.clientHeight,
       window.innerHeight || 0
@@ -1127,11 +1123,13 @@ const styled = defaultStyle(
       margin: 0,
       top: 0,
       left: 0,
+      padding: 8,
       boxSizing: 'border-box',
       backgroundColor: 'transparent',
       fontFamily: 'inherit',
       fontSize: 'inherit',
       letterSpacing: 'inherit',
+      borderRadius: 'inherit',
     },
 
     '&multiLine': {
@@ -1140,7 +1138,6 @@ const styled = defaultStyle(
         bottom: 0,
         overflow: 'hidden',
         resize: 'none',
-
         // fix weird textarea padding in mobile Safari (see: http://stackoverflow.com/questions/6890149/remove-3-pixels-in-ios-webkit-textarea)
         ...(isMobileSafari
           ? {

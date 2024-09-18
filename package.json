@@ -6,7 +6,9 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"version": "node version-bump.mjs && git add manifest.json versions.json"
+		"version": "node version-bump.mjs && git add manifest.json versions.json",
+		"lint": "eslint . --ext .ts,.tsx",
+		"lint:fix": "eslint . --ext .ts,.tsx --fix"
 	},
 	"keywords": [],
 	"author": "",
@@ -21,26 +23,28 @@
 		"@typescript-eslint/parser": "5.29.0",
 		"builtin-modules": "3.3.0",
 		"esbuild": "^0.19.1",
+		"eslint": "^8.56.0",
+		"eslint-plugin-react": "^7.33.2",
+		"eslint-plugin-react-hooks": "^4.6.0",
 		"obsidian": "latest",
 		"tslib": "2.4.0",
 		"typescript": "4.7.4"
 	},
 	"dependencies": {
 		"@koa/cors": "^5.0.0",
-		"@langchain/anthropic": "^0.1.1",
-		"@langchain/google-genai": "^0.0.7",
 		"autoprefixer": "^10.4.19",
 		"esbuild-plugin-svgr": "^2.1.0",
 		"esbuild-postcss": "^0.0.4",
 		"invariant": "^2.2.4",
 		"koa": "^2.14.2",
 		"koa-proxies": "^0.12.3",
-		"langchain": "^0.0.212",
 		"moment": "^2.30.1",
+		"openai": "^4.57.0",
 		"postcss": "^8.4.40",
 		"prop-types": "^15.8.1",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
+		"react-markdown": "^9.0.1",
 		"react-mentions": "^4.4.10",
 		"substyle": "^9.4.1",
 		"tailwindcss": "^3.4.6"
