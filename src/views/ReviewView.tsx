@@ -5,10 +5,10 @@ import { Root, createRoot } from 'react-dom/client';
 import SRPlugin from '@/main';
 import MemoryManager from '@/memory/memoryManager';
 import { DeckManager, Deck } from '@/fsrs/Deck';
-import DeckDisplay from '@/components/DeckDisplay'
+import DeckDisplay from '@/components/review/DeckDisplay'
 import { DeckMetaData, State } from '@/fsrs';
-import NewDeckModal from '@/components/NewDeckModal';
-import ModifyDeckModal from '@/components/ModifyDeckModal';
+import NewDeckModal from '@/components/review/NewDeckModal';
+import ModifyDeckModal from '@/components/review/ModifyDeckModal';
 
 export default class ReviewView extends ItemView {
   private memoryManager: MemoryManager;
