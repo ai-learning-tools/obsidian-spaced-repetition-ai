@@ -6,25 +6,24 @@ import { SRSettingTab } from '@/components/SettingsPage';
 import { SRSettings } from '@/settings';
 import '@/tailwind.css';
 import EncryptionService from '@/utils/encryptionService';
-import { Deck } from './sr/Deck';
-import { DeckIterator } from './sr/DeckIterator';
+import MemoryManager from './memory/memoryManager';
+import { DeckManager } from './fsrs/Deck';
 import AIManager from './llm/AIManager';
 
 export default class SRPlugin extends Plugin {
 	settings: SRSettings;
 	chatIsVisible = false;
 	activateViewPromise: Promise<void> | null = null;
+	memoryManager: MemoryManager;
+	deckManager: DeckManager;
 	aiManager: AIManager;
-
-	deckTree: Deck;
-	deckIterator: DeckIterator;
 
 	async onload(): Promise<void> {
 		
 		await this.loadSettings();
 		this.addSettingTab(new SRSettingTab(this.app, this));
-		this.deckTree = new Deck("", this.app.vault, null);
-		this.deckIterator = new DeckIterator(this.deckTree);
+		this.memoryManager = new MemoryManager(this.app.vault)
+		this.deckManager = new DeckManager(this.memoryManager, this.app.vault)
 		
 		const key = this.settings.openAIApiKey
 		const decryptedKey = EncryptionService.isDecrypted(key) ? key : EncryptionService.getDecryptedKey(key);

@@ -1,4 +1,12 @@
 import { SRSettings } from "@/settings";
+import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { ChatAnthropic } from "@langchain/anthropic";
+
+export const DIRECTORY = "SR" //TODO: Athena - move away to settings
+
+export const PREFERRED_DATE_FORMAT = "YYYY-MM-DD";
+export const ALLOWED_DATE_FORMATS = [PREFERRED_DATE_FORMAT, "DD-MM-YYYY", "ddd MMM DD YYYY"];
 import { z } from 'zod';
 
 // Regex to capture multiline flashcards in the format:
