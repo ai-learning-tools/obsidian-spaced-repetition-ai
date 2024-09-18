@@ -16,8 +16,8 @@ import {
 import type { int } from './types'
 import { FSRSAlgorithm } from './algorithm'
 import { TypeConvert } from './convert'
-import BasicScheduler from './impl/basic_schduler'
-import LongTermScheduler from './impl/long_term_schduler'
+import BasicScheduler from './impl/basic_scheduler'
+import LongTermScheduler from './impl/long_term_scheduler'
 
 export class FSRS extends FSRSAlgorithm {
   private Schduler

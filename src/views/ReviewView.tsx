@@ -23,11 +23,7 @@ export default class ReviewView extends ItemView {
       this.plugin = plugin;
       this.memoryManager = plugin.memoryManager;
       this.deckManager = plugin.deckManager;
-      this.navigation = false; // Set navigation to true
-  }
-
-  async onload(): Promise<void> {
-    // TODO: move this else where
+      this.navigation = false;
   }
 
   getViewType(): string {
