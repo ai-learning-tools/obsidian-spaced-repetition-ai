@@ -62,6 +62,10 @@ export default class SRPlugin extends Plugin {
 			this.toggleView(ViewTypes.CHAT);
 		});
 
+		this.addRibbonIcon('dice', 'Review flashcards', (evt: MouseEvent) => {
+			this.toggleView(ViewTypes.REVIEW);
+		});
+
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new SRSettingTab(this.app, this));
 

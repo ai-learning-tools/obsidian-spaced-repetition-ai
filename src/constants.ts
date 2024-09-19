@@ -19,6 +19,7 @@ export const BACK_CARD_REGEX = /(?:^>\s*((?:.*\n?)+?)(?=(?:^[^>]|\s*$)))/gm;
 
 
 // Optional front and back due to streaming
+//TODO: Move this to model @belindamo
 const entryItem = z.object({
   front: z.string().optional().describe("The front side of the card containing the question or prompt"),
   back: z.string().optional().describe("The back side of the card containing the answer or explanation"),
