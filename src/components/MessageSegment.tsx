@@ -9,10 +9,10 @@ import AIManager from '@/llm/AIManager';
 import { useAIState } from '@/hooks/useAIState';
 import { getFileContent, writeCardtoFile } from '@/utils/obsidianFiles';
 import { EnterIcon } from '@/components/Icons';
-import Entry from '@/components/chat/Entry';
 import ChatTag from '@/components/chat/ChatTag';
 import { errorMessage } from '@/utils/errorMessage';
 import Markdown from 'react-markdown';
+import { EntryView } from '@/components/EntryView';
 
 interface MessageSegmentProps {
   segment: ChatMessage
@@ -359,14 +359,14 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
       </div>
       )}
    
-      <div className='m-4'>
+      <div className='m-4 space-y-2'>
         {aiString && (
           <div className='pb-4'>
             <Markdown>{aiString}</Markdown>
           </div>
         )}
         {aiEntries?.map((entry, i) => (
-          <Entry 
+          <EntryView 
             handleFeedback={async (feedback: 'y' | 'n') => {
               await handleCardFeedback(feedback, entry, i);
             }}
@@ -374,9 +374,8 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
               setFocusedIndex(i);
             }}
             focused={i === focusedIndex}
-            front={entry.front} 
-            back={entry.back} 
-            references={entry.references}
+            front={entry.front || ""} 
+            back={entry.back || ""} 
             key={`entry-${i}-length-${aiEntries.length}`}
           />
         ))}

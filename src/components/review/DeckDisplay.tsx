@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Deck } from '@/fsrs/Deck';
 import { State, Card, Rating, Grade, RecordLogItem } from '@/fsrs';
-import CardView from '@/components/CardView'
+import EntryView from '@/components/EntryView'
 
 interface DeckDisplayProps {
   deck: Deck;
@@ -82,7 +82,7 @@ const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewPro
 
   return (
     <div ref={cardReviewRef} className="h-64 w-full flex-col flex space-y-5 items-center" onKeyDown={handleKeyDown} tabIndex={0}>
-      <CardView front={card.front} back={card.back} showBack={showBack}></CardView>
+      <EntryView front={card.front} back={card.back} showBack={showBack}></EntryView>
       {
         showBack &&
         <div>
