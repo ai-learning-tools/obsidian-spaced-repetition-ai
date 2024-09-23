@@ -82,7 +82,6 @@ export function createEmptyCard<R = Card>(
     last_review: undefined,
 
     id: entry.id,
-    hash: entry.hash,
     front: entry.front,
     back: entry.back,
     path: entry.path

@@ -124,7 +124,6 @@ class MemoryManager {
                 const memory: Memory = JSON.parse(fileContent) as Memory;
                 memory.card.front = content.front
                 memory.card.back = content.back
-                memory.card.hash = content.hash
                 memory.card.path = content.path
                 await this.writeMemory(memory);
             } catch (error) {

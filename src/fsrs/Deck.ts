@@ -110,7 +110,9 @@ export class DeckManager {
                 const content = await this.vault.read(file);
                 const extractedEntries = this.extractEntriesFromContent(content, file.path);
                 for (const newEntry of extractedEntries) {
-                    newEntries[newEntry.id] = newEntry;
+                    // TODO: Athena - create id and write new id into card
+                    newEntries[newEntry.id ?? "abc"] = newEntry;
+                    
                 }
             }
         }
@@ -124,7 +126,7 @@ export class DeckManager {
             } else {
                 // card doesn't exists in memory, we will create one
                 const card = createEmptyCard(entry)
-                const memory = {card: card, reviewLogs: [], id: card.id}
+                const memory = {card: card, reviewLogs: [], id: card.id ?? "abc"}
                 await this.memoryManager.writeMemory(memory)      
             }
         }
@@ -145,35 +147,57 @@ export class DeckManager {
     extractEntriesFromContent(content: string, filePath: string): Entry[] {
         // Implement the logic to extract entry details from the content
 
-        const entryRegex = /\[!card\](.*?)<!--SR:(\w+)-(\w+)-->/gms;
+        const entryRegex = /\[!card\]\+(.*?)(?:<!--SR:(\w+)-->|\n\n|$)/gms;
+        // const entryRegex = /\[!card\](.*?)<!--SR:(\w+)-(\w+)-->/gms;
 
         // Create an array to store the extracted cards
         const entries = [];
     
         // Use the regex to find matches in the text
-        let match;
-        while ((match = entryRegex.exec(content)) !== null) {
-            // Extract the card content (everything between [!card] and <!--SR)
-            const cardContent = match[1].trim();
-            const id = match[2]
-            const hash = match[3]
+        // let match;
+        // while ((match = entryRegex.exec(content)) !== null) {
+        //     // Extract the card content (everything between [!card] and <!--SR)
+        //     console.log("DEBUG-MATCH-CARDS", match, match["input"])
+        //     const cardContent = match[1].trim();
+        //     const id = match[3] || undefined;
     
-            // Split the card content into question and answer
-            const parts = cardContent.split('\n');
-            const question = parts[0].trim(); // First line is the question
-            const answer = parts.slice(1).join('\n').trim(); // Rest is the answer
+        //     // Split the card content into question and answer
+        //     const parts = cardContent.split('\n');
+        //     const question = parts[0].trim().replace(/<br>/g, '\n'); // First line is the question
+        //     const answer = parts.slice(1).join('\n').trim(); // Rest is the answer
 
-            const formattedAnswer = answer.replace(/(^|\n)(>\s?)+/g, '$1');
+        //     const formattedAnswer = answer.replace(/(^|\n)(>\s?)+/g, '$1');
+        //     console.log("DEBUG-MATCH", question, answer)
     
-            // Add the extracted card to the array
+        //     // Add the extracted card to the array
+        //     entries.push({
+        //         'front': question,
+        //         'back': formattedAnswer,
+        //         'id': id,
+        //         'path': filePath
+        //     });
+        // }
+
+        let match;
+        console.log("DEBUG-ATHENA", "start of content")
+        while ((match = entryRegex.exec(content)) !== null) {
+
+            console.log("DEBUG-MATCH", match["input"])
+            const [_, title, body, id] = match;
+            const cleanTitle = title.trim();
+            let cleanBody = body.trim().replace(/\n> /g, '\n').trim();
+    
+            // Remove the ID part from the body if present
+            cleanBody = cleanBody.replace(/<!--SR:.*?-->/g, '').trim();
+    
             entries.push({
-                'front': question,
-                'back': formattedAnswer,
-                'id': id,
-                'hash': hash,
-                'path': filePath
+                front: cleanTitle,
+                back: cleanBody,
+                id: id || undefined,
+                path: filePath
             });
         }
+        
     
         return entries;
     }

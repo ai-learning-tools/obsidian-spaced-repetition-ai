@@ -108,7 +108,6 @@ export default class AIManager {
       for await (const event of stream) {
         if (abortController.signal.aborted) break;
 
-        console.log(event);
         if (event.event === 'thread.message.delta') {
           const content = event.data.delta.content?.[0];
           if (content && 'text' in content) {

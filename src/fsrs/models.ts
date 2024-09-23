@@ -49,8 +49,7 @@ export interface DeckMetaData {
 export interface Entry {
   front: string, 
   back: string, 
-  id: string,
-  hash: string,
+  id?: string,
   path: string, 
 }
 
