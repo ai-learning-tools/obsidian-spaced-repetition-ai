@@ -6,7 +6,7 @@ import { useMessageHistory } from '../hooks/useMessageHistory';
 import SRPlugin from '@/main';
 import { dummyUserMessage, dummyEntriesGeneration } from '@/utils/dummyData';
 import { TFile, WorkspaceLeaf } from 'obsidian';
-import { getFileCards, getSortedFiles } from '@/utils/obsidianFiles';
+import { getFileCards, getFilteredFiles } from '@/utils/obsidianFiles';
 import { EntryItemGeneration } from '@/constants';
 
 interface ChatProps {
@@ -51,6 +51,9 @@ const Chat: React.FC<ChatProps> = ({
         };
 
         const updateAll = () => {
+            getFilteredFiles(vault).then((files) => {
+                setFiles(files);
+            });
             const newActiveFile = workspace.getActiveFile();
             if (newActiveFile && (!activeFile || activeFile.path !== newActiveFile.path) && newActiveFile.extension === 'md') {
                 getSortedFiles(vault).then((files) => {

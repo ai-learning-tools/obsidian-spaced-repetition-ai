@@ -2,13 +2,15 @@ import { TFile, Vault, Plugin } from "obsidian";
 import { EntryItemGeneration } from "@/constants";
 import { errorMessage } from "./errorMessage";
 import { FRONT_CARD_REGEX, BACK_CARD_REGEX } from "@/constants";
+import { DIRECTORY } from "@/constants";
 
-export async function getSortedFiles(
+export async function getFilteredFiles(
   vault: Vault
 ): Promise<TFile[]> {
   const files = vault.getFiles();
-  files.sort((a, b) => b.stat.mtime - a.stat.mtime);
-  return files;
+  const filteredFiles = files.filter(file => !file.path.startsWith(DIRECTORY));
+  filteredFiles.sort((a, b) => b.stat.mtime - a.stat.mtime);
+  return filteredFiles;
 }
 
 export async function getFileContent(
