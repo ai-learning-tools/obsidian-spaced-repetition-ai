@@ -1,4 +1,4 @@
-import { Plugin, WorkspaceLeaf} from 'obsidian';
+import { Plugin, WorkspaceLeaf, Notice } from 'obsidian';
 import { ViewTypes, DEFAULT_SETTINGS } from '@/constants';
 import ChatView from '@/views/ChatView';
 import ReviewView from '@/views/ReviewView';
@@ -9,6 +9,8 @@ import EncryptionService from '@/utils/encryptionService';
 import MemoryManager from './memory/memoryManager';
 import { DeckManager } from './fsrs/Deck';
 import AIManager from './llm/AIManager';
+import { ChatModels } from '@/constants';
+import { errorMessage } from './utils/errorMessage';
 
 export default class SRPlugin extends Plugin {
 	settings: SRSettings;
@@ -21,15 +23,15 @@ export default class SRPlugin extends Plugin {
 	async onload(): Promise<void> {
 		
 		await this.loadSettings();
-		this.addSettingTab(new SRSettingTab(this.app, this));
+
 		this.memoryManager = new MemoryManager(this.app.vault)
 		this.deckManager = new DeckManager(this.memoryManager, this.app.vault)
 		
-		const key = this.settings.openAIApiKey
-		const decryptedKey = EncryptionService.isDecrypted(key) ? key : EncryptionService.getDecryptedKey(key);
+		const key = this.settings.openAIApiKey;
+		const decryptedKey = EncryptionService.getDecryptedKey(key);
 		this.aiManager = AIManager.getInstance(this.settings.defaultModel, decryptedKey);
 
-		await this.saveSettings();
+		this.addSettingTab(new SRSettingTab(this.app, this));
 
 		this.addCommand({
 			id: "chat-toggle-window",
@@ -75,10 +77,31 @@ export default class SRPlugin extends Plugin {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 
-	async saveSettings() {
-		this.settings = EncryptionService.encryptAllKeys(this.settings);
-		this.aiManager.setModel(this.settings.defaultModel);
-		await this.saveData(this.settings);
+	async saveSettings(changed: {
+		apiKey?: boolean,
+		defaultModel?: boolean
+	} = {}): Promise<void> {
+		try {
+			if (changed) {
+				if (changed.apiKey) {
+					new Notice("Checking API Key...");
+					const key = EncryptionService.getDecryptedKey(this.settings.openAIApiKey);
+					const isSet = await this.aiManager.setApiKey(key);
+					if (isSet) {
+						this.settings = EncryptionService.encryptAllKeys(this.settings);
+						new Notice("API Key is valid!");
+					} else {
+						return;
+					}
+				}
+				if (changed.defaultModel) {
+					this.aiManager.setModel(this.settings.defaultModel);
+				}
+			}
+			await this.saveData(this.settings);
+		} catch(e) {
+			errorMessage(e);
+		}
 	}
 
 	toggleView(viewType: ViewTypes) {
