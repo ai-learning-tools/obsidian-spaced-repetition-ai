@@ -54,29 +54,13 @@ export const entriesGenerationSchema = {
             type: "string",
             description: entryItem.shape.back.description,
           },
-          references: {
-            type: "array",
-            description: entryItem.shape.references.description,
-            items: {
-              type: "string",
-              properties: {
-                referenceName: {
-                  type: "string",
-                }
-              },
-              required: ["referenceName"],
-              // additionalProperties: false
-            }
-          },
         },
         required: ["front", "back"],
-        // additionalProperties: false
       },
       description: entriesGeneration.shape.cards.description,
     },
   },
   required: ['cardsSummary', 'cards'],
-  // additionalProperties: false
 };
 
 
