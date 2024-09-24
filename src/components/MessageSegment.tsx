@@ -21,10 +21,11 @@ interface MessageSegmentProps {
     updateUserMessage: (userMessage: string) => void;
     updateModifiedMessage: (modifiedMessage: string) => void;
     updateAIResponse: (aiString: string | null, aiEntries: EntryItemGeneration[] | null) => void;
-    clearMessageHistory: (clearAll?: boolean) => void;
+    clearMessageHistory: () => void;
   };
   messageHistory: ChatMessage[],
   addNewMessage: () => void,
+  clearAll: () => void,
   index: number,
   plugin: Plugin,
   activeFile: TFile | null,
@@ -39,6 +40,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   messageHistory,
   aiManager,
   addNewMessage,
+  clearAll,
   plugin,
   activeFile,
   activeFileCards,
@@ -253,7 +255,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
         <div 
           className='cursor-pointer' 
           onClick={async () => {
-            clearMessageHistory(true);
+            clearAll();
             if (index === 0) {
               setUserMessage(null);
               setAIEntries(null);

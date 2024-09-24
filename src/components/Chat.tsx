@@ -19,7 +19,7 @@ const Chat: React.FC<ChatProps> = ({
     plugin, 
     aiManager,
 }) => {
-    const { messageHistory, createUpdateFunctions, addNewMessage } = useMessageHistory([{ 
+    const { messageHistory, createUpdateFunctions, addNewMessage, clearAll } = useMessageHistory([{ 
         userMessage: null,
         modifiedMessage: null,
         aiString: null,
@@ -93,6 +93,7 @@ const Chat: React.FC<ChatProps> = ({
                     messageHistory={messageHistory}
                     updateHistory={updateHistory}
                     addNewMessage={addNewMessage}
+                    clearAll={clearAll}
                     plugin={plugin}
                     aiManager={aiManager}
                     activeFile={activeFile}
