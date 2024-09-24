@@ -2,7 +2,7 @@ import { ChatModels, entriesGenerationSchema,EntryItemGeneration } from "@/const
 import { ChatMessage } from "@/chatMessage";
 import { errorMessage } from "@/utils/errorMessage";
 import { IncompleteJsonParser } from "@/utils/incomplete-json-parser";
-
+import { APIUserAbortError } from "openai/error";
 import OpenAI from "openai";
 
 export default class AIManager {
@@ -172,7 +172,9 @@ export default class AIManager {
         } 
       }
     } catch(e) {
-      errorMessage(`Error while streaming AI response: ${e}`);
+      if (!(e instanceof APIUserAbortError)) {
+        errorMessage(`Streaming AI response ${e}`);
+      }
     }
 
   }
