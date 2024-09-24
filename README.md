@@ -1,8 +1,6 @@
-# Obsidian Learning Plugin with Spaced Repetition and AI
+# Obsidian AI Learning Plugin with Spaced Repetition 
 
-Obsidian Learn is a plugin for a clean learning interface in [Obsidian](https://obsidian.md). It uses spaced repetition and AI to help you remember your notes for the long-term.
-
-Docs: [https://justanexperiment.com/obsidianlearn](https://justanexperiment.com/obsidianlearn)
+Obsidian Learn is an intuitive learning plugin in [Obsidian](https://obsidian.md). It uses spaced repetition and AI to help you remember your notes for the long-term.
 
 ## Features
 
@@ -36,6 +34,4 @@ We welcome contributions! Submit a Github pull request to contribute.
 - Belinda Mo <justanexperimentpark@gmail.com>
 
 
-## [Support us, Buy us a latte](https://buymeacoffee.com/obsidianlearn)
-
-<script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="obsidianlearn" data-color="#a882ff" data-emoji="☕"  data-font="Cookie" data-text="Buy us a latte" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#FFDD00" ></script>
+## [Support us, Buy us boba 🧋](https://buymeacoffee.com/obsidianlearn)
