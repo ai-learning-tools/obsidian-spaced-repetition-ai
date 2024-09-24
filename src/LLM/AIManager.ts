@@ -126,7 +126,12 @@ export default class AIManager {
               setAIString(result.cardsSummary);
             }
             if (result.cards) {
-              setAIEntries(result.cards);
+              const processedCards = result.cards.map(c => ({
+                ...c,
+                front: c.front ? c.front.replace(/\\n/g, '\n') : '',
+                back: c.back ? c.back.replace(/\\n/g, '\n') : '',
+              }));
+              setAIEntries(processedCards);
             }
           }
         } else if (event.event === 'thread.run.requires_action') {

@@ -1,4 +1,4 @@
-import { Editor, TFile, Vault, MarkdownView, App } from "obsidian";
+import { TFile, Vault, Plugin } from "obsidian";
 import { EntryItemGeneration } from "@/constants";
 import { errorMessage } from "./errorMessage";
 import { FRONT_CARD_REGEX, BACK_CARD_REGEX } from "@/constants";
@@ -20,23 +20,26 @@ export async function getFileContent(
 }
 
 // Currently appends to end of file
-export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, vault: Vault) {
+export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, plugin: Plugin) {
   if (entry.front && entry.back) {
-    const frontWithLineBreaks = entry.front.replace(/\n/g, '<br>');
-    const backWithLineBreaks = entry.back.replace(/\n/g, '\n> ');
-    
-    const card = `
-  > [!card]+ ${frontWithLineBreaks}
-  > ${backWithLineBreaks}
-  `;
-    
-    await vault.append(
+    const { front, back } = entry;
+    // Check if either front or back are multiline
+    const isMultiline = front.includes('\n') || back.includes('\n');
+
+    let card;
+    if (isMultiline) { 
+      const multilineSeparator = plugin.settings.multilineSeparator;
+      card = `\n\n${front}\n${multilineSeparator}\n${back}\n\n`
+    } else {
+      const inlineSeparator = plugin.settings.inlineSeparator;
+      card = `\n\n${front} ${inlineSeparator} ${back}\n\n`
+    }
+
+    await plugin.app.vault.append(
       file,
       card
     );
   }
-
-
 }
 
 export async function getFileCards(file: TFile, vault: Vault): Promise<EntryItemGeneration[]> {

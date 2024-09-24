@@ -133,10 +133,8 @@ export const DEFAULT_SETTINGS: SRSettings = {
   defaultModel: ChatModels.GPT_4,
   defaultModelDisplayName: ChatModelDisplayNames.GPT_4,
   openAIApiKey: "",
-  convertFoldersToDecks: true,
-	noteFoldersToIgnore: [],
-	flashcardTags: [],
-	tagsToReview: [],
+  inlineSeparator: "::",
+  multilineSeparator: "?",
 };
 
 // From here https://github.com/open-spaced-repetition/fsrs4anki/blob/main/fsrs4anki_scheduler.js#L108
