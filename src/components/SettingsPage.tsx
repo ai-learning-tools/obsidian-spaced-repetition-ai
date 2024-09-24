@@ -64,6 +64,18 @@ export class SRSettingTab extends PluginSettingTab {
           await this.plugin.saveSettings({ defaultModel: true});
         }));
 
+    new Setting(containerEl)
+      .setName('Include current file by default')
+      .setDesc('While chatting with your notes, include the last active file as context by default')
+      .addToggle(toggle => toggle
+        .setValue(this.plugin.settings.includeCurrentFile)
+        .onChange((value) => {
+          this.plugin.settings.includeCurrentFile = value;
+          this.plugin.saveSettings();
+        })
+      )
+
+
         
   }
 }

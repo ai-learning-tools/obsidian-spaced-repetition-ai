@@ -119,6 +119,7 @@ export const DEFAULT_SETTINGS: SRSettings = {
   openAIApiKey: "",
   inlineSeparator: "::",
   multilineSeparator: "?",
+  includeCurrentFile: true,
 };
 
 // From here https://github.com/open-spaced-repetition/fsrs4anki/blob/main/fsrs4anki_scheduler.js#L108

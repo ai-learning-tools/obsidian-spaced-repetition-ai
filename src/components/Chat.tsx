@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import AIManager from '@/llm/AIManager';
 import { useMessageHistory } from '../hooks/useMessageHistory';
 import SRPlugin from '@/main';
-import { dummyUserMessage, dummyEntriesGeneration } from '@/utils/dummyData';
-import { TFile, WorkspaceLeaf } from 'obsidian';
+// import { dummyUserMessage, dummyEntriesGeneration } from '@/utils/dummyData';
+import { TFile } from 'obsidian';
 import { getFileCards, getFilteredFiles } from '@/utils/obsidianFiles';
 import { EntryItemGeneration } from '@/constants';
 
@@ -54,14 +54,17 @@ const Chat: React.FC<ChatProps> = ({
             getFilteredFiles(vault).then((files) => {
                 setFiles(files);
             });
+            
             const newActiveFile = workspace.getActiveFile();
-            if (newActiveFile && (!activeFile || activeFile.path !== newActiveFile.path) && newActiveFile.extension === 'md') {
-                getSortedFiles(vault).then((files) => {
-                    setFiles(files);
-                });
-                setActiveFile(newActiveFile);
-                updateFileCards(newActiveFile)
-            }
+            setActiveFile(newActiveFile);
+
+            if (
+                (!newActiveFile && activeFileCards.length > 0) ||
+                newActiveFile?.extension !== 'md'
+            ) setActiveFileCards([]);
+            else if (newActiveFile && activeFile && activeFile.path !== newActiveFile?.path && newActiveFile.extension === 'md') {
+                updateFileCards(newActiveFile);
+            } 
         };
 
         updateAll();
@@ -70,7 +73,7 @@ const Chat: React.FC<ChatProps> = ({
             updateAll();
         };
 
-        workspace.on('active-leaf-change', onActiveLeafChange);
+        workspace.on('active-leaf-change', updateAll);
         
         workspace.on('editor-change', () => {
             if (activeFile) updateFileCards(activeFile);

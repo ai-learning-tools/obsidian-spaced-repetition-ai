@@ -6,4 +6,5 @@ export interface SRSettings {
   openAIApiKey: string;
 	inlineSeparator: string;
 	multilineSeparator: string;
+  includeCurrentFile: boolean;
 }
