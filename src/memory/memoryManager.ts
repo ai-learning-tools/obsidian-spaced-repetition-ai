@@ -26,10 +26,6 @@ class MemoryManager {
                 await this.vault.create(deckFilePath, JSON.stringify({ decks: [] }, null, 2));
             }
         })();
-
-        (async () => {
-            await this._resetMemory()
-        })();
     }
 
     async initializeFolders() {
@@ -178,21 +174,6 @@ class MemoryManager {
             }
         } else {
             throw new Error(`Cannot delete deck: deck.json does not exist`);
-        }
-    }
-
-    async _resetMemory() {
-        for (let i = 1; i <= 6; i++) {
-            const entry = {
-                'id': i.toString(),
-                'hash': i.toString(), 
-                'front': "what's the meaning of life",
-                'back': "to love and be loved",
-                'path': "/"
-            }
-            const card = createEmptyCard(entry);
-            const memory = { card: card, reviewLogs: [], id: i.toString()};
-            await this.writeMemory(memory);
         }
     }
 }

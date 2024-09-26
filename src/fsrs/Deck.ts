@@ -147,8 +147,10 @@ export class DeckManager {
     extractEntriesFromContent(content: string, filePath: string): Entry[] {
         // Implement the logic to extract entry details from the content
 
-        const entryRegex = /\[!card\]\+(.*?)(?:<!--SR:(\w+)-->|\n\n|$)/gms;
+        // const entryRegex = /\[!card\]\+(.*?)(?:<!--SR:(\w+)-->|\n\n|$)/gms;
         // const entryRegex = /\[!card\](.*?)<!--SR:(\w+)-(\w+)-->/gms;
+        //const entryRegex = /^((?:.|\n)*?)\n\?\?\n((?:.|\n)*?)(?:\n<!--LEARN:(\w+)-->)?(?=\n\n|\n?$)/gm;
+        const entryRegex = /(?:^|\n{2,})([^\n](?:(?!\n{2,})[\s\S])*?)\n\?\?\n([^\n](?:(?!\n{2,})[\s\S])*?)(?:\n<!--LEARN:(.*?)-->)?(?=(?:\n{2,})|\n$|$)/g;
 
         // Create an array to store the extracted cards
         const entries = [];
@@ -181,19 +183,13 @@ export class DeckManager {
         let match;
         console.log("DEBUG-ATHENA", "start of content")
         while ((match = entryRegex.exec(content)) !== null) {
-
-            console.log("DEBUG-MATCH", match["input"])
-            const [_, title, body, id] = match;
-            const cleanTitle = title.trim();
-            let cleanBody = body.trim().replace(/\n> /g, '\n').trim();
-    
-            // Remove the ID part from the body if present
-            cleanBody = cleanBody.replace(/<!--SR:.*?-->/g, '').trim();
+            const [, front, back, learnId] = match;
+            console.log(front, back, learnId)
     
             entries.push({
-                front: cleanTitle,
-                back: cleanBody,
-                id: id || undefined,
+                front: front,
+                back: back,
+                id: learnId || undefined,
                 path: filePath
             });
         }
