@@ -113,7 +113,7 @@ class MemoryManager {
 
     // Used when syncing memory files with .md notes
     async updateCardContent(content: Entry): Promise<void> {
-        const file = this.getFile(content.id)
+        const file = this.getFile(content.id!)
         if (file) {
             const fileContent = await this.vault.read(file);
             try {
@@ -175,6 +175,19 @@ class MemoryManager {
         } else {
             throw new Error(`Cannot delete deck: deck.json does not exist`);
         }
+    }
+
+    static generateRandomID(length= 8): string {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const charactersLength = characters.length;
+        let result = '';
+    
+        for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * charactersLength);
+            result += characters.charAt(randomIndex);
+        }
+    
+        return result;
     }
 }
 

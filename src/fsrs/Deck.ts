@@ -5,6 +5,7 @@ import { DIRECTORY } from "@/constants";
 import { fixDate } from "./help";
 import { fsrs, FSRS} from "./fsrs";
 import { createEmptyCard } from "./default";
+import { writeIdToCardInFile } from "@/utils/obsidianFiles";
 
 
 export class Deck {
@@ -110,9 +111,9 @@ export class DeckManager {
                 const content = await this.vault.read(file);
                 const extractedEntries = this.extractEntriesFromContent(content, file.path);
                 for (const newEntry of extractedEntries) {
-                    // TODO: Athena - create id and write new id into card
-                    newEntries[newEntry.id ?? "abc"] = newEntry;
-                    
+                    const id = newEntry.id ?? MemoryManager.generateRandomID();
+                    newEntry.id = id
+                    newEntries[id] = newEntry;
                 }
             }
         }
@@ -121,13 +122,21 @@ export class DeckManager {
         for (const [id, entry] of Object.entries(newEntries)) {
             // Check if card exists in memory file
             if (this.memoryManager.getFile(id)) {
-                // TODO: Athena - check if hash remains the same, if no, update card
                 this.memoryManager.updateCardContent(entry)
             } else {
                 // card doesn't exists in memory, we will create one
                 const card = createEmptyCard(entry)
-                const memory = {card: card, reviewLogs: [], id: card.id ?? "abc"}
-                await this.memoryManager.writeMemory(memory)      
+                const memory = {card: card, reviewLogs: [], id: id}
+                await this.memoryManager.writeMemory(memory) 
+
+                // if entry already has Id but doesnt have a memory file, log a warning
+                if (!entry.isNew) {
+                    console.warn(`memory file of ${entry.id} cannot be found, rewriting`)
+                } else {
+                    // write id into newly created card
+                    writeIdToCardInFile(this.vault, entry, id)
+                }
+                
             }
         }
 
@@ -147,50 +156,23 @@ export class DeckManager {
     extractEntriesFromContent(content: string, filePath: string): Entry[] {
         // Implement the logic to extract entry details from the content
 
-        // const entryRegex = /\[!card\]\+(.*?)(?:<!--SR:(\w+)-->|\n\n|$)/gms;
-        // const entryRegex = /\[!card\](.*?)<!--SR:(\w+)-(\w+)-->/gms;
-        //const entryRegex = /^((?:.|\n)*?)\n\?\?\n((?:.|\n)*?)(?:\n<!--LEARN:(\w+)-->)?(?=\n\n|\n?$)/gm;
-        const entryRegex = /(?:^|\n{2,})([^\n](?:(?!\n{2,})[\s\S])*?)\n\?\?\n([^\n](?:(?!\n{2,})[\s\S])*?)(?:\n<!--LEARN:(.*?)-->)?(?=(?:\n{2,})|\n$|$)/g;
+        const entryRegex = /(?:^|\n{2,})([^\n](?:(?!\n{2,})[\s\S])*?)\n\?\n([^\n](?:(?!\n{2,})[\s\S])*?)(?:\n<!--LEARN:(.*?)-->)?(?=(?:\n{2,})|\n$|$)/g;
 
         // Create an array to store the extracted cards
         const entries = [];
     
-        // Use the regex to find matches in the text
-        // let match;
-        // while ((match = entryRegex.exec(content)) !== null) {
-        //     // Extract the card content (everything between [!card] and <!--SR)
-        //     console.log("DEBUG-MATCH-CARDS", match, match["input"])
-        //     const cardContent = match[1].trim();
-        //     const id = match[3] || undefined;
-    
-        //     // Split the card content into question and answer
-        //     const parts = cardContent.split('\n');
-        //     const question = parts[0].trim().replace(/<br>/g, '\n'); // First line is the question
-        //     const answer = parts.slice(1).join('\n').trim(); // Rest is the answer
-
-        //     const formattedAnswer = answer.replace(/(^|\n)(>\s?)+/g, '$1');
-        //     console.log("DEBUG-MATCH", question, answer)
-    
-        //     // Add the extracted card to the array
-        //     entries.push({
-        //         'front': question,
-        //         'back': formattedAnswer,
-        //         'id': id,
-        //         'path': filePath
-        //     });
-        // }
-
         let match;
         console.log("DEBUG-ATHENA", "start of content")
         while ((match = entryRegex.exec(content)) !== null) {
             const [, front, back, learnId] = match;
-            console.log(front, back, learnId)
+            console.log("MATCH \n", front, back, learnId)
     
             entries.push({
                 front: front,
                 back: back,
                 id: learnId || undefined,
-                path: filePath
+                path: filePath,
+                isNew: learnId == undefined
             });
         }
         

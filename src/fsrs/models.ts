@@ -51,6 +51,7 @@ export interface Entry {
   back: string, 
   id?: string,
   path: string, 
+  isNew?: boolean //this is true if card is new and ID was randomly assigned 
 }
 
 // Card is entry + space repetition data

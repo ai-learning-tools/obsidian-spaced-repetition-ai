@@ -2,6 +2,7 @@ import { TFile, Vault, Plugin } from "obsidian";
 import { EntryItemGeneration } from "@/constants";
 import { errorMessage } from "./errorMessage";
 import { FRONT_CARD_REGEX, BACK_CARD_REGEX } from "@/constants";
+import { Entry } from "@/fsrs";
 
 export async function getSortedFiles(
   vault: Vault
@@ -39,6 +40,39 @@ export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, p
       file,
       card
     );
+  }
+}
+
+export async function writeIdToCardInFile(vault: Vault, entry: Entry, id: string) {
+  try {
+    const file = vault.getAbstractFileByPath(entry.path) as TFile;
+    if (!file) {
+      console.error(`File not found at path: ${entry.path}`);
+      return;
+    }
+
+    const content = await vault.read(file);
+    const entryRegex = /(?:^|\n{2,})([^\n](?:(?!\n{2,})[\s\S])*?)\n\?\n([^\n](?:(?!\n{2,})[\s\S])*?)(?:\n<!--LEARN:(.*?)-->)?(?=(?:\n{2,})|\n$|$)/g;
+
+    let match;
+    while ((match = entryRegex.exec(content)) !== null) {
+      const [fullMatch, front, back, matchedID] = match;
+
+      if (
+        front.trim() == entry.front.trim()
+        && back.trim() == entry.back.trim() 
+        && matchedID == undefined
+      ) {
+        const newCard = `${fullMatch}\n<!--LEARN:${id}-->`
+        const updatedContent = content.replace(fullMatch, newCard);
+        await vault.modify(file, updatedContent)
+        return;
+      }
+    }
+
+    console.error(`No matching card was found for entry: ${entry}`)
+  } catch (e) {
+    console.error(`Error writing ID to card in file at path ${entry.path}: ${e}`);
   }
 }
 
