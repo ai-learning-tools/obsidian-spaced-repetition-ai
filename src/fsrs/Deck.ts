@@ -153,31 +153,71 @@ export class DeckManager {
     }
 
 
-    extractEntriesFromContent(content: string, filePath: string): Entry[] {
-        // Implement the logic to extract entry details from the content
+    extractEntriesFromContent(content: string, filePath: string, multiLineSeparator="?", singleLineSeparator=">>"): Entry[] {
+        
+        const lines = content.split('\n');
+        const entries: Entry[] = [];
+        let i = 0;
+        let frontLines: string[] = [];
+        let backLines: string[] = [];
+        let isSeparatorDetected = false;
+        const pattern = /<!--LEARN:(.*?)-->/
+        while (i < lines.length) {
+        const currText = lines[i].trim()
+        const idMatch = currText.match(pattern)
+        if (currText == "" || idMatch) {
+            // This line is irrelavant 
+            if (frontLines.length > 0 && backLines.length > 0) {
+                // This may indicate the end of a multi-line card
+                const front = frontLines.join('\n');
+                const back = backLines.join('\n');
+                const id = idMatch ? idMatch[1] : undefined; // Fix: Access the first capturing group directly
+                entries.push({
+                    front: front,
+                    back: back,
+                    id: id, // Fix: Use the extracted id
+                    path: filePath
+                });
+            } else {
+                // Even though this is not a multi-line card, there may be many single line card
+                const allText = frontLines.join('\n') + backLines.join('\n') + '\n' + currText;
+                const pattern = new RegExp(`^(.*?)\\s${singleLineSeparator}\\s(.*?)(?:\\n<!--LEARN:(.*?)-->)?$`, 'gm');
+        
+                let match;
+                while ((match = pattern.exec(allText)) !== null) {
+                    const front = match[1].trim();
+                    const back = match[2].trim();
+                    const id = match[3];
+                    entries.push({
+                        front: front,
+                        back: back,
+                        id: id, 
+                        path: filePath
+                    })
+                }
+            }
+            //let's clear previous information
+            frontLines = []
+            backLines = []
+            isSeparatorDetected = false
+        }
 
-        const entryRegex = /(?:^|\n{2,})([^\n](?:(?!\n{2,})[\s\S])*?)\n\?\n([^\n](?:(?!\n{2,})[\s\S])*?)(?:\n<!--LEARN:(.*?)-->)?(?=(?:\n{2,})|\n$|$)/g;
+        else if (currText == multiLineSeparator) {
+            isSeparatorDetected = true
+        }
 
-        // Create an array to store the extracted cards
-        const entries = [];
-    
-        let match;
-        console.log("DEBUG-ATHENA", "start of content")
-        while ((match = entryRegex.exec(content)) !== null) {
-            const [, front, back, learnId] = match;
-            console.log("MATCH \n", front, back, learnId)
-    
-            entries.push({
-                front: front,
-                back: back,
-                id: learnId || undefined,
-                path: filePath,
-                isNew: learnId == undefined
-            });
+        else if (!isSeparatorDetected) {
+            frontLines.push(currText);
         }
         
-    
-        return entries;
+        else {
+            backLines.push(currText)
+        }
+
+        i++
+        }
+
+        return entries
     }
 
     async populateDecks() {
