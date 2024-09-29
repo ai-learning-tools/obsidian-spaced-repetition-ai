@@ -3,6 +3,7 @@ import { EntryItemGeneration } from "@/constants";
 import { errorMessage } from "./errorMessage";
 import { FRONT_CARD_REGEX, BACK_CARD_REGEX } from "@/constants";
 import { Entry } from "@/fsrs";
+import { EntryType } from "@/fsrs/models";
 
 export async function getSortedFiles(
   vault: Vault
@@ -43,7 +44,7 @@ export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, p
   }
 }
 
-export async function writeIdToCardInFile(vault: Vault, entry: Entry, id: string) {
+export async function writeIdToCardInFile(vault: Vault, entry: Entry, multiLineSeparator="?", singleLineSeparator=">>") {
   try {
     const file = vault.getAbstractFileByPath(entry.path) as TFile;
     if (!file) {
@@ -51,26 +52,18 @@ export async function writeIdToCardInFile(vault: Vault, entry: Entry, id: string
       return;
     }
 
+    console.log('to add', entry.id, entry.lineToAddId, entry.path)
+
     const content = await vault.read(file);
-    const entryRegex = /(?:^|\n{2,})([^\n](?:(?!\n{2,})[\s\S])*?)\n\?\n([^\n](?:(?!\n{2,})[\s\S])*?)(?:\n<!--LEARN:(.*?)-->)?(?=(?:\n{2,})|\n$|$)/g;
-
-    let match;
-    while ((match = entryRegex.exec(content)) !== null) {
-      const [fullMatch, front, back, matchedID] = match;
-
-      if (
-        front.trim() == entry.front.trim()
-        && back.trim() == entry.back.trim() 
-        && matchedID == undefined
-      ) {
-        const newCard = `${fullMatch}\n<!--LEARN:${id}-->`
-        const updatedContent = content.replace(fullMatch, newCard);
-        await vault.modify(file, updatedContent)
-        return;
-      }
+    const lines = content.split('\n');
+    if (entry.lineToAddId !== undefined) {
+      lines.splice(entry.lineToAddId, 0, `<!--LEARN:${entry.id}-->`);
+      const updatedContent = lines.join('\n');
+      await vault.modify(file, updatedContent);
+    } else {
+      console.error(`Error: lineToAddId is undefined for entry with id ${entry.id} in file at path ${entry.path}`);
     }
-
-    console.error(`No matching card was found for entry: ${entry}`)
+    
   } catch (e) {
     console.error(`Error writing ID to card in file at path ${entry.path}: ${e}`);
   }

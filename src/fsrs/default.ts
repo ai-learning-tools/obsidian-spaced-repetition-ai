@@ -84,7 +84,8 @@ export function createEmptyCard<R = Card>(
     id: entry.id,
     front: entry.front,
     back: entry.back,
-    path: entry.path
+    path: entry.path,
+    entryType: entry.EntryType
   }
   if (afterHandler && typeof afterHandler === 'function') {
     return afterHandler(emptyCard)
