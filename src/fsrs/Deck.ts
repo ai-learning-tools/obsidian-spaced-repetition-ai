@@ -105,9 +105,6 @@ export class DeckManager {
 
     // Update memory folder with new cards and card details
     async syncMemoryWithNotes() {
-
-        console.log('syncing', this.settings.inlineSeparator, this.settings.multilineSeparator)
-
         // Part 1: Extract cards from notes
         const files = this.vault.getFiles();
         const newEntries: {[key: string]: Entry} = {}
@@ -213,7 +210,7 @@ export class DeckManager {
                         id: id, 
                         path: filePath,
                         lineToAddId: id ? undefined: i - indexFromBack + 1,
-                        entryType: EntryType.SingleLine,
+                        entryType: EntryType.Inline,
                         isNew: id == undefined
                     })
                 }
