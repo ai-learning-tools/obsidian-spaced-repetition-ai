@@ -44,7 +44,7 @@ export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, p
   }
 }
 
-export async function writeIdToCardInFile(vault: Vault, entry: Entry, multiLineSeparator="?", singleLineSeparator=">>") {
+export async function writeIdToCardInFile(vault: Vault, entry: Entry) {
   try {
     const file = vault.getAbstractFileByPath(entry.path) as TFile;
     if (!file) {

@@ -23,7 +23,7 @@ export default class SRPlugin extends Plugin {
 		await this.loadSettings();
 		this.addSettingTab(new SRSettingTab(this.app, this));
 		this.memoryManager = new MemoryManager(this.app.vault)
-		this.deckManager = new DeckManager(this.memoryManager, this.app.vault)
+		this.deckManager = new DeckManager(this.memoryManager, this.app.vault, this.settings)
 		
 		const key = this.settings.openAIApiKey
 		const decryptedKey = EncryptionService.isDecrypted(key) ? key : EncryptionService.getDecryptedKey(key);

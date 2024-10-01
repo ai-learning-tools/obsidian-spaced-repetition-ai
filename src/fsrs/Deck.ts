@@ -6,6 +6,7 @@ import { fixDate } from "./help";
 import { fsrs, FSRS} from "./fsrs";
 import { createEmptyCard } from "./default";
 import { writeIdToCardInFile } from "@/utils/obsidianFiles";
+import { SRSettings } from "@/settings";
 
 
 export class Deck {
@@ -68,7 +69,6 @@ export class Deck {
         }
         
     // We update the card instead of overwriting it since other decks may carry a reference to this card
-        console.log('ATHENA-DEBUG', 'new card', recordLog.card)
         const card = Object.assign(this.cards[index], recordLog.card);
 
         if (updateMemory) {
@@ -87,13 +87,16 @@ export class DeckManager {
     decks: Deck[]
     memoryManager: MemoryManager
     vault: Vault
+    settings: SRSettings
 
     constructor(
         memoryManager: MemoryManager,
-        vault: Vault
+        vault: Vault,
+        settings: SRSettings
     ) {
         this.memoryManager = memoryManager;
         this.vault = vault;
+        this.settings = settings;
         (async() => {
             await this.syncMemoryWithNotes()
         })();
@@ -102,6 +105,8 @@ export class DeckManager {
 
     // Update memory folder with new cards and card details
     async syncMemoryWithNotes() {
+
+        console.log('syncing', this.settings.inlineSeparator, this.settings.multilineSeparator)
 
         // Part 1: Extract cards from notes
         const files = this.vault.getFiles();
@@ -160,8 +165,10 @@ export class DeckManager {
     }
 
 
-    extractEntriesFromContent(content: string, filePath: string, multiLineSeparator="?", singleLineSeparator=">>"): Entry[] {
-        
+    extractEntriesFromContent(content: string, filePath: string): Entry[] {
+        const multiLineSeparator = this.settings.multilineSeparator;
+        const inlineSeparator = this.settings.inlineSeparator;
+      
         const lines = content.split('\n');
         const entries: Entry[] = [];
         let i = 0;
@@ -193,7 +200,7 @@ export class DeckManager {
                 const allLines = frontLines.concat(backLines);
 
                 const allText = allLines.join('\n') + '\n' + currText;
-                const pattern = /^(.*?)\s>>\s(.*?)(?:\n<!--LEARN:(.*?)-->)?$/gm;
+                const pattern = new RegExp(`^(.*?)\\s${inlineSeparator}\\s(.*?)(?:\\n<!--LEARN:(.*?)-->)?$`, 'gm');
 
                 let match;
                 while ((match = pattern.exec(allText)) !== null) {
