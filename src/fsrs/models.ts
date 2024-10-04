@@ -47,7 +47,7 @@ export interface DeckMetaData {
 }
 
 export enum EntryType {
-  MultiLine = 'MultiLine',
+  Multiline = 'Multiline',
   Inline = 'inline',
 }
 

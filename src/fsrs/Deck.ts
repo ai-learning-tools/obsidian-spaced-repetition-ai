@@ -188,7 +188,7 @@ export class DeckManager {
                     back: back,
                     id: id, // Fix: Use the extracted id
                     path: filePath,
-                    entryType: EntryType.MultiLine,
+                    entryType: EntryType.Multiline,
                     lineToAddId: id ? undefined : i,
                     isNew: id == undefined
                 });
