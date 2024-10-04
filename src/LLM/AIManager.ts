@@ -108,7 +108,6 @@ export default class AIManager {
       for await (const event of stream) {
         if (abortController.signal.aborted) break;
 
-        console.log(event);
         if (event.event === 'thread.message.delta') {
           const content = event.data.delta.content?.[0];
           if (content && 'text' in content) {
@@ -127,7 +126,12 @@ export default class AIManager {
               setAIString(result.cardsSummary);
             }
             if (result.cards) {
-              setAIEntries(result.cards);
+              const processedCards = result.cards.map(c => ({
+                ...c,
+                front: c.front ? c.front.replace(/\\n/g, '\n') : '',
+                back: c.back ? c.back.replace(/\\n/g, '\n') : '',
+              }));
+              setAIEntries(processedCards);
             }
           }
         } else if (event.event === 'thread.run.requires_action') {

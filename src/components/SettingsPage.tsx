@@ -15,17 +15,6 @@ export class SRSettingTab extends PluginSettingTab {
     containerEl.empty();
     
     new Setting(containerEl)
-      .setName('Default Model')
-      .addDropdown(dropdown => dropdown
-				.addOptions(MODEL_TO_DISPLAY_NAME)
-				.setValue(this.plugin.settings.defaultModel)
-				.onChange(async (value: ChatModels) => {
-					this.plugin.settings.defaultModel = value;
-					this.plugin.settings.defaultModelDisplayName = MODEL_TO_DISPLAY_NAME[value];
-					await this.plugin.saveSettings();
-				}));
-
-    new Setting(containerEl)
       .setName('OpenAI API Key')
 			.addText(text => text
 				.setPlaceholder('Enter your secret')
@@ -35,46 +24,40 @@ export class SRSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 		
-		new Setting(containerEl)
-			.setName('Convert folders to decks')
-			.addToggle((toggle) =>
-				toggle
-				.setValue(this.plugin.settings.convertFoldersToDecks)
-				.onChange(async (value) => {
-						this.plugin.settings.convertFoldersToDecks = value;
-						await this.plugin.saveSettings();
-				}),
-		);
 
     new Setting(containerEl)
-      .setName('Note folders to ignore')
-      .setDesc('Enter folder paths to ignore when reviewing notes, one per line')
-      .addTextArea(text => text
-        .setValue(this.plugin.settings.noteFoldersToIgnore.join('\n'))
-        .onChange(async (value) => {
-          this.plugin.settings.noteFoldersToIgnore = value.split('\n').map(v => v.trim()).filter(v => v);
+      .setName('Default Model')
+      .addDropdown(dropdown => dropdown
+        .addOptions(MODEL_TO_DISPLAY_NAME)
+        .setValue(this.plugin.settings.defaultModel)
+        .onChange(async (value: ChatModels) => {
+          this.plugin.settings.defaultModel = value;
+          this.plugin.settings.defaultModelDisplayName = MODEL_TO_DISPLAY_NAME[value];
           await this.plugin.saveSettings();
         }));
+
+    new Setting(containerEl)
+      .setName('Separator for inline flashcards')
+      .setDesc(`Your flashcards will use this separator when both the front and back are single lines. Note that you will need to edit your existing cards upon changing this separator.`)
+      .addText(text => text
+        .setValue(this.plugin.settings.inlineSeparator)
+        .onChange(async (value) => {
+          this.plugin.settings.inlineSeparator = value;
+          await this.plugin.saveSettings();
+        })
+      );
+
+    new Setting(containerEl)
+      .setName('Separator for multiline flashcards')
+      .setDesc(`Your flashcards will use this separator when either the front or back are multiline. Note that you will need to edit your existing cards upon changing this separator.`)
+      .addText(text => text
+        .setValue(this.plugin.settings.multilineSeparator)
+        .onChange(async (value) => {
+          this.plugin.settings.multilineSeparator = value;
+          await this.plugin.saveSettings();
+        })
+      );
         
-    new Setting(containerEl)
-      .setName('Flashcard tags')  
-      .setDesc('Enter tags that denote flashcards, one per line')
-      .addTextArea(text => text
-        .setValue(this.plugin.settings.flashcardTags.join('\n'))
-        .onChange(async (value) => {
-          this.plugin.settings.flashcardTags = value.split('\n').map(v => v.trim()).filter(v => v);
-          await this.plugin.saveSettings();
-        }));
-				
-    new Setting(containerEl)
-      .setName('Tags to review')
-      .setDesc('Enter tags that should be included in note review, one per line') 
-      .addTextArea(text => text
-        .setValue(this.plugin.settings.tagsToReview.join('\n'))
-        .onChange(async (value) => {
-          this.plugin.settings.tagsToReview = value.split('\n').map(v => v.trim()).filter(v => v);
-          await this.plugin.saveSettings();
-        }));
   }
 }
 

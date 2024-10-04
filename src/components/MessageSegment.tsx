@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { ChatModelDisplayNames, EntryItemGeneration } from '@/constants';
-import { App, TFile } from 'obsidian';
+import { Plugin, TFile } from 'obsidian';
 import MentionsInput from '@/components/mentions/MentionsInput';
 import { ChatMessage } from '@/chatMessage';
 import Mention from '@/components/mentions/Mention'; 
@@ -26,7 +26,7 @@ interface MessageSegmentProps {
   messageHistory: ChatMessage[],
   addNewMessage: () => void,
   index: number,
-  app: App,
+  plugin: Plugin,
   activeFile: TFile | null,
   activeFileCards: EntryItemGeneration[],
   files: TFile[],
@@ -39,7 +39,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   messageHistory,
   aiManager,
   addNewMessage,
-  app,
+  plugin,
   activeFile,
   activeFileCards,
   files,
@@ -122,7 +122,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     if (mentionedFiles.length > 0) {
       modifiedMessage += `\n\n----- REFERENCE FILES -----\n\n`
       for (const [index, file] of mentionedFiles.entries()) {
-        const fileContent = await getFileContent(file, app.vault);
+        const fileContent = await getFileContent(file, plugin.app.vault);
         modifiedMessage += `\n\n--REFERENCE #${index + 1}: [[${file.name}]]--\n\n${fileContent}`;
       }
     }
@@ -192,7 +192,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     };
     if (feedback === 'y') {
       if (activeFile) {
-        await writeCardtoFile(entry, activeFile, app.vault);
+        await writeCardtoFile(entry, activeFile, plugin);
       } else {
         errorMessage(`Oops, please open the file where you'd like to write this flashcard`);
       }
@@ -204,7 +204,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     event.preventDefault();
 
     if (aiEntries && activeFile) {
-      await Promise.all(aiEntries.map((entry) => writeCardtoFile(entry, activeFile, app.vault)));
+      await Promise.all(aiEntries.map((entry) => writeCardtoFile(entry, activeFile, plugin)));
       setAIEntries([]);
     } else {
       errorMessage(`Oops, please open the file where you'd like to write your ${aiEntries?.length && aiEntries.length > 1 ? 'cards' : 'card'}`)

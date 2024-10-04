@@ -82,10 +82,10 @@ export function createEmptyCard<R = Card>(
     last_review: undefined,
 
     id: entry.id,
-    hash: entry.hash,
     front: entry.front,
     back: entry.back,
-    path: entry.path
+    path: entry.path,
+    entryType: entry.EntryType
   }
   if (afterHandler && typeof afterHandler === 'function') {
     return afterHandler(emptyCard)

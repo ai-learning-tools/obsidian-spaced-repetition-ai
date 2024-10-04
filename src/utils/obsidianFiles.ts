@@ -1,7 +1,9 @@
-import { Editor, TFile, Vault, MarkdownView, App } from "obsidian";
+import { TFile, Vault, Plugin } from "obsidian";
 import { EntryItemGeneration } from "@/constants";
 import { errorMessage } from "./errorMessage";
 import { FRONT_CARD_REGEX, BACK_CARD_REGEX } from "@/constants";
+import { Entry } from "@/fsrs";
+import { EntryType } from "@/fsrs/models";
 
 export async function getSortedFiles(
   vault: Vault
@@ -20,23 +22,51 @@ export async function getFileContent(
 }
 
 // Currently appends to end of file
-export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, vault: Vault) {
+export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, plugin: Plugin) {
   if (entry.front && entry.back) {
-    const frontWithLineBreaks = entry.front.replace(/\n/g, '<br>');
-    const backWithLineBreaks = entry.back.replace(/\n/g, '\n> ');
-    
-    const card = `
-  > [!card]+ ${frontWithLineBreaks}
-  > ${backWithLineBreaks}
-  `;
-    
-    await vault.append(
+    const { front, back } = entry;
+    // Check if either front or back are multiline
+    const isMultiline = front.includes('\n') || back.includes('\n');
+
+    let card;
+    if (isMultiline) { 
+      const multilineSeparator = plugin.settings.multilineSeparator;
+      card = `\n\n${front}\n${multilineSeparator}\n${back}\n\n`
+    } else {
+      const inlineSeparator = plugin.settings.inlineSeparator;
+      card = `\n\n${front} ${inlineSeparator} ${back}\n\n`
+    }
+
+    await plugin.app.vault.append(
       file,
       card
     );
   }
+}
 
+export async function writeIdToCardInFile(vault: Vault, entry: Entry) {
+  try {
+    const file = vault.getAbstractFileByPath(entry.path) as TFile;
+    if (!file) {
+      console.error(`File not found at path: ${entry.path}`);
+      return;
+    }
 
+    console.log('to add', entry.id, entry.lineToAddId, entry.path)
+
+    const content = await vault.read(file);
+    const lines = content.split('\n');
+    if (entry.lineToAddId !== undefined) {
+      lines.splice(entry.lineToAddId, 0, `<!--LEARN:${entry.id}-->`);
+      const updatedContent = lines.join('\n');
+      await vault.modify(file, updatedContent);
+    } else {
+      console.error(`Error: lineToAddId is undefined for entry with id ${entry.id} in file at path ${entry.path}`);
+    }
+    
+  } catch (e) {
+    console.error(`Error writing ID to card in file at path ${entry.path}: ${e}`);
+  }
 }
 
 export async function getFileCards(file: TFile, vault: Vault): Promise<EntryItemGeneration[]> {
