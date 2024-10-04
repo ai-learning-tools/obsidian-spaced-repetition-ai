@@ -1,7 +1,6 @@
 import { Plugin, WorkspaceLeaf, Notice } from 'obsidian';
-import { ViewTypes, DEFAULT_SETTINGS } from '@/constants';
-import ChatView from '@/views/ChatView';
-import ReviewView from '@/views/ReviewView';
+import { ViewType, SubviewType, DEFAULT_SETTINGS } from '@/constants';
+import MainView from '@/views/MainView';
 import { SRSettingTab } from '@/components/SettingsPage';
 import { SRSettings } from '@/settings';
 import '@/tailwind.css';
@@ -9,21 +8,20 @@ import EncryptionService from '@/utils/encryptionService';
 import MemoryManager from './memory/memoryManager';
 import { DeckManager } from './fsrs/Deck';
 import AIManager from './llm/AIManager';
-import { ChatModels } from '@/constants';
 import { errorMessage } from './utils/errorMessage';
 
 export default class SRPlugin extends Plugin {
 	settings: SRSettings;
-	chatIsVisible = false;
-	activateViewPromise: Promise<void> | null = null;
 	memoryManager: MemoryManager;
 	deckManager: DeckManager;
 	aiManager: AIManager;
+	subviewType: SubviewType;
 
 	async onload(): Promise<void> {
 		
 		await this.loadSettings();
 
+		this.subviewType = SubviewType.CHAT;
 		this.memoryManager = new MemoryManager(this.app.vault)
 		this.deckManager = new DeckManager(this.memoryManager, this.app.vault)
 		
@@ -35,37 +33,28 @@ export default class SRPlugin extends Plugin {
 
 		this.addCommand({
 			id: "chat-toggle-window",
-			name: "Toggle Learning Chat Window",
+			name: "Chat with your notes",
 			callback: () => {
-				this.toggleView(ViewTypes.CHAT);
+				this.toggleView(ViewType.MAIN, SubviewType.CHAT);
 			},
 		});
 
 		this.addCommand({
 			id: "review-toggle-window",
-			name: "Toggle Learning Review Window",
+			name: "Review your flashcards",
 			callback: () => {
-				this.toggleView(ViewTypes.REVIEW);
+				this.toggleView(ViewType.MAIN, SubviewType.REVIEW);
 			}
 		});
 
 		this.registerView(
-			ViewTypes.CHAT,
-			(leaf: WorkspaceLeaf) => new ChatView(leaf, this),
-		);
-
-		this.registerView(
-			ViewTypes.REVIEW,
-			(leaf: WorkspaceLeaf) => new ReviewView(leaf, this)
+			ViewType.MAIN,
+			(leaf: WorkspaceLeaf) => new MainView(leaf, this),
 		);
 
 		// This creates an icon in the left ribbon.
-		this.addRibbonIcon('documents', 'Learn with flashcards', (evt: MouseEvent) => {
-			this.toggleView(ViewTypes.CHAT);
-		});
-
-		this.addRibbonIcon('dice', 'Review flashcards', (evt: MouseEvent) => {
-			this.toggleView(ViewTypes.REVIEW);
+		this.addRibbonIcon('documents', 'Review your flashcards and notes', (evt: MouseEvent) => {
+			this.toggleView(ViewType.MAIN, this.subviewType);
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
@@ -104,34 +93,36 @@ export default class SRPlugin extends Plugin {
 		}
 	}
 
-	toggleView(viewType: ViewTypes) {
+	toggleView(viewType: ViewType, subviewType: SubviewType) {
 		const leaves = this.app.workspace.getLeavesOfType(viewType);
-		leaves.length > 0 ? this.deactivateView(viewType) : this.activateView(viewType);
+		if (leaves.length > 0) {
+			this.deactivateView(viewType); 
+			if (this.subviewType !== subviewType) {
+				this.subviewType = subviewType;
+				this.activateView(viewType);
+			}
+		} else {
+			this.subviewType = subviewType;
+			this.activateView(viewType);
+		}
 	}
 
-	async activateView(viewType: ViewTypes) {
+	async activateView(viewType: ViewType) {
 		this.app.workspace.detachLeavesOfType(viewType);
-		this.activateViewPromise = this.app.workspace
+		await this.app.workspace
 		.getRightLeaf(false)!
 		.setViewState({
 			type: viewType,
 			active: true,
 		});
-		await this.activateViewPromise; // TODO @belinda or @athena: this doesn't look like it does anything lol. remove?
 		this.app.workspace.revealLeaf(
 			this.app.workspace.getLeavesOfType(viewType)[0],
 		);
 
-		if (viewType === ViewTypes.CHAT) {
-			this.chatIsVisible = true;
-		}
 	}
 	
-	async deactivateView(viewType: ViewTypes) {
+	async deactivateView(viewType: ViewType) {
 		this.app.workspace.detachLeavesOfType(viewType);
-		if (viewType === ViewTypes.CHAT) {
-			this.chatIsVisible = false;
-		}
 	}
 
 

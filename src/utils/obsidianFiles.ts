@@ -17,8 +17,12 @@ export async function getFileContent(
   file: TFile,
   vault: Vault,
 ): Promise<string | null> {
-  if (file.extension != "md") return null;
-  return await vault.cachedRead(file);
+  try {
+    return await vault.cachedRead(file); // faster performance
+  } catch (error) {
+    errorMessage(error);
+    return null;
+  }
 }
 
 // Currently appends to end of file

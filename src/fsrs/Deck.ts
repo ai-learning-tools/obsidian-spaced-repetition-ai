@@ -179,10 +179,8 @@ export class DeckManager {
         // }
 
         let match;
-        console.log("DEBUG-ATHENA", "start of content")
         while ((match = entryRegex.exec(content)) !== null) {
 
-            console.log("DEBUG-MATCH", match["input"])
             const [_, title, body, id] = match;
             const cleanTitle = title.trim();
             let cleanBody = body.trim().replace(/\n> /g, '\n').trim();

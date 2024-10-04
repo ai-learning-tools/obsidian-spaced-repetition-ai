@@ -63,10 +63,13 @@ export const entriesGenerationSchema = {
   required: ['cardsSummary', 'cards'],
 };
 
+export enum ViewType {
+  MAIN = 'sr-main-view',
+}
 
-export enum ViewTypes {
-  CHAT = "sr-chat-view",
-  REVIEW = "sr-review-view",
+export enum SubviewType {
+  CHAT = "sr-main-chat-view",
+  REVIEW = "sr-main-review-view",
 }
 
 export const DEFAULT_SYSTEM_PROMPT = "You are Obsidian Spaced Repetition Copilot, a helpful assistant that creates and edits spaced repetition flashcards from Obsidian notes."

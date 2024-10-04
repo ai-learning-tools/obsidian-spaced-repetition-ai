@@ -36,13 +36,6 @@ export default class ChatView extends ItemView {
     return 'Learn';
   }
 
-  async getChatVisibility(){
-    // if (this.plugin.activateViewPromise) {
-    //   await this.plugin.activateViewPromise;
-    // }
-    return this.plugin.chatIsVisible;
-  }
-
   async onOpen(): Promise<void> {
     const root = createRoot(this.containerEl.children[1]);
     root.render(

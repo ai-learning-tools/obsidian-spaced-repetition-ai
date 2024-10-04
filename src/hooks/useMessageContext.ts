@@ -5,7 +5,7 @@ import { EntryItemGeneration } from '@/constants';
 export function useMessageContext(files: TFile[], activeFileCards: EntryItemGeneration[], activeFile: TFile | null, includeCurrentFile: boolean) {
   const [mentionedFiles, setMentionedFiles] = useState<TFile[]>(() => {
     if (includeCurrentFile && activeFile) {
-      return [{ ...activeFile, name: `${activeFile.name} (Current File)` }];
+      return [activeFile];
     }
     return [];
   });
@@ -22,11 +22,11 @@ export function useMessageContext(files: TFile[], activeFileCards: EntryItemGene
   useEffect(() => {
     if (includeCurrentFile && activeFile) {
       setMentionedFiles(prevFiles => {
-        const filteredFiles = prevFiles.filter(file => !file.name.includes('(Current File)'));
-        return [...filteredFiles, { ...activeFile, name: `${activeFile.name} (Current File)` }];
+        const filteredFiles = prevFiles.filter(file => file.path !== activeFile.path);
+        return [...filteredFiles, activeFile];
       });
     } else {
-      setMentionedFiles(prevFiles => prevFiles.filter(file => !file.name.includes('(Current File)')));
+      setMentionedFiles(prevFiles => prevFiles.filter(file => file.path !== activeFile?.path));
     }
   }, [activeFile, includeCurrentFile]);
 

@@ -1,7 +1,6 @@
-import MessageSegment from '@/components/MessageSegment'
+import MessageSegment from '@/components/chat/MessageSegment'
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import AIManager from '@/llm/AIManager';
 import { useMessageHistory } from '../hooks/useMessageHistory';
 import SRPlugin from '@/main';
 // import { dummyUserMessage, dummyEntriesGeneration } from '@/utils/dummyData';
@@ -11,13 +10,11 @@ import { EntryItemGeneration } from '@/constants';
 
 interface ChatProps {
     plugin: SRPlugin;
-    aiManager: AIManager;
-  }
+}
 
 // Chat contains conversation history
 const Chat: React.FC<ChatProps> = ({
     plugin, 
-    aiManager,
 }) => {
     const { messageHistory, createUpdateFunctions, addNewMessage, clearAll } = useMessageHistory([{ 
         userMessage: null,
@@ -98,7 +95,7 @@ const Chat: React.FC<ChatProps> = ({
                     addNewMessage={addNewMessage}
                     clearAll={clearAll}
                     plugin={plugin}
-                    aiManager={aiManager}
+                    aiManager={plugin.aiManager}
                     activeFile={activeFile}
                     activeFileCards={activeFileCards}
                     files={files}
