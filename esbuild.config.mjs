@@ -24,12 +24,12 @@ const context = await esbuild.context({
 	bundle: true, // Bundle all dependencies into a single file
 	plugins: [
 		postcssPlugin({
-			plugins: [tailwindcss, autoprefixer], // PostCSS plugins
+			plugins: [tailwindcss, autoprefixer]
 		}),
 	],
 	external: [
 		"obsidian",
-		"electron",
+		"electron",	
 		"@codemirror/autocomplete",
 		"@codemirror/collab",
 		"@codemirror/commands",

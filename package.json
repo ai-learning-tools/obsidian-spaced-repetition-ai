@@ -41,6 +41,7 @@
 		"moment": "^2.30.1",
 		"openai": "^4.57.0",
 		"postcss": "^8.4.40",
+		"postcss-prefix-selector": "^2.0.0",
 		"prop-types": "^15.8.1",
 		"re": "^0.1.4",
 		"react": "^18.3.1",
