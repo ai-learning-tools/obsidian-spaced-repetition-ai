@@ -2,6 +2,7 @@ import { TFile, Vault, Plugin } from "obsidian";
 import { EntryItemGeneration } from "@/constants";
 import { errorMessage } from "./errorMessage";
 import { FRONT_CARD_REGEX, BACK_CARD_REGEX } from "@/constants";
+import { Entry } from "@/fsrs";
 import { DIRECTORY } from "@/constants";
 
 export async function getFilteredFiles(
@@ -45,6 +46,31 @@ export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, p
       file,
       card
     );
+  }
+}
+
+export async function writeIdToCardInFile(vault: Vault, entry: Entry) {
+  try {
+    const file = vault.getAbstractFileByPath(entry.path) as TFile;
+    if (!file) {
+      console.error(`File not found at path: ${entry.path}`);
+      return;
+    }
+
+    console.log('to add', entry.id, entry.lineToAddId, entry.path)
+
+    const content = await vault.read(file);
+    const lines = content.split('\n');
+    if (entry.lineToAddId !== undefined) {
+      lines.splice(entry.lineToAddId, 0, `<!--LEARN:${entry.id}-->`);
+      const updatedContent = lines.join('\n');
+      await vault.modify(file, updatedContent);
+    } else {
+      console.error(`Error: lineToAddId is undefined for entry with id ${entry.id} in file at path ${entry.path}`);
+    }
+    
+  } catch (e) {
+    console.error(`Error writing ID to card in file at path ${entry.path}: ${e}`);
   }
 }
 

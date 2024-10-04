@@ -23,7 +23,7 @@ export default class SRPlugin extends Plugin {
 
 		this.subviewType = SubviewType.CHAT;
 		this.memoryManager = new MemoryManager(this.app.vault)
-		this.deckManager = new DeckManager(this.memoryManager, this.app.vault)
+		this.deckManager = new DeckManager(this.memoryManager, this.app.vault, this.settings)
 		
 		const key = this.settings.openAIApiKey;
 		const decryptedKey = EncryptionService.getDecryptedKey(key);

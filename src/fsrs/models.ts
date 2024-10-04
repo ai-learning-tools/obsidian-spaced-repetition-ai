@@ -46,11 +46,19 @@ export interface DeckMetaData {
   name: string,
 }
 
+export enum EntryType {
+  Multiline = 'Multiline',
+  Inline = 'inline',
+}
+
 export interface Entry {
   front: string, 
   back: string, 
   id?: string,
   path: string, 
+  isNew?: boolean, // this is true if card is new and `id` was randomly assigned
+  lineToAddId?: number, // `line` of file in `path` to add the newly assigned ID, is undefined if card already has `id`
+  entryType: EntryType // enum to indicate if the entry is multi-line or single-line
 }
 
 // Card is entry + space repetition data

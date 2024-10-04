@@ -1,10 +1,12 @@
 import MemoryManager from "@/memory/memoryManager";
-import { Card, RecordLog, RecordLogItem, ReviewLog, State, Grade, Entry, DeckMetaData } from "./models";
+import { Card, RecordLog, RecordLogItem, ReviewLog, State, Grade, Entry, DeckMetaData, EntryType } from "./models";
 import { Vault } from "obsidian";
 import { DIRECTORY } from "@/constants";
 import { fixDate } from "./help";
 import { fsrs, FSRS} from "./fsrs";
 import { createEmptyCard } from "./default";
+import { writeIdToCardInFile } from "@/utils/obsidianFiles";
+import { SRSettings } from "@/settings";
 
 
 export class Deck {
@@ -67,7 +69,6 @@ export class Deck {
         }
         
     // We update the card instead of overwriting it since other decks may carry a reference to this card
-        console.log('ATHENA-DEBUG', 'new card', recordLog.card)
         const card = Object.assign(this.cards[index], recordLog.card);
 
         if (updateMemory) {
@@ -86,13 +87,16 @@ export class DeckManager {
     decks: Deck[]
     memoryManager: MemoryManager
     vault: Vault
+    settings: SRSettings
 
     constructor(
         memoryManager: MemoryManager,
-        vault: Vault
+        vault: Vault,
+        settings: SRSettings
     ) {
         this.memoryManager = memoryManager;
         this.vault = vault;
+        this.settings = settings;
         (async() => {
             await this.syncMemoryWithNotes()
         })();
@@ -101,7 +105,6 @@ export class DeckManager {
 
     // Update memory folder with new cards and card details
     async syncMemoryWithNotes() {
-
         // Part 1: Extract cards from notes
         const files = this.vault.getFiles();
         const newEntries: {[key: string]: Entry} = {}
@@ -110,24 +113,39 @@ export class DeckManager {
                 const content = await this.vault.read(file);
                 const extractedEntries = this.extractEntriesFromContent(content, file.path);
                 for (const newEntry of extractedEntries) {
-                    // TODO: Athena - create id and write new id into card
-                    newEntries[newEntry.id ?? "abc"] = newEntry;
-                    
+                    const id = newEntry.id ?? MemoryManager.generateRandomID();
+                    newEntry.id = id
+                    newEntries[id] = newEntry;
                 }
             }
         }
+        // Sort entries by their lineToAddId in descending order to prevent line shifting
+        const sortedEntries = Object.values(newEntries).sort((a, b) => (b.lineToAddId ?? 0) - (a.lineToAddId ?? 0));
 
         // Part 2: Update memory files with new content
-        for (const [id, entry] of Object.entries(newEntries)) {
+        for (const entry of sortedEntries) {
+            if (!entry.id) {
+                console.warn(`Entry with ID ${entry.id} is missing. Skipping this entry.`);
+                continue;
+            }
             // Check if card exists in memory file
-            if (this.memoryManager.getFile(id)) {
-                // TODO: Athena - check if hash remains the same, if no, update card
+            if (this.memoryManager.getFile(entry.id)) {
                 this.memoryManager.updateCardContent(entry)
             } else {
                 // card doesn't exists in memory, we will create one
                 const card = createEmptyCard(entry)
-                const memory = {card: card, reviewLogs: [], id: card.id ?? "abc"}
-                await this.memoryManager.writeMemory(memory)      
+                const memory = {card: card, reviewLogs: [], id: entry.id}
+                await this.memoryManager.writeMemory(memory) 
+
+                // if entry already has Id but doesnt have a memory file, log a warning
+                if (!entry.isNew) {
+                    console.warn(`memory file of ${entry.id} cannot be found, rewriting`)
+                } else {
+                    // write id into newly created card using lineToAddId, this only works when entries are visited 
+                    // in descending lineToAddId order
+                    await writeIdToCardInFile(this.vault, entry)
+                }
+                
             }
         }
 
@@ -145,59 +163,80 @@ export class DeckManager {
 
 
     extractEntriesFromContent(content: string, filePath: string): Entry[] {
-        // Implement the logic to extract entry details from the content
+        const multiLineSeparator = this.settings.multilineSeparator;
+        const inlineSeparator = this.settings.inlineSeparator;
+      
+        const lines = content.split('\n');
+        const entries: Entry[] = [];
+        let i = 0;
+        let frontLines: string[] = [];
+        let backLines: string[] = [];
+        let isSeparatorDetected = false;
+        const pattern = /<!--LEARN:(.*?)-->/
+        while (i < lines.length) {
+        const currText = lines[i].trim()
+        const idMatch = currText.match(pattern)
+        if (currText == "" || idMatch) {
+            // This line is irrelavant 
+            if (frontLines.length > 0 && backLines.length > 0) {
+                // This may indicate the end of a multi-line card
+                const front = frontLines.join('\n');
+                const back = backLines.join('\n');
+                const id = idMatch ? idMatch[1] : undefined; // Fix: Access the first capturing group directly
+                entries.push({
+                    front: front,
+                    back: back,
+                    id: id, // Fix: Use the extracted id
+                    path: filePath,
+                    entryType: EntryType.Multiline,
+                    lineToAddId: id ? undefined : i,
+                    isNew: id == undefined
+                });
+            } else {
+                // Even though this is not a multi-line card, there may be many single line card
+                const allLines = frontLines.concat(backLines);
 
-        const entryRegex = /\[!card\]\+(.*?)(?:<!--SR:(\w+)-->|\n\n|$)/gms;
-        // const entryRegex = /\[!card\](.*?)<!--SR:(\w+)-(\w+)-->/gms;
+                const allText = allLines.join('\n') + '\n' + currText;
+                const pattern = new RegExp(`^(.*?)\\s${inlineSeparator}\\s(.*?)(?:\\n<!--LEARN:(.*?)-->)?$`, 'gm');
 
-        // Create an array to store the extracted cards
-        const entries = [];
-    
-        // Use the regex to find matches in the text
-        // let match;
-        // while ((match = entryRegex.exec(content)) !== null) {
-        //     // Extract the card content (everything between [!card] and <!--SR)
-        //     console.log("DEBUG-MATCH-CARDS", match, match["input"])
-        //     const cardContent = match[1].trim();
-        //     const id = match[3] || undefined;
-    
-        //     // Split the card content into question and answer
-        //     const parts = cardContent.split('\n');
-        //     const question = parts[0].trim().replace(/<br>/g, '\n'); // First line is the question
-        //     const answer = parts.slice(1).join('\n').trim(); // Rest is the answer
+                let match;
+                while ((match = pattern.exec(allText)) !== null) {
+                    const [matchedText, front, back, id] = match;
+                    const index = allLines.indexOf(matchedText);
+                    const indexFromBack = allLines.length - index;
+                    entries.push({
+                        front: front,
+                        back: back,
+                        id: id, 
+                        path: filePath,
+                        lineToAddId: id ? undefined: i - indexFromBack + 1,
+                        entryType: EntryType.Inline,
+                        isNew: id == undefined
+                    })
+                }
+            }
+            //let's clear previous information
+            frontLines = []
+            backLines = []
+            isSeparatorDetected = false
+        }
 
-        //     const formattedAnswer = answer.replace(/(^|\n)(>\s?)+/g, '$1');
-        //     console.log("DEBUG-MATCH", question, answer)
-    
-        //     // Add the extracted card to the array
-        //     entries.push({
-        //         'front': question,
-        //         'back': formattedAnswer,
-        //         'id': id,
-        //         'path': filePath
-        //     });
-        // }
+        else if (currText == multiLineSeparator) {
+            isSeparatorDetected = true
+        }
 
-        let match;
-        while ((match = entryRegex.exec(content)) !== null) {
-
-            const [_, title, body, id] = match;
-            const cleanTitle = title.trim();
-            let cleanBody = body.trim().replace(/\n> /g, '\n').trim();
-    
-            // Remove the ID part from the body if present
-            cleanBody = cleanBody.replace(/<!--SR:.*?-->/g, '').trim();
-    
-            entries.push({
-                front: cleanTitle,
-                back: cleanBody,
-                id: id || undefined,
-                path: filePath
-            });
+        else if (!isSeparatorDetected) {
+            frontLines.push(currText);
         }
         
-    
-        return entries;
+        else {
+            backLines.push(currText)
+        }
+
+        i++
+        }
+
+        return entries
     }
 
     async populateDecks() {

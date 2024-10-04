@@ -187,7 +187,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           value={userMessage || ''} 
           inputRef={inputRef}
           onChange={handleMentionsChange}
-          className="w-full resize-none p-2 height-auto overflow-hidden"
+          className="w-full resize-none p-2 height-auto border border-neutral-200 rounded overflow-hidden"
           placeholder={index === 0 ? 'Remember anything, @ or [[ to include your notes' : 'Ask a follow-up question'}
           onKeyDown={handleSendMessage}
           suggestionsPortalHost={portalRef.current}

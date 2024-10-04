@@ -33,7 +33,7 @@ export default class MainView extends ItemView {
 
   renderContent(): React.ReactNode {
     return (
-      <>
+      <div className='learn-plugin'>
         <NavBar 
           currentSubview={this.plugin.subviewType}
           changeSubview={(subview: SubviewType) => {
@@ -51,7 +51,7 @@ export default class MainView extends ItemView {
             plugin={this.plugin}
           />
         )}
-      </>
+      </div>
     );
   }
 

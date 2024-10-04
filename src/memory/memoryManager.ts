@@ -26,10 +26,6 @@ class MemoryManager {
                 await this.vault.create(deckFilePath, JSON.stringify({ decks: [] }, null, 2));
             }
         })();
-
-        (async () => {
-            await this._resetMemory()
-        })();
     }
 
     async initializeFolders() {
@@ -117,7 +113,7 @@ class MemoryManager {
 
     // Used when syncing memory files with .md notes
     async updateCardContent(content: Entry): Promise<void> {
-        const file = this.getFile(content.id)
+        const file = this.getFile(content.id!)
         if (file) {
             const fileContent = await this.vault.read(file);
             try {
@@ -181,19 +177,17 @@ class MemoryManager {
         }
     }
 
-    async _resetMemory() {
-        for (let i = 1; i <= 6; i++) {
-            const entry = {
-                'id': i.toString(),
-                'hash': i.toString(), 
-                'front': "what's the meaning of life",
-                'back': "to love and be loved",
-                'path': "/"
-            }
-            const card = createEmptyCard(entry);
-            const memory = { card: card, reviewLogs: [], id: i.toString()};
-            await this.writeMemory(memory);
+    static generateRandomID(length= 8): string {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const charactersLength = characters.length;
+        let result = '';
+    
+        for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * charactersLength);
+            result += characters.charAt(randomIndex);
         }
+    
+        return result;
     }
 }
 
