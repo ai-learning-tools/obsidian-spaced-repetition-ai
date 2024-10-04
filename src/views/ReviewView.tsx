@@ -91,7 +91,7 @@ export default class ReviewView extends ItemView {
     if (this.deckManager.decks.length) {
       this.root?.render(   
         <React.StrictMode>
-          <div className='flex flex-col'>
+          <div className='flex flex-col learn-plugin'>
           <div className='flex flex-col bg-white border border-gray-300 w-full px-10 py-6 rounded-md'>
             <div className='grid grid-cols-6 gap-4 mb-4 font-semibold text-lg px-2'>
               <p className="col-span-2">Deck</p>

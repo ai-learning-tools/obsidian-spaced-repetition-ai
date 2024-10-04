@@ -79,7 +79,7 @@ const Chat: React.FC<ChatProps> = ({
     }, [vault, workspace, activeFile]);
 
     return (
-        <div className='w-full'>
+        <div className='w-full learn-plugin'>
             {messageHistory.map((segment, index) => {
                 const updateHistory = createUpdateFunctions(index);
                 return (
