@@ -82,7 +82,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
               <p className="text-center flex items-center justify-center font-bold">{due.length}</p>
               {!isLastDeck && (
                 <div className="flex items-center justify-end cursor-pointer h-4 w-4 ml-auto" onClick={(e) => { e.stopPropagation(); modifyDeck(deck); }}>
-                  <span ref={el => el && setIcon(el, 'pen')} className="text-gray-500"></span>
+                  <span ref={el => el && setIcon(el, 'pen')} className="text-neutral-400"></span>
                 </div>
               )}
               {isLastDeck && <div className="flex items-center justify-center" />}
