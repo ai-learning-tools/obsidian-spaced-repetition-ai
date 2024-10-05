@@ -3,9 +3,8 @@ module.exports = {
         tailwindcss: {},
         autoprefixer: {},
         'postcss-prefix-selector': {
-            prefix: '.learn-plugin', // Use your unique class or ID here
+            prefix: '.learn-plugin', // our unique id
             transform: (prefix, selector, prefixedSelector) => {
-                // Optionally customize how selectors are prefixed
                 return prefixedSelector;
             },
         },

@@ -21,7 +21,7 @@ export default class SRPlugin extends Plugin {
 		
 		await this.loadSettings();
 
-		this.subviewType = SubviewType.CHAT;
+		this.subviewType = SubviewType.REVIEW; // Update this to change default view
 		this.memoryManager = new MemoryManager(this.app.vault)
 		this.deckManager = new DeckManager(this.memoryManager, this.app.vault, this.settings)
 		

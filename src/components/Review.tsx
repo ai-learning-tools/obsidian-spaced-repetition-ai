@@ -5,6 +5,7 @@ import DeckDisplay from '@/components/review/DeckDisplay';
 import NewDeckModal from '@/components/review/NewDeckModal';
 import ModifyDeckModal from '@/components/review/ModifyDeckModal';
 import SRPlugin from '@/main';
+import { setIcon } from 'obsidian';
 
 interface ReviewProps {
   plugin: SRPlugin;
@@ -15,8 +16,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [decks, setDecks] = useState<Deck[]>([]);
 
-  const deckManager = plugin.deckManager;
-  const memoryManager = plugin.memoryManager;
+  const { deckManager, memoryManager } = plugin
 
   useEffect(() => {
     const initializeDecks = async () => {
@@ -56,7 +56,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
   const renderDeckSelection = () => (
     <div className='flex flex-col'>
       <div className='flex flex-col bg-white border border-gray-300 w-full px-10 py-6 rounded-md'>
-        <div className='grid grid-cols-6 gap-4 mb-4 font-semibold text-lg px-2'>
+        <div className='grid grid-cols-6 gap-4 mb-4 px-4 font-semibold text-lg'>
           <p className="col-span-2">Deck</p>
           <div className="text-center">New</div>
           <div className="text-center">Learn</div>
@@ -69,22 +69,35 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
           const isLastDeck = index === decks.length - 1;
 
           return (
-            <div key={deck.metaData.name} className='grid grid-cols-6 gap-4 bg-gray-100 rounded-lg p-2 mb-2'>
-              <p className="col-span-2 hover:underline" onClick={() => setSelectedDeck(deck)}>
+            <div 
+              key={deck.metaData.name} 
+              className='grid grid-cols-6 gap-4 bg-gray-100 rounded-lg py-2 px-6 mb-2 h-10 items-center cursor-pointer'
+              onClick={async() => { await refresh(); setSelectedDeck(deck);}}
+            >
+              <p className="col-span-2 hover:underline flex items-center">
                 {deck.metaData.name}
               </p>
-              <p className="text-center">{count[State.New]}</p>
-              <p className="text-center">{count[State.Learning] + count[State.Relearning]}</p>
-              <p className="text-center">{due.length}</p>
-              {!isLastDeck && <button onClick={() => modifyDeck(deck)}>Modify</button>}
-              {isLastDeck && <div />}
+              <p className="text-center flex items-center justify-center">{count[State.New]}</p>
+              <p className="text-center flex items-center justify-center">{count[State.Learning] + count[State.Relearning]}</p>
+              <p className="text-center flex items-center justify-center font-bold">{due.length}</p>
+              {!isLastDeck && (
+                <div className="flex items-center justify-end cursor-pointer h-4 w-4 ml-auto" onClick={(e) => { e.stopPropagation(); modifyDeck(deck); }}>
+                  <span ref={el => el && setIcon(el, 'pen')} className="text-gray-500"></span>
+                </div>
+              )}
+              {isLastDeck && <div className="flex items-center justify-center" />}
             </div>
           );
         })}
-        <div className="flex justify-end w-full pt-4 space-x-2">
+        <div className="flex justify-end w-full pt-4 space-x-2 items-center">
           {isSyncing && <div className="spinner ml-2">Syncing</div>}
-          <button className="p-2 flex items-center" onClick={refresh}>refresh</button>
-          <button className="p-2" onClick={addDeck}>Add deck</button>
+          <div className={`p-2 flex items-center cursor-pointer ${isSyncing ? 'animate-spin' : ''}`} onClick={() => refresh()}>
+            <span ref={el => el && setIcon(el, 'refresh-ccw')}></span>
+          </div>
+          <button className="p-2" onClick={() => addDeck()}>
+            <span ref={el => el && setIcon(el, 'list-plus')}></span>
+            <p> Add deck </p>
+          </button>
         </div>
       </div>
     </div>
@@ -94,7 +107,12 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
     <div>
       {selectedDeck ? (
         <div>
-          <button className="bg-indigo-400 m-2 p-2" onClick={() => setSelectedDeck(null)}>Back to Decks</button>
+          <div className="m-2 p-2 flex items-center" 
+            onClick={async() => {setSelectedDeck(null); await refresh();}}
+          >
+            <span ref={el => el && setIcon(el, 'arrow-left')}></span>
+            Decks
+          </div>
           <DeckDisplay className="flex w-full h-full flex-col justify-center" deck={selectedDeck} />
         </div>
       ) : (
