@@ -5,7 +5,7 @@ import DeckDisplay from '@/components/review/DeckDisplay';
 import NewDeckModal from '@/components/review/NewDeckModal';
 import ModifyDeckModal from '@/components/review/ModifyDeckModal';
 import SRPlugin from '@/main';
-import { setIcon } from 'obsidian';
+import { setIcon, Notice } from 'obsidian';
 import EntryView from './EntryView';
 
 interface ReviewProps {
@@ -73,7 +73,14 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
             <div 
               key={deck.metaData.name} 
               className='grid grid-cols-6 gap-4 bg-gray-100 rounded-lg py-2 px-6 mb-2 h-10 items-center cursor-pointer'
-              onClick={async() => { await refresh(); setSelectedDeck(deck);}}
+              onClick={async() => { 
+                await refresh(); 
+                if (deck.cards.length > 0) { 
+                  setSelectedDeck(deck);
+                } else {
+                  new Notice(`There are no cards detected in ${deck.metaData.name}. Add some cards to path ${deck.metaData.rootPath} or modify its settings`);
+                }
+              }}
             >
               <p className="col-span-2 hover:underline flex items-center">
                 {deck.metaData.name}
