@@ -149,16 +149,17 @@ export class DeckManager {
             }
         }
 
-        // Part 3: move untracked memory files to trash
-        const trackedIds = new Set(Object.keys(newEntries));
-        const memoryFiles = this.memoryManager.getAllMemoryFiles();
+        // Note: We no longer moved untracked files to trash. this allows users move cards between files without losing data.
+        // // Part 3: move untracked memory files to trash
+        // const trackedIds = new Set(Object.keys(newEntries));
+        // const memoryFiles = this.memoryManager.getAllMemoryFiles();
 
-        for (const file of memoryFiles) {
-            const id = file.basename;
-            if (!trackedIds.has(id)) {
-                await this.vault.trash(file, true);
-            }
-        }
+        // for (const file of memoryFiles) {
+        //     const id = file.basename;
+        //     if (!trackedIds.has(id)) {
+        //         await this.vault.trash(file, true);
+        //     }
+        // }
     }
 
 
