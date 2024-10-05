@@ -58,7 +58,7 @@ const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewPro
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!showBack && (event.key === 'Enter' || event.key === ' ')) {
+    if (!showBack && (event.key === 'Enter' || event.key == 'Space')) {
       setShowBack(true);
     } else if (showBack) {
       switch (event.key) {
@@ -81,7 +81,7 @@ const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewPro
   };
 
   return (
-    <div ref={cardReviewRef} className="h-64 w-full flex-col flex space-y-5 items-center" onKeyDown={handleKeyDown} tabIndex={0}>
+    <div ref={cardReviewRef} className="h-full w-full flex-col flex space-y-5 items-center" onKeyDown={handleKeyDown} tabIndex={0}>
       <EntryView front={card.front} back={card.back} showBack={showBack}></EntryView>
       {
         showBack &&

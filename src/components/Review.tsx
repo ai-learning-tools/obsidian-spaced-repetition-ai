@@ -6,6 +6,7 @@ import NewDeckModal from '@/components/review/NewDeckModal';
 import ModifyDeckModal from '@/components/review/ModifyDeckModal';
 import SRPlugin from '@/main';
 import { setIcon } from 'obsidian';
+import EntryView from './EntryView';
 
 interface ReviewProps {
   plugin: SRPlugin;
@@ -123,6 +124,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
         )
       )}
     </div>
+
   );
 };
 
