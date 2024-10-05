@@ -58,7 +58,7 @@ const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewPro
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!showBack && event.key === 'Enter') {
+    if (!showBack && (event.key === 'Enter' || event.key === ' ')) {
       setShowBack(true);
     } else if (showBack) {
       switch (event.key) {
