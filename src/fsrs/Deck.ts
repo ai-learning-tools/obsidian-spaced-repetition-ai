@@ -130,11 +130,11 @@ export class DeckManager {
             }
             // Check if card exists in memory file
             if (this.memoryManager.getFile(entry.id)) {
-                this.memoryManager.updateCardContent(entry)
+                this.memoryManager.updateMemoryContent(entry.id, entry, true)
             } else {
                 // card doesn't exists in memory, we will create one
                 const card = createEmptyCard(entry)
-                const memory = {card: card, reviewLogs: [], id: entry.id}
+                const memory = {card: card, reviewLogs: [], id: entry.id, isShown: true}
                 await this.memoryManager.writeMemory(memory) 
 
                 // if entry already has Id but doesnt have a memory file, log a warning
@@ -150,16 +150,16 @@ export class DeckManager {
         }
 
         // Note: We no longer moved untracked files to trash. this allows users move cards between files without losing data.
-        // // Part 3: move untracked memory files to trash
-        // const trackedIds = new Set(Object.keys(newEntries));
-        // const memoryFiles = this.memoryManager.getAllMemoryFiles();
+        // Part 3: update untracked memory files
+        const trackedIds = new Set(Object.keys(newEntries));
+        const memoryFiles = this.memoryManager.getAllMemoryFiles();
 
-        // for (const file of memoryFiles) {
-        //     const id = file.basename;
-        //     if (!trackedIds.has(id)) {
-        //         await this.vault.trash(file, true);
-        //     }
-        // }
+        for (const file of memoryFiles) {
+            const id = file.basename;
+            if (!trackedIds.has(id)) {
+                this.memoryManager.updateMemoryContent(id, undefined, false)
+            }
+        }
     }
 
 
@@ -249,7 +249,10 @@ export class DeckManager {
         const allCards: Card[] = [];
         for (const file of files) {
             const memory = await this.memoryManager.readMemoryFromPath(file.path);
-            allCards.push(memory.card);
+            if (memory.isShown) {
+                // Only populate cards that are physically present in the vault
+                allCards.push(memory.card);                
+            }
         }
 
         // Get Deck
