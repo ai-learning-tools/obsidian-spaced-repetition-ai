@@ -1,25 +1,22 @@
-import MessageSegment from '@/components/MessageSegment'
+import MessageSegment from '@/components/chat/MessageSegment'
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import AIManager from '@/llm/AIManager';
 import { useMessageHistory } from '../hooks/useMessageHistory';
 import SRPlugin from '@/main';
-import { dummyUserMessage, dummyEntriesGeneration } from '@/utils/dummyData';
-import { TFile, WorkspaceLeaf } from 'obsidian';
-import { getFileCards, getSortedFiles } from '@/utils/obsidianFiles';
+// import { dummyUserMessage, dummyEntriesGeneration } from '@/utils/dummyData';
+import { TFile } from 'obsidian';
+import { getFileCards, getFilteredFiles } from '@/utils/obsidianFiles';
 import { EntryItemGeneration } from '@/constants';
 
 interface ChatProps {
     plugin: SRPlugin;
-    aiManager: AIManager;
-  }
+}
 
 // Chat contains conversation history
 const Chat: React.FC<ChatProps> = ({
     plugin, 
-    aiManager,
 }) => {
-    const { messageHistory, createUpdateFunctions, addNewMessage } = useMessageHistory([{ 
+    const { messageHistory, createUpdateFunctions, addNewMessage, clearAll } = useMessageHistory([{ 
         userMessage: null,
         modifiedMessage: null,
         aiString: null,
@@ -51,14 +48,20 @@ const Chat: React.FC<ChatProps> = ({
         };
 
         const updateAll = () => {
+            getFilteredFiles(vault).then((files) => {
+                setFiles(files);
+            });
+            
             const newActiveFile = workspace.getActiveFile();
-            if (newActiveFile && (!activeFile || activeFile.path !== newActiveFile.path) && newActiveFile.extension === 'md') {
-                getSortedFiles(vault).then((files) => {
-                    setFiles(files);
-                });
-                setActiveFile(newActiveFile);
-                updateFileCards(newActiveFile)
-            }
+            setActiveFile(newActiveFile);
+
+            if (
+                (!newActiveFile && activeFileCards.length > 0) ||
+                newActiveFile?.extension !== 'md'
+            ) setActiveFileCards([]);
+            else if (newActiveFile && activeFile && activeFile.path !== newActiveFile?.path && newActiveFile.extension === 'md') {
+                updateFileCards(newActiveFile);
+            } 
         };
 
         updateAll();
@@ -67,7 +70,7 @@ const Chat: React.FC<ChatProps> = ({
             updateAll();
         };
 
-        workspace.on('active-leaf-change', onActiveLeafChange);
+        workspace.on('active-leaf-change', updateAll);
         
         workspace.on('editor-change', () => {
             if (activeFile) updateFileCards(activeFile);
@@ -79,7 +82,7 @@ const Chat: React.FC<ChatProps> = ({
     }, [vault, workspace, activeFile]);
 
     return (
-        <div className='w-full learn-plugin'>
+        <div className='w-full'>
             {messageHistory.map((segment, index) => {
                 const updateHistory = createUpdateFunctions(index);
                 return (
@@ -90,8 +93,9 @@ const Chat: React.FC<ChatProps> = ({
                     messageHistory={messageHistory}
                     updateHistory={updateHistory}
                     addNewMessage={addNewMessage}
+                    clearAll={clearAll}
                     plugin={plugin}
-                    aiManager={aiManager}
+                    aiManager={plugin.aiManager}
                     activeFile={activeFile}
                     activeFileCards={activeFileCards}
                     files={files}

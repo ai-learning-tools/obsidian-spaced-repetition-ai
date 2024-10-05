@@ -1,18 +1,20 @@
 import * as React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { ChatModelDisplayNames, EntryItemGeneration } from '@/constants';
-import { Plugin, TFile } from 'obsidian';
+import { TFile } from 'obsidian';
+import SRPlugin from '@/main';
 import MentionsInput from '@/components/mentions/MentionsInput';
 import { ChatMessage } from '@/chatMessage';
 import Mention from '@/components/mentions/Mention'; 
 import AIManager from '@/llm/AIManager';
 import { useAIState } from '@/hooks/useAIState';
 import { getFileContent, writeCardtoFile } from '@/utils/obsidianFiles';
-import { EnterIcon } from '@/components/Icons';
+import { EnterIcon, RefreshIcon } from '@/components/Icons';
 import ChatTag from '@/components/chat/ChatTag';
 import { errorMessage } from '@/utils/errorMessage';
 import Markdown from 'react-markdown';
 import { EntryView } from '@/components/EntryView';
+import { useMessageContext } from '@/hooks/useMessageContext';
 
 interface MessageSegmentProps {
   segment: ChatMessage
@@ -21,12 +23,13 @@ interface MessageSegmentProps {
     updateUserMessage: (userMessage: string) => void;
     updateModifiedMessage: (modifiedMessage: string) => void;
     updateAIResponse: (aiString: string | null, aiEntries: EntryItemGeneration[] | null) => void;
-    clearMessageHistory: (clearAll?: boolean) => void;
+    clearMessageHistory: () => void;
   };
   messageHistory: ChatMessage[],
   addNewMessage: () => void,
+  clearAll: () => void,
   index: number,
-  plugin: Plugin,
+  plugin: SRPlugin,
   activeFile: TFile | null,
   activeFileCards: EntryItemGeneration[],
   files: TFile[],
@@ -39,6 +42,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   messageHistory,
   aiManager,
   addNewMessage,
+  clearAll,
   plugin,
   activeFile,
   activeFileCards,
@@ -51,16 +55,13 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   // We create useState in this component for variables that change often, this is used to update overall convo history periodically 
   const [aiString, setAIString] = useState<string | null>(segment.aiString);
   const [aiEntries, setAIEntries] = useState<EntryItemGeneration[] | null>(segment.aiEntries);
-  const [focusedIndex, setFocusedIndex] = useState<number>(0);
   const [userMessage, setUserMessage] = useState<string | null>(segment.userMessage);
 
-  const [remainingActiveCards, setRemainingActiveCards] = useState<EntryItemGeneration[]>(activeFileCards); // TODO @belindamo: update this once there is a Card class. Card ids in this component also need to be updated to card.id rather than card.front for robustness
+  const { mentionedFiles, mentionedCards, remainingActiveCards, handleFileAdd, handleCardAdd, removeFile, removeCard } = useMessageContext(files, activeFileCards, activeFile, plugin.settings.includeCurrentFile);
 
   // Mentions 
   const inputRef = useRef<HTMLDivElement | null>(null);
   const portalRef = useRef<HTMLDivElement | null>(null);
-  const [mentionedFiles, setMentionedFiles] = useState<TFile[]>([]);
-  const [mentionedCards, setMentionedCards] = useState<EntryItemGeneration[]>([]); // TODO @belindamo: change this to card
 
   // Update overall conversation history, this is only done periodically to prevent rapid reloading
   const { 
@@ -69,31 +70,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     updateAIResponse, 
     clearMessageHistory 
   } = updateHistory;
-  
-  useEffect(() => {
-    const newActiveCards = activeFileCards.filter((c) => {
-      mentionedCards.forEach((e) => {
-        if (e.front === c.front) return false;
-      });
-      return true;
-    });
-    setRemainingActiveCards(newActiveCards);
-  }, [activeFileCards]);
 
-  const handleFileAdd = (id: string) => {
-    const mentionedFile = files.find(file => file.path === id);
-    if (mentionedFile && !mentionedFiles.includes(mentionedFile)) {
-      setMentionedFiles([...mentionedFiles, mentionedFile]);
-    }
-  };
-
-  const handleCardAdd = (id: string) => {
-    if (!activeFileCards) return;
-    const mentionedCard = activeFileCards.find(card => card.front === id);
-    if (mentionedCard && !mentionedCards?.includes(mentionedCard)) {
-      setMentionedCards([...mentionedCards, mentionedCard]);
-    }
-  };
 
   const handleMentionsChange = (e: any, newValue: string) => {
     const fileRegex = /\[\[(.*?)\]\((.*?)\)/g;
@@ -103,6 +80,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   };
 
   const handleSendMessage = async (event: React.KeyboardEvent<HTMLTextAreaElement> | React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+
     if ('key' in event) { // Handle textarea
       if (!(event.key === 'Enter' && !event.shiftKey)) return;
       event.preventDefault(); // Prevents adding a newline to the textarea
@@ -110,9 +88,9 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     if (!userMessage) return;
     
     clearMessageHistory(); // Clear message history from current index
+    handleStopGenerating();
 
     updateUserMessage(userMessage);
-
 
     let modifiedMessage = `----- USER MESSAGE -----\n\n${userMessage}`;
     const entriesToEdit = messageHistory[index-1]?.aiEntries;
@@ -139,7 +117,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     // If currentMessage is not the last message, ie. user is overwriting a message that has already been sent, then we clean conversation history after this message
     setAIString(null);
     setAIEntries(null);
-    setFocusedIndex(0);
 
     if (index < messageHistory.length - 1) {
       await aiManager.setNewThread(messageHistory.slice(0, index));
@@ -156,7 +133,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     );
 
     setAbortController(null);
-    setFocusedIndex(0);
 
     updateAIResponse(aiString, aiEntries);
     addNewMessage();
@@ -180,14 +156,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
         const updatedEntries = aiEntries.filter((_, i) => i !== index);
         setAIEntries([...updatedEntries]);
         updateAIResponse(aiString, updatedEntries);
-        // Adjust focus index
-        if (!aiEntries[focusedIndex]) {
-          if (aiEntries[focusedIndex - 1]) {
-            setFocusedIndex(focusedIndex - 1);
-          } else {
-            setFocusedIndex(0);
-          }
-        }
       }
     };
     if (feedback === 'y') {
@@ -219,7 +187,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           value={userMessage || ''} 
           inputRef={inputRef}
           onChange={handleMentionsChange}
-          className="w-full resize-none p-2 height-auto overflow-hidden"
+          className="w-full resize-none p-2 height-auto border border-neutral-200 rounded overflow-hidden"
           placeholder={index === 0 ? 'Remember anything, @ or [[ to include your notes' : 'Ask a follow-up question'}
           onKeyDown={handleSendMessage}
           suggestionsPortalHost={portalRef.current}
@@ -237,11 +205,11 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           />
         </MentionsInput>
       </div>
-      <div className="flex flex-row items-center justify-start my-2 space-x-4 text-neutral-400">
+      <div className="flex flex-row flex-wrap items-center justify-start my-2 space-x-4 text-neutral-400 [&>*]:cursor-pointer [&>*]:mb-2">
         <select
           value={currentModel}
           onChange={handleModelChange}
-          className="text-center cursor-pointer"
+          className="text-center"
           style={{ width: '150px' }}
         >
           {Object.entries(ChatModelDisplayNames).map(([key, displayName]) => (
@@ -251,15 +219,12 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           ))}
         </select>
         <div 
-          className='cursor-pointer' 
           onClick={async () => {
-            clearMessageHistory(true);
+            clearAll();
             if (index === 0) {
               setUserMessage(null);
               setAIEntries(null);
-              setFocusedIndex(0);
               setAIString(null);
-              setMentionedFiles([]);
               setAbortController(null);
             }
             await aiManager.setNewThread();
@@ -272,7 +237,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
             setUserMessage((userMessage || '') + ' @')
             inputRef.current?.focus();
           }} 
-          className="cursor-pointer"
         >
           <p>@ for Card</p>
         </div>
@@ -281,19 +245,26 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
             setUserMessage((userMessage || '') + ' [[')
             inputRef.current?.focus();
           }} 
-          className="cursor-pointer"
         >
           <p>{`[[`} for File</p>
         </div>
         <div 
           onClick={async (e) => {await handleSendMessage(e)}}
-          className='flex flex-row items-center space-x-2 cursor-pointer'
+          className='flex flex-row items-center space-x-2'
         > 
           <EnterIcon /> 
           <p>Enter</p> 
         </div>
+        {aiString && !abortController && (userMessage === messageHistory[index].userMessage) && (
+          <div  
+            onClick={async (e) => {await handleSendMessage(e)}}
+            className='flex flex-row items-center space-x-2'
+          >
+            <RefreshIcon />
+          </div>
+        )}
         {abortController && (
-          <button className='cursor-pointer p-4' onClick={handleStopGenerating}>Cancel generation</button>
+          <button className='p-4' onClick={handleStopGenerating}>Cancel generation</button>
         )}
       </div>
 
@@ -306,53 +277,44 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
       {
         (mentionedFiles.length > 0 || mentionedCards.length > 0) && 
         <div className='m-4'>
-          <p className='pb-2'>References:</p>
+          <p className='pb-2'>Using context:</p>
           <div className="flex-wrap">
             {mentionedFiles.map((file, index) => (
               <ChatTag 
                 key={file.path} 
-                name={`${file.path}`} 
-                handleRemove={() => {
-                  const newFiles = mentionedFiles.filter((_, i) => i !== index);
-                  setMentionedFiles([...newFiles]);
-                }} 
+                name={file.name} 
+                handleRemove={() => removeFile(index)} 
               />
             ))}
             {mentionedCards.map((card, index) => (
               <ChatTag 
                 key={`${card.front}-${index}`} 
                 name={`${card.front}`} 
-                handleRemove={() => {
-                  const newCards = mentionedCards.filter((_, i) => i !== index);
-                  setMentionedCards([...newCards]);
-                }} 
+                handleRemove={() => removeCard(index)} 
               />
             ))}
           </div>
         </div>
       }
 
-      {(index === 0 && !aiString && activeFile) && (
+      {(index === 0 && !aiString && (remainingActiveCards.length > 0 || (activeFile && !plugin.settings.includeCurrentFile  && !mentionedFiles.some(file => file.path === activeFile.path)))) && (
       <div className='m-4'>
         <div className='mb-2'> 
-          Add references from the current file:
+          Contexts from current file:
         </div>
         <div>
-          <ChatTag
-            name={activeFile.path}
-            handleClick={() => handleFileAdd(activeFile.path)}
-          />
+          {!plugin.settings.includeCurrentFile && activeFile && !mentionedFiles.some(file => file.path === activeFile.path) && (
+            <ChatTag 
+              key={`active-${activeFile.name}`}
+              name={`+ ${activeFile.name}`}
+              handleClick={() => { handleFileAdd(activeFile.path) }} 
+            />
+          )}
           {remainingActiveCards.map((c, i) => (
             <ChatTag 
               key={`active-${c.front}-${i}`}
-              name={c.front}
-              handleClick={() => {
-                if (!mentionedCards.includes(c)) {
-                  setMentionedCards([c, ...mentionedCards]);
-                }
-                const remaining = remainingActiveCards.filter((_, i) => i !== index);
-                setRemainingActiveCards(remaining);
-              }} 
+              name={`+ ${c.front}`}
+              handleClick={() => { handleCardAdd(c.front) }} 
             />
           ))}
         </div>
@@ -370,10 +332,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
             handleFeedback={async (feedback: 'y' | 'n') => {
               await handleCardFeedback(feedback, entry, i);
             }}
-            handleFocus={() => {
-              setFocusedIndex(i);
-            }}
-            focused={i === focusedIndex}
             front={entry.front || ""} 
             back={entry.back || ""} 
             key={`entry-${i}-length-${aiEntries.length}`}

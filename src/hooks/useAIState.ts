@@ -1,5 +1,5 @@
 import AIManager from "@/llm/AIManager";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChatModelDisplayNames, DISPLAY_NAME_TO_MODEL, MODEL_TO_DISPLAY_NAME } from "@/constants";
 
 // React hook to manage state related to model and memory in Chat component.
@@ -10,6 +10,10 @@ export function useAIState(
   (model: ChatModelDisplayNames) => void,
 ] {
   const [currentModel, setCurrentModel] = useState<ChatModelDisplayNames>(MODEL_TO_DISPLAY_NAME[aiManager.chatModel]);
+
+  useEffect(() => {
+    setCurrentModel(MODEL_TO_DISPLAY_NAME[aiManager.chatModel]);
+  }, [ aiManager.chatModel ]);
 
   const setModel = (newModelDisplayName: ChatModelDisplayNames) => {
     aiManager.setModel(DISPLAY_NAME_TO_MODEL[newModelDisplayName]);

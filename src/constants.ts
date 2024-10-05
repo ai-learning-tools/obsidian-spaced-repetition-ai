@@ -54,35 +54,22 @@ export const entriesGenerationSchema = {
             type: "string",
             description: entryItem.shape.back.description,
           },
-          references: {
-            type: "array",
-            description: entryItem.shape.references.description,
-            items: {
-              type: "string",
-              properties: {
-                referenceName: {
-                  type: "string",
-                }
-              },
-              required: ["referenceName"],
-              // additionalProperties: false
-            }
-          },
         },
         required: ["front", "back"],
-        // additionalProperties: false
       },
       description: entriesGeneration.shape.cards.description,
     },
   },
   required: ['cardsSummary', 'cards'],
-  // additionalProperties: false
 };
 
+export enum ViewType {
+  MAIN = 'sr-main-view',
+}
 
-export enum ViewTypes {
-  CHAT = "sr-chat-view",
-  REVIEW = "sr-review-view",
+export enum SubviewType {
+  CHAT = "sr-main-chat-view",
+  REVIEW = "sr-main-review-view",
 }
 
 export const DEFAULT_SYSTEM_PROMPT = "You are Obsidian Spaced Repetition Copilot, a helpful assistant that creates and edits spaced repetition flashcards from Obsidian notes."
@@ -135,6 +122,7 @@ export const DEFAULT_SETTINGS: SRSettings = {
   openAIApiKey: "",
   inlineSeparator: "::",
   multilineSeparator: "?",
+  includeCurrentFile: true,
 };
 
 // From here https://github.com/open-spaced-repetition/fsrs4anki/blob/main/fsrs4anki_scheduler.js#L108

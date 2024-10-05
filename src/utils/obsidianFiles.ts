@@ -3,22 +3,27 @@ import { EntryItemGeneration } from "@/constants";
 import { errorMessage } from "./errorMessage";
 import { FRONT_CARD_REGEX, BACK_CARD_REGEX } from "@/constants";
 import { Entry } from "@/fsrs";
-import { EntryType } from "@/fsrs/models";
+import { DIRECTORY } from "@/constants";
 
-export async function getSortedFiles(
+export async function getFilteredFiles(
   vault: Vault
 ): Promise<TFile[]> {
   const files = vault.getFiles();
-  files.sort((a, b) => b.stat.mtime - a.stat.mtime);
-  return files;
+  const filteredFiles = files.filter(file => !file.path.startsWith(DIRECTORY));
+  filteredFiles.sort((a, b) => b.stat.mtime - a.stat.mtime);
+  return filteredFiles;
 }
 
 export async function getFileContent(
   file: TFile,
   vault: Vault,
 ): Promise<string | null> {
-  if (file.extension != "md") return null;
-  return await vault.cachedRead(file);
+  try {
+    return await vault.cachedRead(file); // faster performance
+  } catch (error) {
+    errorMessage(error);
+    return null;
+  }
 }
 
 // Currently appends to end of file

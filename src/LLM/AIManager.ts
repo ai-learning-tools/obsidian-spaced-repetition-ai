@@ -1,8 +1,8 @@
- import { ChatModels, entriesGenerationSchema,EntryItemGeneration } from "@/constants";
+import { ChatModels, entriesGenerationSchema,EntryItemGeneration } from "@/constants";
 import { ChatMessage } from "@/chatMessage";
 import { errorMessage } from "@/utils/errorMessage";
 import { IncompleteJsonParser } from "@/utils/incomplete-json-parser";
-
+import { APIUserAbortError } from "openai/error";
 import OpenAI from "openai";
 
 export default class AIManager {
@@ -15,11 +15,16 @@ export default class AIManager {
 
   constructor(chatModel: ChatModels, apiKey: string) {
     this.chatModel = chatModel;  
-    this.client = new OpenAI({
-      apiKey,
-      dangerouslyAllowBrowser: true
-    });
     this.parser = new IncompleteJsonParser();
+    this.checkApiKey(apiKey)
+    .then((valid) => {
+      if (valid) {
+        this.client = new OpenAI({
+          apiKey,
+          dangerouslyAllowBrowser: true
+        });
+      }
+    })
   }
 
   // Gets singleton instance
@@ -28,6 +33,30 @@ export default class AIManager {
       AIManager.instance = new AIManager(chatModel, apiKey);
     }
     return AIManager.instance;
+  }
+
+  async checkApiKey(apiKey: string) {
+    const tempClient = new OpenAI({
+      apiKey,
+      dangerouslyAllowBrowser: true
+    });
+    const response = await tempClient.chat.completions.create({
+      messages: [{ role: 'user', content: 'this is a test' }],
+      model: this.chatModel,
+    })
+    return !!response.choices[0].message.content;
+  }
+
+  async setApiKey(apiKey: string) {
+    const valid = await this.checkApiKey(apiKey);
+    if (valid) {
+      this.client = new OpenAI({
+        apiKey,
+        dangerouslyAllowBrowser: true
+      });
+      return true;
+    }
+    return false;
   }
 
   // Sets the chat model
@@ -143,7 +172,9 @@ export default class AIManager {
         } 
       }
     } catch(e) {
-      errorMessage(`Error while streaming AI response: ${e}`);
+      if (!(e instanceof APIUserAbortError)) {
+        errorMessage(`Streaming AI response ${e}`);
+      }
     }
 
   }
