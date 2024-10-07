@@ -4,7 +4,8 @@ import { DIRECTORY } from "@/constants";
 
 interface Memory {
     id: string
-    card: Card,
+    isShown: boolean // this is true if card with corresponding id is present in the obsidian vault. we only show cards present in the deck, but keeps memory files of all cards.
+    card: Card
     reviewLogs: ReviewLog[]
 }
 
@@ -112,18 +113,26 @@ class MemoryManager {
     }
 
     // Used when syncing memory files with .md notes
-    async updateCardContent(content: Entry): Promise<void> {
-        const file = this.getFile(content.id!)
-        if (file) {
-            const fileContent = await this.vault.read(file);
-            try {
-                const memory: Memory = JSON.parse(fileContent) as Memory;
-                memory.card.front = content.front
-                memory.card.back = content.back
-                memory.card.path = content.path
-                await this.writeMemory(memory);
-            } catch (error) {
-                throw new Error(`Cannot update card: Invalid memory content in file: ${DIRECTORY}/memory/${content.id}.json`);
+    async updateMemoryContent(id: string, content: Entry | undefined, isShown: boolean | undefined): Promise<void> {
+        if (content || isShown !== undefined) {
+            const file = this.getFile(id);
+            if (file) {
+                const fileContent = await this.vault.read(file);
+                try {
+                    const memory: Memory = JSON.parse(fileContent) as Memory;
+                    if (content) {
+                        memory.card.front = content.front;
+                        memory.card.back = content.back;
+                        memory.card.path = content.path;
+                    }
+                    if (isShown !== undefined) {
+                        memory.isShown = isShown;
+                    }
+                    
+                    await this.writeMemory(memory);
+                } catch (error) {
+                    throw new Error(`Cannot update card: Invalid memory content in file: ${DIRECTORY}/memory/${content?.id}.json`);
+                }
             }
         }
     }
