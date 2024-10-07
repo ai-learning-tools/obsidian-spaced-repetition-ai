@@ -134,7 +134,7 @@ export class DeckManager {
             } else {
                 // card doesn't exists in memory, we will create one
                 const card = createEmptyCard(entry)
-                const memory = {card: card, reviewLogs: [], id: entry.id, isShown: true}
+                const memory = MemoryManager.createNewMemory(card, true)
                 await this.memoryManager.writeMemory(memory) 
 
                 // if entry already has Id but doesnt have a memory file, log a warning
@@ -243,7 +243,7 @@ export class DeckManager {
     async populateDecks() {
         // Get all files
         const directory = `${DIRECTORY}/memory`
-        const files = this.vault.getFiles().filter(file => file.path.startsWith(directory) && file.extension === 'json');
+        const files = this.vault.getFiles().filter(file => file.path.startsWith(directory) && file.extension === 'md');
         
         // Get all cards
         const allCards: Card[] = [];
