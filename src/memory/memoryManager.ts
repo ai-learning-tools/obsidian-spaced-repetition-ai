@@ -1,5 +1,5 @@
 import { Card, ReviewLog, createEmptyCard, DeckMetaData, Entry } from "@/fsrs";
-import { Vault, TFolder, TFile } from "obsidian";
+import { Vault, TFolder, TFile, Notice } from "obsidian";
 import { DIRECTORY } from "@/constants";
 
 interface Memory {
@@ -52,7 +52,11 @@ class MemoryManager {
         
         if (file) {
             const fileContent = await this.vault.read(file);
-            return JSON.parse(fileContent) as Memory;
+            try {
+                return JSON.parse(fileContent) as Memory;
+            } catch (error) {
+                throw new Error(`Cannot parse memory file: ${filePath}. Error: ${error.message}`);
+            }
         } else {
             throw new Error(`Memory file not found: ${filePath}`);
         }
@@ -131,8 +135,8 @@ class MemoryManager {
         if (content || isShown !== undefined) {
             const file = this.getFile(id);
             if (file) {
-                const fileContent = await this.vault.read(file);
                 try {
+                    const fileContent = await this.vault.read(file);
                     const memory: Memory = JSON.parse(fileContent) as Memory;
                     if (content) {
                         memory.card.front = content.front;
@@ -145,7 +149,7 @@ class MemoryManager {
                     
                     await this.writeMemory(memory);
                 } catch (error) {
-                    throw new Error(`Cannot update card: Invalid memory content in file: ${DIRECTORY}/memory/${content?.id}.json`);
+                    new Notice(`Cannot update card ${id}: ${error.message}`, 5000);
                 }
             }
         }
