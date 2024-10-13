@@ -1,6 +1,5 @@
 import Markdown from 'react-markdown';
 
-
 interface EntryViewProps {
     front: string,
     back: string, 
@@ -16,11 +15,10 @@ export const EntryView: React.FC<EntryViewProps> = ({
 }: EntryViewProps) => {
     return (
         <div 
-            className="bg-white bg-opacity-50 w-full max-w-lg p-6 h-auto min-h-48 flex flex-col justify-evenly border border-gray-300 rounded-md"
+            className="bg-white bg-opacity-50 w-full max-w-lg p-6 h-auto flex flex-col border border-gray-300 rounded-md space-y-4"
         >
           {handleFeedback && 
-            <div 
-            className={`float-right`}>
+            <div className='w-full flex justify-end'>
               <button
                 className="mr-2 px-2 py-1 rounded !bg-red-300 text-neutral-600"
                 onClick={ async (e) => {await handleFeedback('n')}}
