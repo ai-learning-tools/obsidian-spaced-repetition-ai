@@ -57,35 +57,44 @@ const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewPro
     await onReview(rating);
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!showBack && (event.key === 'Enter' || event.key == 'Space')) {
-      setShowBack(true);
-    } else if (showBack) {
-      switch (event.key) {
-        case '1':
-          handleReview(1);
-          break;
-        case '2':
-          handleReview(2);
-          break;
-        case '3':
-          handleReview(3);
-          break;
-        case '4':
-          handleReview(4);
-          break;
-        default:
-          break;
-      }
-    }
-  };
+  
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (!showBack && (event.key === 'Enter' || event.key === ' ')) {
+				setShowBack(true);
+			} else if (showBack) {
+				switch (event.key) {
+					case '1':
+						handleReview(1);
+						break;
+					case '2':
+						handleReview(2);
+						break;
+					case '3':
+						handleReview(3);
+						break;
+					case '4':
+						handleReview(4);
+						break;
+					default:
+						break;
+				}
+			}
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [showBack]);
 
   return (
-    <div ref={cardReviewRef} className="h-full w-full flex-col flex space-y-5 items-center" onKeyDown={handleKeyDown} tabIndex={0}>
+    <div ref={cardReviewRef} className="h-full w-full flex-col flex space-y-5 items-center" tabIndex={0}>
       <EntryView front={card.front} back={card.back} showBack={showBack}></EntryView>
       {
         showBack &&
-        <div>
+        <div className="flex space-x-4">
           <button className='p-2' onClick={() => handleReview(1)}>Again</button>
           <button className='p-2' onClick={() => handleReview(2)}>Hard</button>
           <button className='p-2' onClick={() => handleReview(3)}>Good</button>
