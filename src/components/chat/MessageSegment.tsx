@@ -45,7 +45,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   clearAll,
   plugin,
   activeFile,
-  activeFileCards,
   files,
 }) => {
   // LLM
@@ -57,7 +56,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   const [aiEntries, setAIEntries] = useState<EntryItemGeneration[] | null>(segment.aiEntries);
   const [userMessage, setUserMessage] = useState<string | null>(segment.userMessage);
 
-  const { mentionedFiles, mentionedCards, remainingActiveCards, handleFileAdd, handleCardAdd, removeFile, removeCard } = useMessageContext(files, activeFileCards, activeFile, plugin.settings.includeCurrentFile);
+  const { mentionedFiles, handleFileAdd, removeFile } = useMessageContext(files, activeFile, plugin.settings.includeCurrentFile); // See commit 7ef47c918bc8f9e8252373cd1286e288c5ce0a91 and 1 commit ahead of it to add cards back in
 
   // Mentions 
   const inputRef = useRef<HTMLDivElement | null>(null);
@@ -74,8 +73,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
   const handleMentionsChange = (e: any, newValue: string) => {
     const fileRegex = /\[\[(.*?)\]\((.*?)\)/g;
-    const cardRegex = /@\[([\s\S]*?)\]\(([\s\S]*?)\)/g;
-    const newUserMessage = newValue.replace(cardRegex, '').replace(fileRegex, '');
+    const newUserMessage = newValue.replace(fileRegex, '');
     setUserMessage(newUserMessage);
   };
 
@@ -105,13 +103,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
       }
     }
 
-    if (mentionedCards.length > 0) {
-      modifiedMessage += `\n\n--- REFERENCE CARDS ---\n\nUse these as context. They are existing flashcards in the user's deck.`
-      for (const card of mentionedCards) {
-        modifiedMessage += `\n\nfront:${card.front}\nback:${card.back}\n\n`
-      }
-    }
-
     updateModifiedMessage(modifiedMessage);
 
     // If currentMessage is not the last message, ie. user is overwriting a message that has already been sent, then we clean conversation history after this message
@@ -129,7 +120,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
       modifiedMessage,
       controller,
       setAIString,
-      setAIEntries,
+      setAIEntries
     );
 
     setAbortController(null);
@@ -157,7 +148,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
         setAIEntries([...updatedEntries]);
         updateAIResponse(aiString, updatedEntries);
       }
-    };
+    }
     if (feedback === 'y') {
       if (activeFile) {
         await writeCardtoFile(entry, activeFile, plugin);
@@ -188,7 +179,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           inputRef={inputRef}
           onChange={handleMentionsChange}
           className="w-full resize-none p-2 height-auto border border-neutral-200 rounded overflow-hidden"
-          placeholder={index === 0 ? 'Remember anything, @ or [[ to include your notes' : 'Ask a follow-up question'}
+          placeholder={index === 0 ? 'Remember anything, [[ to include your notes' : 'Ask a follow-up question'}
           onKeyDown={handleSendMessage}
           suggestionsPortalHost={portalRef.current}
         >
@@ -196,12 +187,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
             trigger="[["
             data={files.map((file) => ({ id: file.path, display: file.path }))}
             onAdd={(id: string) => handleFileAdd(id)}
-          />
-          <Mention
-            trigger="@"
-            // TODO @belindamo: update this once there is a global cards array
-            data={activeFileCards ? activeFileCards.map((card) => ({ id: card.front, display: card.front })) : []}            
-            onAdd={(id: string) => handleCardAdd(id)}
           />
         </MentionsInput>
       </div>
@@ -232,14 +217,16 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
         >
           + New
         </div>
-        <div 
-          onClick={() => {
-            setUserMessage((userMessage || '') + ' @')
-            inputRef.current?.focus();
-          }} 
-        >
-          <p>@ for Card</p>
-        </div>
+        {/* <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="generateCards"
+            checked={generateCards || false}
+            onChange={() => setGenerateCards(!generateCards)}
+            className="mr-2"
+          />
+          <label htmlFor="generateCards">Generate cards</label>
+        </div> */}
         <div 
           onClick={() => {
             setUserMessage((userMessage || '') + ' [[')
@@ -275,7 +262,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
       ></div>
 
       {
-        (mentionedFiles.length > 0 || mentionedCards.length > 0) && 
+        mentionedFiles.length > 0 && 
         <div className='m-4'>
           <p className='pb-2'>Using context:</p>
           <div className="flex-wrap">
@@ -286,18 +273,11 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
                 handleRemove={() => removeFile(index)} 
               />
             ))}
-            {mentionedCards.map((card, index) => (
-              <ChatTag 
-                key={`${card.front}-${index}`} 
-                name={`${card.front}`} 
-                handleRemove={() => removeCard(index)} 
-              />
-            ))}
           </div>
         </div>
       }
 
-      {(index === 0 && !aiString && (remainingActiveCards.length > 0 || (activeFile && !plugin.settings.includeCurrentFile  && !mentionedFiles.some(file => file.path === activeFile.path)))) && (
+      {(index === 0 && !aiString && (activeFile && !plugin.settings.includeCurrentFile  && !mentionedFiles.some(file => file.path === activeFile.path))) && (
       <div className='m-4'>
         <div className='mb-2'> 
           Contexts from current file:
@@ -310,13 +290,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
               handleClick={() => { handleFileAdd(activeFile.path) }} 
             />
           )}
-          {remainingActiveCards.map((c, i) => (
-            <ChatTag 
-              key={`active-${c.front}-${i}`}
-              name={`+ ${c.front}`}
-              handleClick={() => { handleCardAdd(c.front) }} 
-            />
-          ))}
         </div>
       </div>
       )}

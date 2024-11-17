@@ -1,23 +1,13 @@
 import { useState, useEffect } from 'react';
 import { TFile } from 'obsidian';
-import { EntryItemGeneration } from '@/constants';
 
-export function useMessageContext(files: TFile[], activeFileCards: EntryItemGeneration[], activeFile: TFile | null, includeCurrentFile: boolean) {
+export function useMessageContext(files: TFile[], activeFile: TFile | null, includeCurrentFile: boolean) {
   const [mentionedFiles, setMentionedFiles] = useState<TFile[]>(() => {
     if (includeCurrentFile && activeFile) {
       return [activeFile];
     }
     return [];
   });
-  const [mentionedCards, setMentionedCards] = useState<EntryItemGeneration[]>([]);
-  const [remainingActiveCards, setRemainingActiveCards] = useState<EntryItemGeneration[]>(activeFileCards);
-
-  useEffect(() => {
-    const newRemainingCards = activeFileCards.filter(card => 
-      !mentionedCards.some(mentionedCard => mentionedCard.front === card.front)
-    );
-    setRemainingActiveCards(newRemainingCards);
-  }, [activeFileCards, mentionedCards]);
 
   useEffect(() => {
     if (includeCurrentFile && activeFile) {
@@ -37,34 +27,13 @@ export function useMessageContext(files: TFile[], activeFileCards: EntryItemGene
     }
   };
 
-  const handleCardAdd = (id: string) => {
-    if (!activeFileCards) return;
-    const mentionedCard = activeFileCards.find(card => card.front === id);
-    if (mentionedCard && !mentionedCards.includes(mentionedCard)) {
-      setMentionedCards(prevCards => [...prevCards, mentionedCard]);
-      setRemainingActiveCards(prevCards => prevCards.filter(card => card.front !== id));
-    }
-  };
-
   const removeFile = (index: number) => {
     setMentionedFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
   };
 
-  const removeCard = (index: number) => {
-    const removedCard = mentionedCards[index];
-    setMentionedCards(prevCards => prevCards.filter((_, i) => i !== index));
-    if (removedCard) {
-      setRemainingActiveCards(prevCards => [...prevCards, removedCard]);
-    }
-  };
-
   return {
     mentionedFiles,
-    mentionedCards,
-    remainingActiveCards,
     handleFileAdd,
-    handleCardAdd,
     removeFile,
-    removeCard,
   };
 }
