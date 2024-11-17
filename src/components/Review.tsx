@@ -12,21 +12,30 @@ interface ReviewProps {
   plugin: SRPlugin;
 }
 
-const Review: React.FC<ReviewProps> = ({ plugin }) => {
+
+
+const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
+  const PLACEHOLDER_DECK: Deck = new Deck([], { "name": "All Cards", "rootPath": " "}, plugin.memoryManager);
   const [selectedDeck, setSelectedDeck] = useState<Deck | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [decks, setDecks] = useState<Deck[]>([]);
+  const [decks, setDecks] = useState<Deck[]>([PLACEHOLDER_DECK]);
 
-  const { deckManager, memoryManager } = plugin
+  const { deckManager, memoryManager } = plugin;
 
+  
   useEffect(() => {
     const initializeDecks = async () => {
+      setIsSyncing(true);
       await deckManager.syncMemoryWithNotes();
       await deckManager.populateDecks();
       setDecks(deckManager.decks);
+      setIsSyncing(false);
     };
 
-    initializeDecks();
+    
+    if (!isSyncing) {
+      initializeDecks();
+    }
   }, [deckManager]);
 
   const refresh = async () => {
@@ -124,11 +133,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
           <DeckDisplay className="flex w-full h-full flex-col justify-center" deck={selectedDeck} />
         </div>
       ) : (
-        decks.length ? renderDeckSelection() : (
-          <div className="flex justify-center items-center h-full my-2">
-            <div>Add some cards man ♠️</div>
-          </div>
-        )
+        renderDeckSelection()
       )}
     </div>
 
