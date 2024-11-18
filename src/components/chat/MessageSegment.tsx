@@ -72,7 +72,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
 
   const handleMentionsChange = (e: any, newValue: string) => {
-    const fileRegex = /\[\[(.*?)\]\((.*?)\)/g;
+    const fileRegex = /@\[(.*?)\]\((.*?)\)/g;
     const newUserMessage = newValue.replace(fileRegex, '');
     setUserMessage(newUserMessage);
   };
