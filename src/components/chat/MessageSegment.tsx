@@ -280,7 +280,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
       {(index === 0 && !aiString && (activeFile && !plugin.settings.includeCurrentFile  && !mentionedFiles.some(file => file.path === activeFile.path))) && (
       <div className='m-4'>
         <div className='mb-2'> 
-          Contexts from current file:
+          Add current file:
         </div>
         <div>
           {!plugin.settings.includeCurrentFile && activeFile && !mentionedFiles.some(file => file.path === activeFile.path) && (

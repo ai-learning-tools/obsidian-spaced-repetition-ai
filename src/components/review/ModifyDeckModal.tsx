@@ -27,7 +27,7 @@ export default class ModifyDeckModal extends Modal {
 
         new Setting(contentEl)
           .setName("Root path")
-          .setDesc("Include all cards from files that begin with the specified root path\nexample: main/")
+          .setDesc("Include all cards from files that begin with the specified root path\nexample: main")
           .addText((text) => {
             text.setValue(this.metaData.rootPath);
             text.onChange((value) => {

@@ -29,7 +29,7 @@ export default class NewDeckModal extends Modal {
 
       new Setting(contentEl)
         .setName("Root path")
-        .setDesc("Include all cards from files that begin with the specified root path\nexample: main/")
+        .setDesc("Include all cards from files that begin with the specified root path\nexample: main")
         .addText((text) =>
           text.onChange((value) => {
             this.metaData.rootPath = value
