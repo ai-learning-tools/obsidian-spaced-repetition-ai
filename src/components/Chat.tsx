@@ -1,52 +1,28 @@
 import MessageSegment from '@/components/chat/MessageSegment'
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { useMessageHistory } from '../hooks/useMessageHistory';
+import { MessageHistoryHook } from '../hooks/useMessageHistory';
 import SRPlugin from '@/main';
-// import { dummyUserMessage, dummyEntriesGeneration } from '@/utils/dummyData';
 import { TFile } from 'obsidian';
-import { getFileCards, getFilteredFiles } from '@/utils/obsidianFiles';
-import { EntryItemGeneration } from '@/constants';
+import { getFilteredFiles } from '@/utils/obsidianFiles';
 
 interface ChatProps {
     plugin: SRPlugin;
+    messageHistoryHook: MessageHistoryHook;
 }
 
-// Chat contains conversation history
 const Chat: React.FC<ChatProps> = ({
-    plugin, 
+    plugin,
+    messageHistoryHook,
 }) => {
-    const { messageHistory, createUpdateFunctions, addNewMessage, clearAll } = useMessageHistory([{ 
-        userMessage: null,
-        modifiedMessage: null,
-        aiString: null,
-        aiEntries: null
-        // FOR TESTING
-        // Make sure to change this before committing
-        // userMessage: dummyUserMessage,
-        // modifiedMessage: dummyUserMessage,
-        // aiString: dummyEntriesGeneration.cardsSummary,
-        // aiEntries: dummyEntriesGeneration.cards
-    }])
+    const { messageHistory, createUpdateFunctions, addNewMessage, clearAll } = messageHistoryHook;
 
     const { workspace, vault } = plugin.app;
 
     const [activeFile, setActiveFile] = useState<TFile|null>(null);
-    const [activeFileCards, setActiveFileCards] = useState<EntryItemGeneration[]>([]); // TODO @belinda - change the type later once we have the card class
     const [files, setFiles] = useState<TFile[]>([]);
     
     useEffect(() => {
-        const updateFileCards = (newActiveFile: TFile) => {
-            getFileCards(newActiveFile, vault)
-            .then((cards) => {
-                setActiveFileCards(cards);
-            })
-            .catch((error) => {
-                console.error("Error fetching file cards:", error);
-                setActiveFileCards([]);
-            });
-        };
-
         const updateAll = () => {
             getFilteredFiles(vault).then((files) => {
                 setFiles(files);
@@ -55,13 +31,6 @@ const Chat: React.FC<ChatProps> = ({
             const newActiveFile = workspace.getActiveFile();
             setActiveFile(newActiveFile);
 
-            if (
-                (!newActiveFile && activeFileCards.length > 0) ||
-                newActiveFile?.extension !== 'md'
-            ) setActiveFileCards([]);
-            else if (newActiveFile && activeFile && activeFile.path !== newActiveFile?.path && newActiveFile.extension === 'md') {
-                updateFileCards(newActiveFile);
-            } 
         };
 
         updateAll();
@@ -71,10 +40,6 @@ const Chat: React.FC<ChatProps> = ({
         };
 
         workspace.on('active-leaf-change', updateAll);
-        
-        workspace.on('editor-change', () => {
-            if (activeFile) updateFileCards(activeFile);
-        });
 
         return () => {
             workspace.off('active-leaf-change', onActiveLeafChange);
@@ -95,9 +60,7 @@ const Chat: React.FC<ChatProps> = ({
                     addNewMessage={addNewMessage}
                     clearAll={clearAll}
                     plugin={plugin}
-                    aiManager={plugin.aiManager}
                     activeFile={activeFile}
-                    activeFileCards={activeFileCards}
                     files={files}
                 />
                 );

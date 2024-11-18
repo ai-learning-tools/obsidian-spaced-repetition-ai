@@ -14,11 +14,10 @@ import ChatTag from '@/components/chat/ChatTag';
 import { errorMessage } from '@/utils/errorMessage';
 import Markdown from 'react-markdown';
 import { EntryView } from '@/components/EntryView';
-import { useMessageContext } from '@/hooks/useMessageContext';
+import { useFiles } from '@/hooks/useFiles';
 
 interface MessageSegmentProps {
   segment: ChatMessage
-  aiManager: AIManager;
   updateHistory: {
     updateUserMessage: (userMessage: string) => void;
     updateModifiedMessage: (modifiedMessage: string) => void;
@@ -31,7 +30,6 @@ interface MessageSegmentProps {
   index: number,
   plugin: SRPlugin,
   activeFile: TFile | null,
-  activeFileCards: EntryItemGeneration[],
   files: TFile[],
 }
 
@@ -40,14 +38,15 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   segment,
   updateHistory,
   messageHistory,
-  aiManager,
   addNewMessage,
   clearAll,
   plugin,
   activeFile,
   files,
 }) => {
+
   // LLM
+  const { aiManager } = plugin;
   const [ currentModel, setModel ] = useAIState(aiManager);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
 
@@ -56,7 +55,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   const [aiEntries, setAIEntries] = useState<EntryItemGeneration[] | null>(segment.aiEntries);
   const [userMessage, setUserMessage] = useState<string | null>(segment.userMessage);
 
-  const { mentionedFiles, handleFileAdd, removeFile } = useMessageContext(files, activeFile, plugin.settings.includeCurrentFile); // See commit 7ef47c918bc8f9e8252373cd1286e288c5ce0a91 and 1 commit ahead of it to add cards back in
+  const { mentionedFiles, handleFileAdd, removeFile } = useFiles(files, activeFile, plugin.settings.includeCurrentFile); // See commit 7ef47c918bc8f9e8252373cd1286e288c5ce0a91 and 1 commit ahead of it to add cards back in
 
   // Mentions 
   const inputRef = useRef<HTMLDivElement | null>(null);
@@ -105,10 +104,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
     updateModifiedMessage(modifiedMessage);
 
-    // If currentMessage is not the last message, ie. user is overwriting a message that has already been sent, then we clean conversation history after this message
-    setAIString(null);
-    setAIEntries(null);
-
     if (index < messageHistory.length - 1) {
       await aiManager.setNewThread(messageHistory.slice(0, index));
     } 
@@ -116,7 +111,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     const controller = new AbortController();
     setAbortController(controller);
     
-    await aiManager.streamAIResponse(
+    const { str, entries } = await aiManager.streamAIResponse(
       modifiedMessage,
       controller,
       setAIString,
@@ -125,7 +120,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
     setAbortController(null);
 
-    updateAIResponse(aiString, aiEntries);
+    updateAIResponse(str, entries);
     addNewMessage();
   }
 

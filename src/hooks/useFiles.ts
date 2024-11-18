@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { TFile } from 'obsidian';
 
-export function useMessageContext(files: TFile[], activeFile: TFile | null, includeCurrentFile: boolean) {
+export function useFiles(files: TFile[], activeFile: TFile | null, includeCurrentFile: boolean) {
   const [mentionedFiles, setMentionedFiles] = useState<TFile[]>(() => {
     if (includeCurrentFile && activeFile) {
       return [activeFile];

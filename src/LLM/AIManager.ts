@@ -98,10 +98,11 @@ export default class AIManager {
     abortController: AbortController,
     setAIString: (response: string) => void,
     setAIEntries: (response: EntryItemGeneration[]) => void
-  ): Promise<void> {
-    if (newMessageModded.length > MAX_CHARACTERS) {
+    ): Promise<{ str: string; entries: EntryItemGeneration[] }> {
+    
+      if (newMessageModded.length > MAX_CHARACTERS) {
       setAIString(`Oops! Your message context is too long. Please keep it under about ${MAX_CHARACTERS/5} words.`);
-      return;
+      return { str: '', entries: [] };
     }
     
     try { 
@@ -139,9 +140,10 @@ export default class AIManager {
         { assistant_id: this.assistant.id },
         { signal: abortController.signal }
       );
-
       let aiString = '';
       let aiEntriesString = '';
+      let entries: EntryItemGeneration[] = [];
+
       for await (const event of stream) {
         if (abortController.signal.aborted) break;
 
@@ -152,37 +154,36 @@ export default class AIManager {
             setAIString(aiString);
           }
         } else if (event.event === 'thread.run.step.delta') {
-          const delta = event.data.delta.step_details.tool_calls[0].function.arguments;
-            // console.log(delta)
+          const delta = event.data.delta.step_details?.tool_calls?.[0]?.function?.arguments;
           if (delta) {
-            aiEntriesString += delta
+            aiEntriesString += delta;
             const result = this.parser.parse(aiEntriesString);
-            // this.parser.write(delta);
-            // const result = this.parser.getObjects();
             if (result.cardsSummary) {
               setAIString(result.cardsSummary);
             }
             if (result.cards) {
-              const processedCards = result.cards.map(c => ({
+              entries = result.cards.map((c: any) => ({
                 ...c,
                 front: c.front ? c.front.replace(/\\n/g, '\n') : '',
                 back: c.back ? c.back.replace(/\\n/g, '\n') : '',
               }));
-              setAIEntries(processedCards);
+              setAIEntries(entries);
             }
           }
         } else if (event.event === 'thread.run.requires_action') {
-          const run = await this.client.beta.threads.runs.cancel(
+          await this.client.beta.threads.runs.cancel(
             this.thread.id,
             event.data.id
           );
-
-        } 
+        }
       }
+
+      return { str: aiString, entries };
     } catch(e) {
       if (!(e instanceof APIUserAbortError)) {
         errorMessage(`Streaming AI response ${e}`);
       }
+      return { str: '', entries: [] };
     }
 
   }
