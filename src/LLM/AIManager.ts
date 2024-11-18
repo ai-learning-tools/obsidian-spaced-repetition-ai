@@ -1,4 +1,8 @@
-import { ChatModels, entriesGenerationSchema,EntryItemGeneration } from "@/constants";
+import { 
+  ChatModels, 
+  entriesGenerationSchema,EntryItemGeneration,
+  MAX_CHARACTERS,
+} from "@/constants";
 import { ChatMessage } from "@/chatMessage";
 import { errorMessage } from "@/utils/errorMessage";
 import { IncompleteJsonParser } from "@/utils/incomplete-json-parser";
@@ -95,6 +99,10 @@ export default class AIManager {
     setAIString: (response: string) => void,
     setAIEntries: (response: EntryItemGeneration[]) => void
   ): Promise<void> {
+    if (newMessageModded.length > MAX_CHARACTERS) {
+      setAIString(`Oops! Your message context is too long. Please keep it under about ${MAX_CHARACTERS/5} words.`);
+      return;
+    }
     
     try { 
       if (!this.assistant) {
