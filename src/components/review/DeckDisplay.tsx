@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Deck } from '@/fsrs/Deck';
 import { State, Card, Rating, Grade, RecordLogItem } from '@/fsrs';
-import EntryView from '@/components/EntryView';
+import CardView from '@/components/CardView';
 import SRPlugin from '@/main';
 
 interface DeckDisplayProps {
@@ -94,7 +94,7 @@ const CardReview: React.FC<CardReviewProps> = ({ plugin, card, onReview }: CardR
 
   return (
     <div ref={cardReviewRef} className="h-full w-full flex-col flex space-y-5 items-center" tabIndex={0}>
-      <EntryView plugin={plugin} front={card.front} back={card.back} showBack={showBack} path={card.path}></EntryView>
+      <CardView plugin={plugin} front={card.front} back={card.back} showBack={showBack} path={card.path}></CardView>
       {
         showBack &&
         <div className="flex space-x-4">

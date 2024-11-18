@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { ChatModelDisplayNames, EntryItemGeneration } from '@/constants';
 import { TFile } from 'obsidian';
 import SRPlugin from '@/main';

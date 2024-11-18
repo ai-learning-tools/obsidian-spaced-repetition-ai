@@ -109,7 +109,7 @@ export default class AIManager {
       if (!this.assistant) {
         this.assistant = await this.client.beta.assistants.create({
           name: "Flashcard Generator",
-          instructions: "You are the world's best teacher. Respond naturally to help your student learn.",
+          instructions: "You are the world's best teacher. Respond naturally to help your student learn. Generate flashcards.",
           tools: [{ 
             type: "function",
             function: {
