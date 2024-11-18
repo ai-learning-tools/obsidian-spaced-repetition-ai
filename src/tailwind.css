@@ -6,3 +6,9 @@
 body {
   user-select: text;
 }
+
+/* EntryView component */
+code {
+  white-space : pre-wrap !important;
+  word-break: break-word;
+}
