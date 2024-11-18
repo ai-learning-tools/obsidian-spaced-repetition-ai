@@ -4,6 +4,7 @@ import { errorMessage } from "./errorMessage";
 import { FRONT_CARD_REGEX, BACK_CARD_REGEX } from "@/constants";
 import { Entry } from "@/fsrs";
 import { DIRECTORY } from "@/constants";
+import SRPlugin from "@/main";
 
 export async function getFilteredFiles(
   vault: Vault
@@ -27,7 +28,7 @@ export async function getFileContent(
 }
 
 // Currently appends to end of file
-export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, plugin: Plugin) {
+export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, plugin: SRPlugin) {
   if (entry.front && entry.back) {
     const { front, back } = entry;
     // Check if either front or back are multiline

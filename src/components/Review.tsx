@@ -6,13 +6,10 @@ import NewDeckModal from '@/components/review/NewDeckModal';
 import ModifyDeckModal from '@/components/review/ModifyDeckModal';
 import SRPlugin from '@/main';
 import { setIcon, Notice } from 'obsidian';
-import EntryView from './EntryView';
 
 interface ReviewProps {
   plugin: SRPlugin;
 }
-
-
 
 const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
   const PLACEHOLDER_DECK: Deck = new Deck([], { "name": "All Cards", "rootPath": " "}, plugin.memoryManager);
@@ -22,7 +19,6 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
 
   const { deckManager, memoryManager } = plugin;
 
-  
   useEffect(() => {
     const initializeDecks = async () => {
       setIsSyncing(true);
@@ -32,7 +28,6 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
       setIsSyncing(false);
     };
 
-    
     if (!isSyncing) {
       initializeDecks();
     }
@@ -130,7 +125,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
             <span ref={el => el && setIcon(el, 'arrow-left')}></span>
             Decks
           </div>
-          <DeckDisplay className="flex w-full h-full flex-col justify-center" deck={selectedDeck} />
+          <DeckDisplay className="flex w-full h-full flex-col justify-center" deck={selectedDeck} plugin={plugin} />
         </div>
       ) : (
         renderDeckSelection()
