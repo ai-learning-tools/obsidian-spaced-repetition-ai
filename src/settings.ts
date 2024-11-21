@@ -1,4 +1,4 @@
-import { ChatModels, ChatModelDisplayNames } from "@/constants";
+import { ChatModels, ChatModelDisplayNames, OnboardingStatus } from "@/constants";
 
 export interface SRSettings {
   defaultModel: ChatModels;
@@ -7,4 +7,5 @@ export interface SRSettings {
 	inlineSeparator: string;
 	multilineSeparator: string;
   includeCurrentFile: boolean;
+  onboardingStatus: OnboardingStatus;
 }

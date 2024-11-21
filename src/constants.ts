@@ -1,10 +1,16 @@
 import { SRSettings } from "@/settings";
 
-export const DIRECTORY = "SR" //TODO: Athena - move away to settings
+export const DIRECTORY = "SR" // TODO: Athena - move away to settings
 
 export const PREFERRED_DATE_FORMAT = "YYYY-MM-DD";
 export const ALLOWED_DATE_FORMATS = [PREFERRED_DATE_FORMAT, "DD-MM-YYYY", "ddd MMM DD YYYY"];
 import { z } from 'zod';
+
+export enum OnboardingStatus {
+  Import = 'onboarding-import',
+  Migrate = 'onboarding-migrate',
+  Done = 'onboarding-done'
+}
 
 // Regex to capture multiline flashcards in the format:
 // > [!card]+ frontLine1<br>frontLine2<br>frontLine3...
@@ -119,12 +125,13 @@ export const MODEL_TO_DISPLAY_NAME: Record<ChatModels, ChatModelDisplayNames> = 
 ) as Record<ChatModels, ChatModelDisplayNames>;
 
 export const DEFAULT_SETTINGS: SRSettings = {
-  defaultModel: ChatModels.GPT_4,
-  defaultModelDisplayName: ChatModelDisplayNames.GPT_4,
+  defaultModel: ChatModels.GPT_4o_MINI,
+  defaultModelDisplayName: ChatModelDisplayNames.GPT_4o_MINI,
   openAIApiKey: "",
   inlineSeparator: "::",
   multilineSeparator: "?",
   includeCurrentFile: true,
+  onboardingStatus: OnboardingStatus.Import,
 };
 
 // From here https://github.com/open-spaced-repetition/fsrs4anki/blob/main/fsrs4anki_scheduler.js#L108

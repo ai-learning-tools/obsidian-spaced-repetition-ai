@@ -6,6 +6,10 @@ import NewDeckModal from '@/components/review/NewDeckModal';
 import ModifyDeckModal from '@/components/review/ModifyDeckModal';
 import SRPlugin from '@/main';
 import { setIcon, Notice } from 'obsidian';
+import { ImportView, MigrateView } from '@/components/onboarding/OnboardingViews';
+import { OnboardingStatus } from '@/constants';
+import MigrateMenu from '@/components/onboarding/MigrateMenu';
+import { countOldSRCards } from '@/utils/pluginPort';
 
 interface ReviewProps {
   plugin: SRPlugin;
@@ -17,21 +21,34 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [decks, setDecks] = useState<Deck[]>([PLACEHOLDER_DECK]);
 
-  const { deckManager, memoryManager } = plugin;
+  const { deckManager, memoryManager, settings } = plugin;
+
+  const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus>(settings.onboardingStatus);
+  const [nCardsMigrate, setNCardsMigrate] = useState<number | null>(null);
+
+  const initializeDecks = async () => {
+    setIsSyncing(true);
+    await deckManager.syncMemoryWithNotes();
+    await deckManager.populateDecks();
+    setDecks(deckManager.decks);
+    setIsSyncing(false);
+  };
 
   useEffect(() => {
-    const initializeDecks = async () => {
-      setIsSyncing(true);
-      await deckManager.syncMemoryWithNotes();
-      await deckManager.populateDecks();
-      setDecks(deckManager.decks);
-      setIsSyncing(false);
-    };
-
-    if (!isSyncing) {
+    updateOnboardingStatus(OnboardingStatus.Import); // TODO: remember to remove on commit
+    if (!isSyncing && onboardingStatus == OnboardingStatus.Done) {
       initializeDecks();
     }
   }, [deckManager]);
+
+  const updateOnboardingStatus = (status: OnboardingStatus) => {
+    setOnboardingStatus(status);
+    if (status == OnboardingStatus.Done) {
+      initializeDecks();
+    }
+    settings.onboardingStatus = status;
+    plugin.saveSettings();
+  }
 
   const refresh = async () => {
     setIsSyncing(true);
@@ -110,6 +127,11 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
             <span ref={el => el && setIcon(el, 'list-plus')}></span>
             <p> Add deck </p>
           </button>
+          <MigrateMenu onMigrate={async () => {
+            const cards = await countOldSRCards(plugin.app.vault);
+            setNCardsMigrate(cards);
+            updateOnboardingStatus(OnboardingStatus.Migrate);
+          }} />
         </div>
       </div>
     </div>
@@ -117,7 +139,25 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
 
   return (
     <div>
-      {selectedDeck ? (
+      {onboardingStatus === OnboardingStatus.Import ? (
+
+        <ImportView 
+          settings={settings}
+          updateOnboardingStatus={updateOnboardingStatus}
+          setNCardsMigrate={setNCardsMigrate}
+          vault={plugin.app.vault}
+        />
+
+      ) : onboardingStatus === OnboardingStatus.Migrate ? (
+
+        <MigrateView 
+          settings={settings}
+          updateOnboardingStatus={updateOnboardingStatus}
+          nCardsMigrate={nCardsMigrate ?? 0}
+        />
+
+      ) : selectedDeck ? (
+
         <div>
           <div className="m-2 p-2 flex items-center" 
             onClick={async() => {setSelectedDeck(null); await refresh();}}
@@ -127,11 +167,13 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
           </div>
           <DeckDisplay className="flex w-full h-full flex-col justify-center" deck={selectedDeck} plugin={plugin} />
         </div>
+
       ) : (
+
         renderDeckSelection()
+
       )}
     </div>
-
   );
 };
 
