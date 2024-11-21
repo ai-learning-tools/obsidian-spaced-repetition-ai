@@ -3,6 +3,7 @@ import { Deck } from '@/fsrs/Deck';
 import { State, Card, Rating, Grade, RecordLogItem } from '@/fsrs';
 import CardView from '@/components/CardView';
 import SRPlugin from '@/main';
+import { TFile } from 'obsidian';
 
 interface DeckDisplayProps {
   deck: Deck;
@@ -94,6 +95,12 @@ const CardReview: React.FC<CardReviewProps> = ({ plugin, card, onReview }: CardR
 
   return (
     <div ref={cardReviewRef} className="h-full w-full flex-col flex space-y-5 items-center" tabIndex={0}>
+      <div 
+        className="text-sm mb-2 cursor-pointer text-center"
+        onClick={() => plugin.app.workspace.openLinkText(card.path, '', true)}
+      >
+        {card.path}
+      </div>
       <CardView plugin={plugin} front={card.front} back={card.back} showBack={showBack} path={card.path}></CardView>
       {
         showBack &&

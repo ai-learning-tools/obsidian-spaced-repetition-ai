@@ -26,7 +26,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
   const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus>(settings.onboardingStatus);
   const [nCardsMigrate, setNCardsMigrate] = useState<number | null>(null);
 
-  const initializeDecks = async () => {
+  const refresh = async () => {
     setIsSyncing(true);
     await deckManager.syncMemoryWithNotes();
     await deckManager.populateDecks();
@@ -35,28 +35,21 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
   };
 
   useEffect(() => {
-    updateOnboardingStatus(OnboardingStatus.Import); // TODO: remember to remove on commit
+    // updateOnboardingStatus(OnboardingStatus.Import); // TODO: remember to remove on commit
     if (!isSyncing && onboardingStatus == OnboardingStatus.Done) {
-      initializeDecks();
+      refresh();
     }
   }, [deckManager]);
 
   const updateOnboardingStatus = (status: OnboardingStatus) => {
     setOnboardingStatus(status);
     if (status == OnboardingStatus.Done) {
-      initializeDecks();
+      refresh();
     }
     settings.onboardingStatus = status;
     plugin.saveSettings();
   }
 
-  const refresh = async () => {
-    setIsSyncing(true);
-    await deckManager.syncMemoryWithNotes();
-    await deckManager.populateDecks();
-    setDecks(deckManager.decks);
-    setIsSyncing(false);
-  };
 
   const addDeck = () => {
     const onDeckSubmit = async (metaData: DeckMetaData) => {
@@ -95,7 +88,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
               key={deck.metaData.name} 
               className='grid grid-cols-6 gap-4 bg-gray-100 rounded-lg py-2 px-6 mb-2 h-10 items-center cursor-pointer'
               onClick={async() => { 
-                await refresh(); 
+                // await refresh(); // TODO NOTE: take this out for now since it's way too slow
                 if (deck.cards.length > 0) { 
                   setSelectedDeck(deck);
                 } else {
@@ -160,7 +153,10 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
 
         <div>
           <div className="m-2 p-2 flex items-center" 
-            onClick={async() => {setSelectedDeck(null); await refresh();}}
+            onClick={async() => {
+              setSelectedDeck(null); 
+              // await refresh(); // TODO NOTE: take this out for now since it's way too slow
+          }}
           >
             <span ref={el => el && setIcon(el, 'arrow-left')}></span>
             Decks
