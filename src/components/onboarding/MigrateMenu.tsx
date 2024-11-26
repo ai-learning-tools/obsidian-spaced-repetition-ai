@@ -19,10 +19,10 @@ const MigrateMenu: React.FC<MigrateMenuProps> = ({ onMigrate }: MigrateMenuProps
             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
             onClick={() => {
               setShowMenu(false);
-              onMigrate();
+              window.open('https://github.com/athenaleong/obsidian-sr', '_blank'); // TODO @belindamo change the url
             }}
           >
-            Migrate cards from obsidian-spaced-repetition
+            About Spaced Repetition AI
           </div>
         </div>
       )}
