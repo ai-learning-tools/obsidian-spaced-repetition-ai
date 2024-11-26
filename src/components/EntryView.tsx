@@ -33,12 +33,22 @@ export const EntryView: React.FC<EntryViewProps> = ({
               </button>
             </div>
           }
-            <Markdown>{front}</Markdown>
+            <Markdown components={{
+                p: ({children}) => <p className="whitespace-pre-wrap">{children}</p>,
+                ul: ({children}) => <ul className="list-disc pl-4">{children}</ul>,
+                ol: ({children}) => <ol className="list-decimal pl-4">{children}</ol>,
+                li: ({children}) => <li className="mb-1">{children}</li>
+            }}>{front}</Markdown>
           {
             showBack &&
             <>
                 <div className="h-0.5 bg-gray-200" />
-                <Markdown>{back}</Markdown>
+                <Markdown components={{
+                    p: ({children}) => <p className="whitespace-pre-wrap">{children}</p>,
+                    ul: ({children}) => <ul className="list-disc pl-4">{children}</ul>,
+                    ol: ({children}) => <ol className="list-decimal pl-4">{children}</ol>,
+                    li: ({children}) => <li className="mb-1">{children}</li>
+                }}>{back}</Markdown>
             </>
           }
         </div>
