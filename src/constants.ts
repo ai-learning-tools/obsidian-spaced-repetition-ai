@@ -8,7 +8,6 @@ import { z } from 'zod';
 
 export enum OnboardingStatus {
   Import = 'onboarding-import',
-  Migrate = 'onboarding-migrate',
   Done = 'onboarding-done'
 }
 

@@ -1,11 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { setIcon } from 'obsidian';
 
-interface MigrateMenuProps {
-  onMigrate: () => Promise<void>;
-}
-
-const MigrateMenu: React.FC<MigrateMenuProps> = ({ onMigrate }: MigrateMenuProps) => {
+const DotsMenu = () => {
   const [showMenu, setShowMenu] = useState(false);
 
   return (
@@ -30,4 +26,4 @@ const MigrateMenu: React.FC<MigrateMenuProps> = ({ onMigrate }: MigrateMenuProps
   );
 };
 
-export default MigrateMenu;
+export default DotsMenu;
