@@ -20,20 +20,21 @@ export const CardView: React.FC<CardViewProps> = ({
     const frontRef = useRef<HTMLDivElement>(null);
     const backRef = useRef<HTMLDivElement>(null);
 
-
     useEffect(() => {
         const renderMarkdown = async () => {
-            if (frontRef.current && !frontRef.current.hasChildNodes()) {
+            if (frontRef.current) {
+                frontRef.current.innerHTML = ''; // Clear existing content
                 const wrapper = new RenderMarkdownWrapper(plugin, path);
                 await wrapper.renderMarkdownWrapper(front.trimStart(), frontRef.current);
             }
-            if (showBack && backRef.current && !backRef.current.hasChildNodes()) {
+            if (showBack && backRef.current) {
+                backRef.current.innerHTML = ''; // Clear existing content
                 const wrapper = new RenderMarkdownWrapper(plugin, path);
                 await wrapper.renderMarkdownWrapper(back.trimStart(), backRef.current);
             }
         };
         renderMarkdown();
-    }, [front, back, showBack]);
+    }, [front, back, showBack, path, plugin]);
 
     return (
         <div 
