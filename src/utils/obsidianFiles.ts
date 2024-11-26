@@ -4,6 +4,7 @@ import { errorMessage } from "./errorMessage";
 import { FRONT_CARD_REGEX, BACK_CARD_REGEX } from "@/constants";
 import { Entry } from "@/fsrs";
 import { DIRECTORY } from "@/constants";
+import { EntryType } from "@/fsrs/models";
 
 export async function getFilteredFiles(
   vault: Vault
@@ -49,7 +50,7 @@ export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, p
   }
 }
 
-export async function writeIdToCardInFile(vault: Vault, entry: Entry) {
+export async function writeIdToCardInFile(vault: Vault, entry: Entry, separator: string) {
   try {
     const file = vault.getAbstractFileByPath(entry.path) as TFile;
     if (!file) {
@@ -62,7 +63,12 @@ export async function writeIdToCardInFile(vault: Vault, entry: Entry) {
     const content = await vault.read(file);
     const lines = content.split('\n');
     if (entry.lineToAddId !== undefined) {
-      lines.splice(entry.lineToAddId, 0, `<!--LEARN:${entry.id}-->`);
+      const separatorWithId = `[[SR/memory/${entry.id}.md|${separator}]]`
+      if (entry.entryType == EntryType.Multiline) {
+        lines[entry.lineToAddId] = separatorWithId;
+      } else {
+        lines[entry.lineToAddId] = lines[entry.lineToAddId].replace(separator, separatorWithId);
+      }
       const updatedContent = lines.join('\n');
       await vault.modify(file, updatedContent);
     } else {

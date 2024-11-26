@@ -105,11 +105,12 @@ export class DeckManager {
 
     // Update memory folder with new cards and card details
     async syncMemoryWithNotes() {
+        console.log("DEBUG-ATHENA", "syncing memory with notes")
         // Part 1: Extract cards from notes
         const files = this.vault.getFiles();
         const newEntries: {[key: string]: Entry} = {}
         for (const file of files) {
-            if (file.extension === 'md') {
+            if (file.extension === 'md' && !file.path.startsWith(`${DIRECTORY}/memory`)) {
                 const content = await this.vault.read(file);
                 const extractedEntries = this.extractEntriesFromContent(content, file.path);
                 for (const newEntry of extractedEntries) {
@@ -143,7 +144,8 @@ export class DeckManager {
                 } else {
                     // write id into newly created card using lineToAddId, this only works when entries are visited 
                     // in descending lineToAddId order
-                    await writeIdToCardInFile(this.vault, entry)
+                    const separator = entry.entryType == EntryType.Multiline ? this.settings.multilineSeparator : this.settings.inlineSeparator
+                    await writeIdToCardInFile(this.vault, entry, separator)
                 }
                 
             }
@@ -168,73 +170,93 @@ export class DeckManager {
         const inlineSeparator = this.settings.inlineSeparator;
       
         const lines = content.split('\n');
+        lines.push(''); //Adding an empty line helps the algorithm to detect cards at the end of the file
         const entries: Entry[] = [];
         let i = 0;
         let frontLines: string[] = [];
         let backLines: string[] = [];
+
+        // logic to keep track of multiline separators
         let isSeparatorDetected = false;
-        const pattern = /<!--LEARN:(.*?)-->/
+        let detectedId = undefined;
+
+        const pattern = new RegExp(`\\[\\[SR\\/memory\\/([A-Za-z0-9]{8})\\.md\\|\\?\\]\\]`);
         while (i < lines.length) {
-        const currText = lines[i].trim()
-        const idMatch = currText.match(pattern)
-        if (currText == "" || idMatch) {
-            // This line is irrelavant 
-            if (frontLines.length > 0 && backLines.length > 0) {
-                // This may indicate the end of a multi-line card
-                const front = frontLines.join('\n');
-                const back = backLines.join('\n');
-                const id = idMatch ? idMatch[1] : undefined; // Fix: Access the first capturing group directly
-                entries.push({
-                    front: front,
-                    back: back,
-                    id: id, // Fix: Use the extracted id
-                    path: filePath,
-                    entryType: EntryType.Multiline,
-                    lineToAddId: id ? undefined : i,
-                    isNew: id == undefined
-                });
-            } else {
-                // Even though this is not a multi-line card, there may be many single line card
-                const allLines = frontLines.concat(backLines);
-
-                const allText = allLines.join('\n') + '\n' + currText;
-                const pattern = new RegExp(`^(.*?)\\s${inlineSeparator}\\s(.*?)(?:\\n<!--LEARN:(.*?)-->)?$`, 'gm');
-
-                let match;
-                while ((match = pattern.exec(allText)) !== null) {
-                    const [matchedText, front, back, id] = match;
-                    const index = allLines.indexOf(matchedText);
-                    const indexFromBack = allLines.length - index;
-                    entries.push({
+            const currText = lines[i].trim();
+            const idMatch = currText.match(pattern);
+            if (!currText || currText == "") {
+                // This line is irrelavant 
+                if (frontLines.length > 0 && backLines.length > 0) {
+                    // This may indicate the end of a multi-line card
+                    const front = frontLines.join('\n');
+                    const back = backLines.join('\n');
+                    const id = detectedId ? detectedId[1] : undefined;
+                    const entry = {
                         front: front,
                         back: back,
-                        id: id, 
+                        id: id,
                         path: filePath,
-                        lineToAddId: id ? undefined: i - indexFromBack + 1,
-                        entryType: EntryType.Inline,
+                        entryType: EntryType.Multiline,
+                        lineToAddId: id ? undefined : i - backLines.length - 1,
                         isNew: id == undefined
-                    })
+                    }
+                    entries.push(entry);
+                } else {
+                    // Even though this is not a multi-line card, there may be many single line card
+                    const allLines = frontLines.concat(backLines);
+
+                    const allText = allLines.join('\n') + '\n' + currText;
+                    const pattern = new RegExp(`^(.*?)\\s(?:>>|\\[\\[SR\\/memory\\/([A-Za-z0-9]{8})\\.md\\|>>\\]\\])\\s(.*?)$`, 'gm');
+                    let match;
+                    while ((match = pattern.exec(allText)) !== null) {
+                        let matchedText, front, id, back;
+                        if (match.length == 4) {
+                            // id detected
+                            [matchedText, front, id, back] = match;
+                        } else {
+                            [matchedText, front, back] = match;
+                            id = undefined
+                        }
+                        
+                        const index = allLines.indexOf(matchedText);
+                        const indexFromBack = allLines.length - index;
+                        entries.push({
+                            front: front,
+                            back: back,
+                            id: id,
+                            path: filePath,
+                            lineToAddId: id ? undefined: i - indexFromBack, //todo: check this
+                            entryType: EntryType.Inline,
+                            isNew: id == undefined
+                        })
+                    }
                 }
+                //let's clear previous information
+                frontLines = []
+                backLines = []
+                isSeparatorDetected = false
+                detectedId = undefined
             }
-            //let's clear previous information
-            frontLines = []
-            backLines = []
-            isSeparatorDetected = false
-        }
 
-        else if (currText == multiLineSeparator) {
-            isSeparatorDetected = true
-        }
+            // Both scenarios indicate that a multiline separator has been found
+            // Add !isSeparatedDetected to ensure we don't catch rogue separators that may be sneaked in on the back of a card
+            else if (idMatch && !isSeparatorDetected) {
+                isSeparatorDetected = true
+                detectedId = idMatch
+            }
+            else if (currText == multiLineSeparator && !isSeparatorDetected) {
+                isSeparatorDetected = true
+            }
 
-        else if (!isSeparatorDetected) {
-            frontLines.push(currText);
-        }
-        
-        else {
-            backLines.push(currText)
-        }
+            else if (!isSeparatorDetected) {
+                frontLines.push(currText);
+            }
+            
+            else {
+                backLines.push(currText)
+            }
 
-        i++
+            i++
         }
 
         return entries
