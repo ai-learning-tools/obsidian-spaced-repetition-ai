@@ -180,7 +180,7 @@ export class DeckManager {
         let isSeparatorDetected = false;
         let detectedId = undefined;
 
-        const pattern = new RegExp(`\\[\\[SR\\/memory\\/([A-Za-z0-9]{8})\\.md\\|\\?\\]\\]`);
+        const pattern = new RegExp(`\\[\\[SR\\/memory\\/([A-Za-z0-9]{8})\\.md\\|${multiLineSeparator}\\]\\]`);
         while (i < lines.length) {
             const currText = lines[i].trim();
             const idMatch = currText.match(pattern);
@@ -206,7 +206,7 @@ export class DeckManager {
                     const allLines = frontLines.concat(backLines);
 
                     const allText = allLines.join('\n') + '\n' + currText;
-                    const pattern = new RegExp(`^(.*?)\\s(?:>>|\\[\\[SR\\/memory\\/([A-Za-z0-9]{8})\\.md\\|>>\\]\\])\\s(.*?)$`, 'gm');
+                    const pattern = new RegExp(`^(.*?)\\s(?:>>|\\[\\[SR\\/memory\\/([A-Za-z0-9]{8})\\.md\\|${inlineSeparator}\\]\\])\\s(.*?)$`, 'gm');
                     let match;
                     while ((match = pattern.exec(allText)) !== null) {
                         let matchedText, front, id, back;
