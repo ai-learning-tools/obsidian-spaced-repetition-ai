@@ -16,10 +16,16 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [decks, setDecks] = useState<Deck[]>([]);
   const [isNarrow, setIsNarrow] = useState(false);
+  const observerRef = useRef<ResizeObserver| null>(null);
 
   const { deckManager, memoryManager } = plugin;
 
   const refCallback = (node: HTMLDivElement | null) => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null
+    }
+
     if (node) {
       // Create ResizeObserver when the node is attached
       const observer = new ResizeObserver((entries) => {
@@ -28,13 +34,18 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
       });
 
       observer.observe(node);
-
-      // Cleanup observer when the node is detached
-      return () => {
-        observer.disconnect();
-      };
+      observerRef.current = observer
     }
   };
+
+  useEffect(() => {
+    // Cleanup any observer on unmount
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const initializeDecks = async () => {

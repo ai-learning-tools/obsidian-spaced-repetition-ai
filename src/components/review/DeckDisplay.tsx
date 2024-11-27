@@ -56,7 +56,6 @@ const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewPro
     setShowBack(false)
     await onReview(rating);
   };
-
   
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {

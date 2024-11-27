@@ -159,6 +159,9 @@ class MemoryManager {
     }
 
     async getAllDeckMetaData(): Promise<DeckMetaData[]> {
+        const deckFilePath = `${DIRECTORY}/deck.md`;
+        this.deckFile = this.vault.getFileByPath(deckFilePath);
+        
         if (this.deckFile) {
             try {
                 const fileContent = await this.vault.read(this.deckFile);
