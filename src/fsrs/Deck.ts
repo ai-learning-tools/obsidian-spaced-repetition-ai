@@ -14,7 +14,6 @@ export class Deck {
     metaData: DeckMetaData;
     memoryManager: MemoryManager //TODO: Athena - make memory manager a singleton
 
-
     static basicScheduler: FSRS = new FSRS({
         request_retention: 0.90,
         enable_short_term: true
@@ -105,12 +104,11 @@ export class DeckManager {
 
     // Update memory folder with new cards and card details
     async syncMemoryWithNotes() {
-        console.log("DEBUG-ATHENA", "syncing memory with notes")
         // Part 1: Extract cards from notes
         const files = this.vault.getFiles();
         const newEntries: {[key: string]: Entry} = {}
         for (const file of files) {
-            if (file.extension === 'md' && !file.path.startsWith(`${DIRECTORY}/memory`)) {
+            if (file.extension === 'md' && !file.path.startsWith(`${DIRECTORY}`)) {
                 const content = await this.vault.read(file);
                 const extractedEntries = this.extractEntriesFromContent(content, file.path);
                 for (const newEntry of extractedEntries) {

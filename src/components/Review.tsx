@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { DeckManager, Deck } from '@/fsrs/Deck';
+import React, { useState, useEffect, useRef } from 'react';
+import { Deck } from '@/fsrs/Deck';
 import { DeckMetaData, State } from '@/fsrs';
 import DeckDisplay from '@/components/review/DeckDisplay';
 import NewDeckModal from '@/components/review/NewDeckModal';
 import ModifyDeckModal from '@/components/review/ModifyDeckModal';
 import SRPlugin from '@/main';
 import { setIcon, Notice } from 'obsidian';
-import EntryView from './EntryView';
 
 interface ReviewProps {
   plugin: SRPlugin;
@@ -16,14 +15,37 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
   const [selectedDeck, setSelectedDeck] = useState<Deck | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [decks, setDecks] = useState<Deck[]>([]);
+  const [isNarrow, setIsNarrow] = useState(false);
 
-  const { deckManager, memoryManager } = plugin
+  const { deckManager, memoryManager } = plugin;
+
+  const refCallback = (node: HTMLDivElement | null) => {
+    if (node) {
+      // Create ResizeObserver when the node is attached
+      const observer = new ResizeObserver((entries) => {
+        const width = entries[0]?.contentRect?.width || 0;
+        setIsNarrow(width < 400);
+      });
+
+      observer.observe(node);
+
+      // Cleanup observer when the node is detached
+      return () => {
+        observer.disconnect();
+      };
+    }
+  };
 
   useEffect(() => {
     const initializeDecks = async () => {
+      await deckManager.populateDecks();
+      setDecks(deckManager.decks);
+
+      setIsSyncing(true);
       await deckManager.syncMemoryWithNotes();
       await deckManager.populateDecks();
       setDecks(deckManager.decks);
+      setIsSyncing(false);
     };
 
     initializeDecks();
@@ -55,12 +77,13 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
   };
 
   const renderDeckSelection = () => (
-    <div className='flex flex-col'>
+    <div className='flex flex-col' ref={refCallback}>
       <div className='flex flex-col bg-white border border-gray-300 w-full px-10 py-6 rounded-md'>
-        <div className='grid grid-cols-6 gap-4 mb-4 px-4 font-semibold text-lg'>
+        <div className={`grid ${isNarrow ? 'grid-cols-5' : 'grid-cols-7'} gap-4 mb-4 px-4 font-semibold text-lg`}>
           <p className="col-span-2">Deck</p>
-          <div className="text-center">New</div>
-          <div className="text-center">Learn</div>
+          {!isNarrow && <div className="text-center">New</div>}
+          {!isNarrow && <div className="text-center">Learn</div>}
+          <div className="text-center">Total</div>
           <div className="text-center">Due</div>
           <div></div>
         </div>
@@ -72,7 +95,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
           return (
             <div 
               key={deck.metaData.name} 
-              className='grid grid-cols-6 gap-4 bg-gray-100 rounded-lg py-2 px-6 mb-2 h-10 items-center cursor-pointer'
+              className={`grid ${isNarrow ? 'grid-cols-5' : 'grid-cols-7'} gap-4 bg-gray-100 rounded-lg py-2 px-6 mb-2 h-10 items-center cursor-pointer`}
               onClick={async() => { 
                 await refresh(); 
                 if (deck.cards.length > 0) { 
@@ -82,11 +105,12 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
                 }
               }}
             >
-              <p className="col-span-2 hover:underline flex items-center">
+              <p className="col-span-2 hover:underline flex items-center truncate">
                 {deck.metaData.name}
               </p>
-              <p className="text-center flex items-center justify-center">{count[State.New]}</p>
-              <p className="text-center flex items-center justify-center">{count[State.Learning] + count[State.Relearning]}</p>
+              {!isNarrow && <p className="text-center flex items-center justify-center">{count[State.New]}</p>}
+              {!isNarrow && <p className="text-center flex items-center justify-center">{count[State.Learning] + count[State.Relearning]}</p>}
+              <p className="text-center flex items-center justify-center">{deck.cards.length}</p>
               <p className="text-center flex items-center justify-center font-bold">{due.length}</p>
               {!isLastDeck && (
                 <div className="flex items-center justify-end cursor-pointer h-4 w-4 ml-auto" onClick={(e) => { e.stopPropagation(); modifyDeck(deck); }}>
@@ -131,7 +155,6 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
         )
       )}
     </div>
-
   );
 };
 
