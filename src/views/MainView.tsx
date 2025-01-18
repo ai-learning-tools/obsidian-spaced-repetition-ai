@@ -34,11 +34,11 @@ export default class MainView extends ItemView {
   }
 
   getTitle(): string {
-    return 'Notes to Flashcards';
+    return 'Spaced Repetition AI';
   }
 
   getDisplayText(): string {
-    return 'Notes to Flashcards';
+    return 'Spaced Repetition AI';
   }
 
   renderContent(): React.ReactNode {
