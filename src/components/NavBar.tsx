@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { SubviewType } from '@/constants';
 
 interface NavBarProps {
@@ -9,12 +9,12 @@ interface NavBarProps {
 const NavBar: React.FC<NavBarProps> = ({ currentSubview, changeSubview }) => {
 
   return (
-    <div className="top-0 flex flex-row items-center justify-center space-x-4 text-neutral-400 mb-2">
+    <div className="top-0 flex flex-row items-center justify-center space-x-4 theme-text-faint mb-2">
       <div
         onClick={() => changeSubview(SubviewType.CHAT)}
-        className={`cursor-pointer p-1 rounded-md hover:bg-gray-200 transition-colors ${
+        className={`cursor-pointer p-1 rounded-md theme-bg-hover transition-colors ${
           currentSubview === SubviewType.CHAT
-            ? 'bg-purple-100'
+            ? 'theme-bg-active'
             : ''
         }`}
       >
@@ -22,7 +22,7 @@ const NavBar: React.FC<NavBarProps> = ({ currentSubview, changeSubview }) => {
           xmlns="http://www.w3.org/2000/svg"
           className={`h-5 w-5 ${
             currentSubview === SubviewType.CHAT
-              ? 'text-purple-500'
+              ? 'theme-text-accent'
               : ''
           }`}
           fill="none"
@@ -39,9 +39,9 @@ const NavBar: React.FC<NavBarProps> = ({ currentSubview, changeSubview }) => {
       </div>
       <div
         onClick={() => changeSubview(SubviewType.REVIEW)}
-        className={`cursor-pointer p-1 rounded-md hover:bg-gray-200 transition-colors ${
+        className={`cursor-pointer p-1 rounded-md theme-bg-hover transition-colors ${
           currentSubview === SubviewType.REVIEW
-            ? 'bg-purple-100'
+            ? 'theme-bg-active'
             : ''
         }`}
       >
@@ -49,7 +49,7 @@ const NavBar: React.FC<NavBarProps> = ({ currentSubview, changeSubview }) => {
           xmlns="http://www.w3.org/2000/svg"
           className={`h-5 w-5 ${
             currentSubview === SubviewType.REVIEW
-              ? 'text-purple-500'
+              ? 'theme-text-accent'
               : ''
           }`}
           fill="none"
@@ -72,6 +72,6 @@ const NavBar: React.FC<NavBarProps> = ({ currentSubview, changeSubview }) => {
       </div>
     </div>
   );
-};
+}
 
 export default NavBar;

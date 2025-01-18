@@ -173,7 +173,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           value={userMessage || ''} 
           inputRef={inputRef}
           onChange={handleMentionsChange}
-          className="w-full resize-none p-2 height-auto border border-neutral-200 rounded overflow-hidden"
+          className="w-full resize-none p-2 height-auto theme-border border rounded overflow-hidden"
           placeholder={index === 0 ? 'Remember anything, [[ to include your notes' : 'Ask a follow-up question'}
           onKeyDown={handleSendMessage}
           suggestionsPortalHost={portalRef.current}
@@ -185,11 +185,11 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           />
         </MentionsInput>
       </div>
-      <div className="flex flex-row flex-wrap items-center justify-start my-2 space-x-4 text-neutral-400 [&>*]:cursor-pointer [&>*]:mb-2">
+      <div className="flex flex-row flex-wrap items-center justify-start my-2 space-x-4 theme-text-faint [&>*]:cursor-pointer [&>*]:mb-2">
         <select
           value={currentModel}
           onChange={handleModelChange}
-          className="text-center"
+          className="text-center theme-bg-surface theme-border theme-text"
           style={{ width: '150px' }}
         >
           {Object.entries(ChatModelDisplayNames).map(([key, displayName]) => (
@@ -209,30 +209,22 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
             }
             await aiManager.setNewThread();
           }}
+          className="theme-bg-hover rounded px-4 py-2"
         >
           + New
         </div>
-        {/* <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="generateCards"
-            checked={generateCards || false}
-            onChange={() => setGenerateCards(!generateCards)}
-            className="mr-2"
-          />
-          <label htmlFor="generateCards">Generate cards</label>
-        </div> */}
         <div 
           onClick={() => {
             setUserMessage((userMessage || '') + ' [[')
             inputRef.current?.focus();
           }} 
+          className="theme-bg-hover rounded px-4 py-2"
         >
           <p>{`[[`} for File</p>
         </div>
         <div 
           onClick={async (e) => {await handleSendMessage(e)}}
-          className='flex flex-row items-center space-x-2'
+          className='flex flex-row items-center space-x-2 theme-bg-hover rounded px-4 py-2'
         > 
           <EnterIcon /> 
           <p>Enter</p> 
@@ -240,13 +232,13 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
         {aiString && !abortController && (userMessage === messageHistory[index].userMessage) && (
           <div  
             onClick={async (e) => {await handleSendMessage(e)}}
-            className='flex flex-row items-center space-x-2'
+            className='flex flex-row items-center space-x-2 theme-bg-hover rounded px-4 py-2'
           >
             <RefreshIcon />
           </div>
         )}
         {abortController && (
-          <button className='p-4' onClick={handleStopGenerating}>Cancel generation</button>
+          <button className='p-4 theme-bg-hover rounded' onClick={handleStopGenerating}>Cancel generation</button>
         )}
       </div>
 
@@ -259,7 +251,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
       {
         mentionedFiles.length > 0 && 
         <div className='m-4'>
-          <p className='pb-2'>Using context:</p>
+          <p className='pb-2 theme-text'>Using context:</p>
           <div className="flex-wrap">
             {mentionedFiles.map((file, index) => (
               <ChatTag 
@@ -274,7 +266,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
       {(index === 0 && !aiString && (activeFile && !plugin.settings.includeCurrentFile  && !mentionedFiles.some(file => file.path === activeFile.path))) && (
       <div className='m-4'>
-        <div className='mb-2'> 
+        <div className='mb-2 theme-text'> 
           Add current file:
         </div>
         <div>
@@ -291,7 +283,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
    
       <div className='m-4 space-y-2'>
         {aiString && (
-          <div className='pb-4'>
+          <div className='pb-4 theme-text'>
             <Markdown>{aiString}</Markdown>
           </div>
         )}
@@ -305,16 +297,15 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
             key={`entry-${i}-length-${aiEntries.length}`}
           />
         ))}
-        {aiEntries && (
+        {aiEntries && aiEntries.length > 0 && (
           <>
             <div className='float-right'>
               {activeFile ? (
-                  <span>Adding to {activeFile.name}</span>
+                  <span className="theme-text">Adding to {activeFile.name}</span>
               ) : (
-                  <span>Open a file to add cards</span>
+                  <span className="theme-text">Open a file to add cards</span>
               )}
-              <button disabled={activeFile === null || aiEntries.length === 0} className='cursor-pointer p-4 ml-4 disabled:text-neutral-400' onClick={addAllCards}>Add all cards</button>
-              
+              <button disabled={activeFile === null} className='cursor-pointer p-4 ml-4 disabled:theme-text-faint theme-bg-hover rounded' onClick={addAllCards}>Add all cards</button>
             </div>
           </>
         )}

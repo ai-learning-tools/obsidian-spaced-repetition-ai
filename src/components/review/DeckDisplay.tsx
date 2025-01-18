@@ -96,7 +96,7 @@ const CardReview: React.FC<CardReviewProps> = ({ plugin, card, onReview }: CardR
   return (
     <div ref={cardReviewRef} className="h-full w-full flex-col flex space-y-5 items-center" tabIndex={0}>
       <div 
-        className="text-sm mb-2 cursor-pointer text-center"
+        className="text-sm mb-2 cursor-pointer text-center hover:underline"
         onClick={() => plugin.app.workspace.openLinkText(card.path, '', true)}
       >
         {card.path}

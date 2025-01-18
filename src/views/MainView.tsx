@@ -56,17 +56,19 @@ export default class MainView extends ItemView {
               setSubviewType(subview);
             }}
           />
-          {this.plugin.subviewType === SubviewType.CHAT && (
-            <Chat
-              plugin={this.plugin}
-              messageHistoryHook={messageHistoryHook}
-            />
-          )}
-          {this.plugin.subviewType === SubviewType.REVIEW && (
-            <Review
-              plugin={this.plugin}
-            />
-          )}
+          <div className="mt-8 mx-auto max-w-[768px]">
+            {this.plugin.subviewType === SubviewType.CHAT && (
+              <Chat
+                plugin={this.plugin}
+                messageHistoryHook={messageHistoryHook}
+              />
+            )}
+            {this.plugin.subviewType === SubviewType.REVIEW && (
+              <Review
+                plugin={this.plugin}
+              />
+            )}
+          </div>
         </div>
       );
     };

@@ -47,7 +47,7 @@ const Chat: React.FC<ChatProps> = ({
     }, [vault, workspace, activeFile]);
 
     return (
-        <div className='w-full'>
+        <div>
             {messageHistory.map((segment, index) => {
                 const updateHistory = createUpdateFunctions(index);
                 return (

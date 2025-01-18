@@ -38,13 +38,13 @@ export const CardView: React.FC<CardViewProps> = ({
 
     return (
         <div 
-            className="bg-white bg-opacity-50 w-full max-w-lg p-6 h-auto flex flex-col border border-gray-300 rounded-md space-y-4"
+            className="theme-bg-surface theme-border w-full max-w-lg p-6 h-auto flex flex-col border rounded-md space-y-4"
         >
           <div ref={frontRef}></div>
           {
             showBack &&
             <>
-                <div className="h-0.5 bg-gray-200" />
+                <div className="h-0.5 theme-divider" />
                 <div ref={backRef}></div>
             </>
           }

@@ -10,9 +10,9 @@ const DotsMenu = () => {
         <span ref={el => el && setIcon(el, 'ellipsis-vertical')}></span>
       </div>
       {showMenu && (
-        <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-md shadow-lg z-10">
+        <div className="absolute right-0 mt-2 w-64 theme-bg-surface theme-border border rounded-md shadow-lg z-10">
           <div 
-            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            className="px-4 py-2 theme-text theme-bg-hover cursor-pointer"
             onClick={() => {
               setShowMenu(false);
               window.open('https://github.com/athenaleong/obsidian-sr', '_blank'); // TODO @belindamo change the url
