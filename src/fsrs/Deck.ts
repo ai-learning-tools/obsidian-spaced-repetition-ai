@@ -71,7 +71,7 @@ export class Deck {
         const card = Object.assign(this.cards[index], recordLog.card);
 
         if (updateMemory) {
-            console.log("ATHENA-DEBUG", 'updating card')
+            console.log("ATHENA-DEBUG", 'updating card', card.id)
             await this.memoryManager.updateCard(card)
             await this.memoryManager.insertReviewLog(recordLog.log, card.id)
         }
@@ -111,6 +111,8 @@ export class DeckManager {
             if (file.extension === 'md' && !file.path.startsWith(`${DIRECTORY}`)) {
                 const content = await this.vault.read(file);
                 const extractedEntries = this.extractEntriesFromContent(content, file.path);
+                console.log('extracted entries')
+                console.log(extractedEntries)
                 for (const newEntry of extractedEntries) {
                     const id = newEntry.id ?? MemoryManager.generateRandomID();
                     newEntry.id = id
@@ -178,7 +180,12 @@ export class DeckManager {
         let isSeparatorDetected = false;
         let detectedId = undefined;
 
-        const pattern = new RegExp(`\\[\\[${DIRECTORY}\\/memory\\/([A-Za-z0-9]{8})\\.md\\|${multiLineSeparator}\\]\\]`);
+        const escapeRegExp = (string: string) => {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        };
+        
+
+        const pattern = new RegExp(`\\[\\[${DIRECTORY}\\/memory\\/([A-Za-z0-9]{8})\\.md\\|${escapeRegExp(multiLineSeparator)}\\]\\]`);
         while (i < lines.length) {
             const currText = lines[i].trim();
             const idMatch = currText.match(pattern);
@@ -204,7 +211,7 @@ export class DeckManager {
                     const allLines = frontLines.concat(backLines);
 
                     const allText = allLines.join('\n') + '\n' + currText;
-                    const pattern = new RegExp(`^(.*?)\\s(?:>>|\\[\\[${DIRECTORY}\\/memory\\/([A-Za-z0-9]{8})\\.md\\|${inlineSeparator}\\]\\])\\s(.*?)$`, 'gm');
+                    const pattern = new RegExp(`^(.*?)\\s(?:${inlineSeparator}|\\[\\[${DIRECTORY}\\/memory\\/([A-Za-z0-9]{8})\\.md\\|${escapeRegExp(inlineSeparator)}\\]\\])\\s(.*?)$`, 'gm');
                     let match;
                     while ((match = pattern.exec(allText)) !== null) {
                         let matchedText, front, id, back;
