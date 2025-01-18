@@ -58,7 +58,7 @@ export async function writeIdToCardInFile(vault: Vault, entry: Entry, separator:
       return;
     }
 
-    console.log('to add', entry.id, entry.lineToAddId, entry.path)
+    console.log('to add', entry.id, entry.lineToAddId, entry.path, entry.front, entry.back)
 
     const content = await vault.read(file);
     const lines = content.split('\n');

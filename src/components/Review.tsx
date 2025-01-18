@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Deck } from '@/fsrs/Deck';
 import { DeckMetaData, State } from '@/fsrs';
 import DeckDisplay from '@/components/review/DeckDisplay';
@@ -17,6 +17,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
   const [decks, setDecks] = useState<Deck[]>([]);
   const [isNarrow, setIsNarrow] = useState(false);
   const observerRef = useRef<ResizeObserver| null>(null);
+  const loadPromiseRef = useRef<Promise<void>>();
 
   const { deckManager, memoryManager } = plugin;
 
@@ -48,26 +49,49 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
   }, []);
 
   useEffect(() => {
-    const initializeDecks = async () => {
-      await deckManager.populateDecks();
-      setDecks(deckManager.decks);
-
-      setIsSyncing(true);
-      await deckManager.syncMemoryWithNotes();
-      await deckManager.populateDecks();
-      setDecks(deckManager.decks);
-      setIsSyncing(false);
+    const loadDecks = async () => {
+      if (!loadPromiseRef.current) {
+        loadPromiseRef.current = (async () => {
+          console.log("DEBUG-ATHENA loading deck")
+          try {
+            setIsSyncing(true);
+            
+            // First populate with existing cards
+            await deckManager.populateDecks();
+            setDecks(deckManager.decks);
+    
+            // Then do full sync
+            await deckManager.syncMemoryWithNotes();
+            await deckManager.populateDecks();
+            setDecks(deckManager.decks);
+          } catch (error) {
+            console.error('Error loading decks:', error);
+          } finally {
+            setIsSyncing(false);
+            loadPromiseRef.current = undefined;
+          }
+        })();
+      }
+      return loadPromiseRef.current;
     };
-
-    initializeDecks();
-  }, [deckManager]);
+  
+    loadDecks();
+  }, [deckManager]); // Only depends on deckManager now
 
   const refresh = async () => {
-    setIsSyncing(true);
-    await deckManager.syncMemoryWithNotes();
-    await deckManager.populateDecks();
-    setDecks(deckManager.decks);
-    setIsSyncing(false);
+    
+    try {
+      if (!isSyncing) {
+        setIsSyncing(true);
+        await deckManager.syncMemoryWithNotes();
+        await deckManager.populateDecks();
+        setDecks(deckManager.decks);
+      }
+    } catch (error) {
+      console.error('Error refreshing decks:', error);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const addDeck = () => {

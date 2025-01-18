@@ -96,6 +96,7 @@ export class DeckManager {
         this.memoryManager = memoryManager;
         this.vault = vault;
         this.settings = settings;
+        console.log('DEBUG-ATHENA setting up deck manager');
         (async() => {
             await this.syncMemoryWithNotes()
         })();
@@ -105,13 +106,14 @@ export class DeckManager {
     // Update memory folder with new cards and card details
     async syncMemoryWithNotes() {
         // Part 1: Extract cards from notes
+        console.log('DEBUG-ATHENA syncing memory with notes');
         const files = this.vault.getFiles();
         const newEntries: {[key: string]: Entry} = {}
         for (const file of files) {
             if (file.extension === 'md' && !file.path.startsWith(`${DIRECTORY}`)) {
                 const content = await this.vault.read(file);
                 const extractedEntries = this.extractEntriesFromContent(content, file.path);
-                console.log('extracted entries')
+                console.log('extracted entries from', file.path)
                 console.log(extractedEntries)
                 for (const newEntry of extractedEntries) {
                     const id = newEntry.id ?? MemoryManager.generateRandomID();
@@ -268,6 +270,7 @@ export class DeckManager {
     }
 
     async populateDecks() {
+        console.log('DEBUG-ATHENA populate deck')
         // Get all files
         const directory = `${DIRECTORY}/memory`
         const files = this.vault.getFiles().filter(file => file.path.startsWith(directory) && file.extension === 'md');
@@ -288,7 +291,7 @@ export class DeckManager {
 
         // Get Deck
         const decksMetaData = await this.memoryManager.getAllDeckMetaData()
-        console.log("DBEUG-ATHENA", decksMetaData)
+        console.log("DEBUG-ATHENA", decksMetaData)
         const allDecks : Deck[] = []
 
         for (const currData of decksMetaData) {
