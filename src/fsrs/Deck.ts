@@ -1,7 +1,7 @@
 import MemoryManager from "@/memory/memoryManager";
 import { Card, RecordLogItem, State, Grade, Entry, DeckMetaData, EntryType } from "./models";
 import { Vault } from "obsidian";
-import { DIRECTORY } from "@/constants";
+import { DIRECTORY, OnboardingStatus } from "@/constants";
 import { fixDate } from "./help";
 import { FSRS} from "./fsrs";
 import { createEmptyCard } from "./default";
@@ -97,10 +97,13 @@ export class DeckManager {
         this.vault = vault;
         this.settings = settings;
         this.isSyncing = false;
-        console.log('DEBUG-ATHENA setting up deck manager');
-        (async() => {
-            await this.syncMemoryWithNotes()
-        })();
+        
+        if (this.settings.onboardingStatus == OnboardingStatus.Done) {
+            (async() => {
+                console.log('DEBUG-ATHENA setting up deck manager');
+                await this.syncMemoryWithNotes()
+            })();
+        }
     }
 
 
