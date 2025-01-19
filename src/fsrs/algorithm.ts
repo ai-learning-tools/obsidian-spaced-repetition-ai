@@ -7,7 +7,7 @@ import { alea } from './alea'
 /**
  * @default DECAY = -0.5
  */
-export const DECAY: number = -0.5
+export const DECAY = -0.5
 /**
  * FACTOR = Math.pow(0.9, 1 / DECAY) - 1= 19 / 81
  *

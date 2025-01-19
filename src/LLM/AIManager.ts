@@ -3,10 +3,10 @@ import {
   EntryItemGeneration,
   MAX_CHARACTERS,
 } from "@/constants";
-import { ChatMessage } from "@/chatMessage";
 import { errorMessage } from "@/utils/errorMessage";
 import { APIUserAbortError } from "openai/error";
 import OpenAI from "openai";
+import { ChatCompletionCreateParamsBase, ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 const PROMPT = `
 <INSTRUCTION>
@@ -121,7 +121,7 @@ export default class AIManager {
 
   private parseFlashcards(xmlString: string): { chatResponse: string; entries: EntryItemGeneration[] } {
     let chatResponse = '';
-    let entries: EntryItemGeneration[] = [];
+    const entries: EntryItemGeneration[] = [];
 
     // Extract chat response - handle both complete and partial tags
     const chatMatch = xmlString.match(/<chat response>([^]*?)(?:<\/chat response>|$)/);
@@ -158,7 +158,7 @@ export default class AIManager {
       this.messageHistory.push({ role: 'user' as const, content: newMessageModded });
       const stream = await this.client.chat.completions.create({
         model: this.chatModel,
-        messages: this.messageHistory,
+        messages: this.messageHistory as ChatCompletionMessageParam[],
         stream: true,
       });
 

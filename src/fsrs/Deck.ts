@@ -1,9 +1,9 @@
 import MemoryManager from "@/memory/memoryManager";
-import { Card, RecordLog, RecordLogItem, ReviewLog, State, Grade, Entry, DeckMetaData, EntryType } from "./models";
+import { Card, RecordLogItem, State, Grade, Entry, DeckMetaData, EntryType } from "./models";
 import { Vault } from "obsidian";
 import { DIRECTORY } from "@/constants";
 import { fixDate } from "./help";
-import { fsrs, FSRS} from "./fsrs";
+import { FSRS} from "./fsrs";
 import { createEmptyCard } from "./default";
 import { writeIdToCardInFile } from "@/utils/obsidianFiles";
 import { SRSettings } from "@/settings";
@@ -72,7 +72,7 @@ export class Deck {
 
         if (updateMemory) {
             await this.memoryManager.updateCard(card)
-            await this.memoryManager.insertReviewLog(recordLog.log, card.id)
+            await this.memoryManager.insertReviewLog(recordLog.log, card.id as string)
         }
     }
 

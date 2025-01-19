@@ -1,5 +1,4 @@
 import type {
-  Card,
   Grade,
   RecordLog,
   RecordLogItem,

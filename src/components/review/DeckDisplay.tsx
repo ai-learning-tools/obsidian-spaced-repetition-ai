@@ -3,7 +3,6 @@ import { Deck } from '@/fsrs/Deck';
 import { State, Card, Rating, Grade, RecordLogItem } from '@/fsrs';
 import CardView from '@/components/CardView';
 import SRPlugin from '@/main';
-import { TFile } from 'obsidian';
 
 interface DeckDisplayProps {
   deck: Deck;
@@ -12,13 +11,11 @@ interface DeckDisplayProps {
 
 const DeckDisplay: React.FC<DeckDisplayProps> = ({ deck, plugin }: DeckDisplayProps) => {
   const [stateCounts, setStateCounts] = useState(deck.getCountForStates());
-  const [cards, setCards] = useState<Card[]>(deck.cards);
   const [topCard, setTopCard] = useState<Card | null>(deck.cards[0] || null);
 
   useEffect(() => {
     console.log("DEBUG-ATHENA", "deck update received")
     setStateCounts(deck.getCountForStates());
-    setCards([...deck.cards]); // Create new array to ensure state update
     setTopCard(deck.cards[0] || null);
   }, [deck, deck.cards]);
 
@@ -43,7 +40,7 @@ const DeckDisplay: React.FC<DeckDisplayProps> = ({ deck, plugin }: DeckDisplayPr
         ))}
       </div>
 
-      <CardReview plugin={plugin} card={topCard} onReview={onTopCardReview} />
+      <CardReview plugin={plugin} card={topCard!} onReview={onTopCardReview} />
     </div>
   );
 }

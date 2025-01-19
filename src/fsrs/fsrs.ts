@@ -348,7 +348,7 @@ export class FSRS extends FSRSAlgorithm {
   forget<R = RecordLogItem>(
     card: CardInput | Card,
     now: DateInput,
-    reset_count: boolean = false,
+    reset_count = false,
     afterHandler?: (recordLogItem: RecordLogItem) => R
   ): R {
     const processedCard = TypeConvert.card(card)

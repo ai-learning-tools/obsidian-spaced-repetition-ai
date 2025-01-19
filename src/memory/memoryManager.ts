@@ -1,4 +1,4 @@
-import { Card, ReviewLog, createEmptyCard, DeckMetaData, Entry } from "@/fsrs";
+import { Card, ReviewLog, DeckMetaData, Entry } from "@/fsrs";
 import { Vault, TFolder, TFile, Notice } from "obsidian";
 import { CORRUPTION_WARNING, DIRECTORY } from "@/constants";
 
@@ -99,8 +99,8 @@ class MemoryManager {
         return this.vault.getFiles().filter(file => file.path.startsWith(`${DIRECTORY}/memory`) && file.extension === 'md');
     }
 
-    async insertReviewLog(newLog: ReviewLog, id: number): Promise<void> {
-        const file = this.getFile(id.toString());
+    async insertReviewLog(newLog: ReviewLog, id: string): Promise<void> {
+        const file = this.getFile(id);
         
         if (file) {
             const fileContent = await this.vault.read(file);
@@ -117,7 +117,7 @@ class MemoryManager {
     }
 
     async updateCard(newCard: Card): Promise<void> {
-        const file = this.getFile(newCard.id.toString());
+        const file = this.getFile(newCard.id!.toString());
         
         if (file) {
             const fileContent = await this.vault.read(file);

@@ -1,6 +1,6 @@
 import { Card, DateInput, FSRSParameters, State } from './models'
 import { TypeConvert } from './convert'
-import { Entry } from './Deck'
+import { Entry } from './models'
 
 export const default_request_retention = 0.9
 export const default_maximum_interval = 36500
@@ -12,7 +12,7 @@ export const default_w = [
 export const default_enable_fuzz = false
 export const defualt_enable_short_term = true
 
-export const FSRSVersion: string = 'v4.1.1 using FSRS V5.0'
+export const FSRSVersion = 'v4.1.1 using FSRS V5.0'
 
 export const generatorParameters = (
   props?: Partial<FSRSParameters>
@@ -85,7 +85,7 @@ export function createEmptyCard<R = Card>(
     front: entry.front,
     back: entry.back,
     path: entry.path,
-    entryType: entry.EntryType
+    entryType: entry.entryType
   }
   if (afterHandler && typeof afterHandler === 'function') {
     return afterHandler(emptyCard)

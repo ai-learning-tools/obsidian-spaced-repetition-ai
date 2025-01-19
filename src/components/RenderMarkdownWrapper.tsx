@@ -23,11 +23,11 @@ export class RenderMarkdownWrapper {
     ): Promise<void> {
         if (recursiveDepth > 4) return;
 
-        let el: HTMLElement = containerEl;
+        const el: HTMLElement = containerEl;
         MarkdownRenderer.render(this.app, markdownString, el, this.notePath, this.plugin);
 
         el.findAll(".internal-embed").forEach((el) => {
-            const link = this.parseLink(el.getAttribute("src"));
+            const link = this.parseLink(el.getAttribute("src")!);
 
             // file does not exist, display dead link
             if (!link.target) {
@@ -48,14 +48,14 @@ export class RenderMarkdownWrapper {
     private parseLink(src: string) {
         const linkComponentsRegex =
             /^(?<file>[^#^]+)?(?:#(?!\^)(?<heading>.+)|#\^(?<blockId>.+)|#)?$/;
-        const matched = typeof src === "string" && src.match(linkComponentsRegex);
-        const file = matched.groups.file || this.notePath;
+        const matched = (typeof src === "string" && src.match(linkComponentsRegex)) as RegExpMatchArray;
+        const file = matched.groups!.file || this.notePath;
         const target = this.plugin.app.metadataCache.getFirstLinkpathDest(file, this.notePath);
         return {
             text: matched[0],
-            file: matched.groups.file,
-            heading: matched.groups.heading,
-            blockId: matched.groups.blockId,
+            file: matched.groups!.file,
+            heading: matched.groups!.heading,
+            blockId: matched.groups!.blockId,
             target: target,
         };
     }
@@ -72,15 +72,15 @@ export class RenderMarkdownWrapper {
                 },
                 (img) => {
                     if (el.hasAttribute("width"))
-                        img.setAttribute("width", el.getAttribute("width"));
+                        img.setAttribute("width", el.getAttribute("width") as string);
                     else img.setAttribute("width", "100%");
-                    if (el.hasAttribute("alt")) img.setAttribute("alt", el.getAttribute("alt"));
+                    if (el.hasAttribute("alt")) img.setAttribute("alt", el.getAttribute("alt") as string);
                     el.addEventListener(
                         "click",
                         (ev) =>
                             ((ev.target as HTMLElement).style.minWidth =
                                 (ev.target as HTMLElement).style.minWidth === "100%"
-                                    ? null
+                                    ? ""
                                     : "100%"),
                     );
                 },
@@ -99,7 +99,7 @@ export class RenderMarkdownWrapper {
                     },
                 },
                 (audio) => {
-                    if (el.hasAttribute("alt")) audio.setAttribute("alt", el.getAttribute("alt"));
+                    if (el.hasAttribute("alt")) audio.setAttribute("alt", el.getAttribute("alt") as string);
                 },
             );
             el.addClasses(["media-embed", "is-loaded"]);

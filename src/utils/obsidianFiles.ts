@@ -1,7 +1,6 @@
-import { TFile, Vault, Plugin } from "obsidian";
+import { TFile, Vault } from "obsidian";
 import { EntryItemGeneration } from "@/constants";
 import { errorMessage } from "./errorMessage";
-import { FRONT_CARD_REGEX, BACK_CARD_REGEX } from "@/constants";
 import { Entry } from "@/fsrs";
 import { DIRECTORY } from "@/constants";
 import { EntryType } from "@/fsrs/models";
@@ -41,7 +40,7 @@ export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, p
       card = `\n\n${front}\n${multilineSeparator}\n${back}\n\n`
     } else {
       const inlineSeparator = plugin.settings.inlineSeparator;
-      card = `\n\n${front} ${inlineSeparator} ${back}\n\n`
+      card = `\n\n${front} ${inlineSeparator} ${back}`
     }
 
     await plugin.app.vault.append(
@@ -77,35 +76,4 @@ export async function writeIdToCardInFile(vault: Vault, entry: Entry, separator:
   } catch (e) {
     console.error(`Error writing ID to card in file at path ${entry.path}: ${e}`);
   }
-}
-
-export async function getFileCards(file: TFile, vault: Vault): Promise<EntryItemGeneration[]> {
-  try {
-    const content = await getFileContent(file, vault);
-    if (!content) return [];
-
-    const cards: EntryItemGeneration[] = [];
-    let frontMatch;
-    while ((frontMatch = FRONT_CARD_REGEX.exec(content)) !== null) {
-      const [, front] = frontMatch;
-      const backMatch = BACK_CARD_REGEX.exec(content.slice(frontMatch.index + frontMatch[0].length));
-      if (backMatch) {
-        const [, back] = backMatch;
-        cards.push({
-          front: front.trim().replace(/<br>/g, '\n'), // Replace <br> with newlines in front
-          back: back.trim().replace(/^\s*>\s*/gm, '').trim() // Remove leading '> ' and trim each line
-        });
-        // Reset lastIndex of BACK_CARD_REGEX
-        BACK_CARD_REGEX.lastIndex = 0;
-        // Move the lastIndex of FRONT_CARD_REGEX to after the back content
-        FRONT_CARD_REGEX.lastIndex = frontMatch.index + frontMatch[0].length + backMatch[0].length;
-      }
-    }
-
-    return cards;
-
-  } catch (e) {
-    errorMessage(`Error getting flashcards from file ${file.name}: ${e}`);
-  }
-  return [];
 }

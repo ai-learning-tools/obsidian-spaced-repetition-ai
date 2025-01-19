@@ -272,8 +272,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
             <span ref={(el) => el && setIcon(el, "arrow-left")}></span>
             Decks
           </div>
-          <DeckDisplay
-            className="flex w-full h-full flex-col justify-center" deck={selectedDeck} plugin={plugin}
+          <DeckDisplay deck={selectedDeck} plugin={plugin}
           />
         </div>
       )

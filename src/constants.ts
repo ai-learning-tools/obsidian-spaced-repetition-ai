@@ -13,14 +13,6 @@ export enum OnboardingStatus {
   Done = 'onboarding-done'
 }
 
-// Regex to capture multiline flashcards in the format:
-// > [!card]+ frontLine1<br>frontLine2<br>frontLine3...
-// > backLine1
-// > backLine2
-// > backLine3...
-export const FRONT_CARD_REGEX = /^>\s*\[!card\][\+\-]?\s*((?:.*(?:<br>|$))+?)/gm;
-export const BACK_CARD_REGEX = /(?:^>\s*((?:.*\n?)+?)(?=(?:^[^>]|\s*$)))/gm;
-
 // Maximum characters allowed for OpenAI Assistants API, as of 2024-11-17
 export const MAX_CHARACTERS = 256000;
 

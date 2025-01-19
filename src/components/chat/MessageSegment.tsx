@@ -173,7 +173,8 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
   return (
     <div className="w-full flex flex-col mb-4">
-      <div>
+      <div>        
+        {/* @ts-ignore */}
         <MentionsInput
           value={userMessage || ''} 
           inputRef={inputRef}
@@ -185,6 +186,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
         >
           <Mention
             trigger="[["
+            // @ts-ignore
             data={files.map((file) => ({ id: file.path, display: file.path }))}
             onAdd={(id: string) => handleFileAdd(id)}
           />
