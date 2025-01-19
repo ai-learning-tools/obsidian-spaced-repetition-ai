@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Deck } from '@/fsrs/Deck';
 import { State, Card, Rating, Grade, RecordLogItem } from '@/fsrs';
-import EntryView from '@/components/EntryView'
+import CardView from '@/components/CardView';
+import SRPlugin from '@/main';
+import { TFile } from 'obsidian';
 
 interface DeckDisplayProps {
   deck: Deck;
+  plugin: SRPlugin;
 }
 
-const DeckDisplay: React.FC<DeckDisplayProps> = ({ deck }: DeckDisplayProps) => {
+const DeckDisplay: React.FC<DeckDisplayProps> = ({ deck, plugin }: DeckDisplayProps) => {
   const [stateCounts, setStateCounts] = useState(deck.getCountForStates());
   const [topCard, setTopCard] = useState<Card>(deck.cards[0]);
 
@@ -34,17 +37,18 @@ const DeckDisplay: React.FC<DeckDisplayProps> = ({ deck }: DeckDisplayProps) => 
         ))}
       </div>
 
-      <CardReview card={topCard} onReview={onTopCardReview} />
+      <CardReview plugin={plugin} card={topCard} onReview={onTopCardReview} />
     </div>
   );
 }
 
 interface CardReviewProps {
+  plugin: SRPlugin;
   card: Card;
   onReview: (rating: Rating) => Promise<void>;
 }
 
-const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewProps) => {
+const CardReview: React.FC<CardReviewProps> = ({ plugin, card, onReview }: CardReviewProps) => {
   const [showBack, setShowBack] = useState(false);
   const cardReviewRef = useRef<HTMLDivElement>(null);
 
@@ -91,7 +95,13 @@ const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewPro
 
   return (
     <div ref={cardReviewRef} className="h-full w-full flex-col flex space-y-5 items-center" tabIndex={0}>
-      <EntryView front={card.front} back={card.back} showBack={showBack}></EntryView>
+      <div 
+        className="text-sm mb-2 cursor-pointer text-center hover:underline"
+        onClick={() => plugin.app.workspace.openLinkText(card.path, '', true)}
+      >
+        {card.path}
+      </div>
+      <CardView plugin={plugin} front={card.front} back={card.back} showBack={showBack} path={card.path}></CardView>
       {
         showBack &&
         <div className="flex space-x-4">
@@ -109,4 +119,4 @@ const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewPro
   );
 };
 
-export default DeckDisplay
+export default DeckDisplay;

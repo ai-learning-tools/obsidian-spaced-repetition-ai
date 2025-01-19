@@ -1,10 +1,15 @@
 import { SRSettings } from "@/settings";
 
-export const DIRECTORY = "SR" //TODO: Athena - move away to settings
+export const DIRECTORY = "SR" // TODO: Athena - move away to settings
 
 export const PREFERRED_DATE_FORMAT = "YYYY-MM-DD";
 export const ALLOWED_DATE_FORMATS = [PREFERRED_DATE_FORMAT, "DD-MM-YYYY", "ddd MMM DD YYYY"];
 import { z } from 'zod';
+
+export enum OnboardingStatus {
+  Import = 'onboarding-import',
+  Done = 'onboarding-done'
+}
 
 // Regex to capture multiline flashcards in the format:
 // > [!card]+ frontLine1<br>frontLine2<br>frontLine3...
@@ -14,6 +19,8 @@ import { z } from 'zod';
 export const FRONT_CARD_REGEX = /^>\s*\[!card\][\+\-]?\s*((?:.*(?:<br>|$))+?)/gm;
 export const BACK_CARD_REGEX = /(?:^>\s*((?:.*\n?)+?)(?=(?:^[^>]|\s*$)))/gm;
 
+// Maximum characters allowed for OpenAI Assistants API, as of 2024-11-17
+export const MAX_CHARACTERS = 256000;
 
 // Optional front and back due to streaming
 //TODO: Move this to model @belindamo
@@ -80,36 +87,80 @@ export enum ChatModels {
   GPT_35_TURBO = "gpt-3.5-turbo",
   GPT_4 = "gpt-4",
   GPT_4_TURBO = "gpt-4-turbo-preview",
-  GPT_4_32K = "gpt-4-32k",
   GPT_4o = "gpt-4o",
-  GPT_4o_MINI = "gpt-4o-mini"
+  CHATGPT_4o_LATEST = "chatgpt-4o-latest",
+  GPT_4o_MINI = "gpt-4o-mini",
+  GPT_4o_2024_11_20 = "gpt-4o-2024-11-20",
+  GPT_4o_2024_08_06 = "gpt-4o-2024-08-06",
+  GPT_4o_2024_05_13 = "gpt-4o-2024-05-13",
+  GPT_4o_MINI_2024_07_18 = "gpt-4o-mini-2024-07-18",
+  // O1 = "o1",
+  // O1_MINI = "o1-mini",
+  // O1_PREVIEW = "o1-preview",
+  // O1_2024_12_17 = "o1-2024-12-17",
+  // O1_MINI_2024_09_12 = "o1-mini-2024-09-12",
+  // O1_PREVIEW_2024_09_12 = "o1-preview-2024-09-12",
+  // O1_PRO = "o1-pro"
 }
 
 export enum ChatModelDisplayNames {
   GPT_35_TURBO = "GPT-3.5 Turbo",
   GPT_4 = "GPT-4",
   GPT_4_TURBO = "GPT-4 Turbo",
-  GPT_4_32K = "GPT-4 32k",
   GPT_4o = "GPT-4o",
-  GPT_4o_MINI = "GPT-4o Mini"
+  CHATGPT_4o_LATEST = "ChatGPT-4o latest",
+  GPT_4o_MINI = "GPT-4o mini",
+  GPT_4o_2024_11_20 = "GPT-4o 2024-11-20",
+  GPT_4o_2024_08_06 = "GPT-4o 2024-08-06",
+  GPT_4o_2024_05_13 = "GPT-4o 2024-05-13",
+  GPT_4o_MINI_2024_07_18 = "GPT-4o mini 2024-07-18",
+  // O1 = "o1",
+  // O1_MINI = "o1-mini",
+  // O1_PREVIEW = "o1-preview",
+  // O1_2024_12_17 = "o1 2024-12-17",
+  // O1_MINI_2024_09_12 = "o1-mini 2024-09-12",
+  // O1_PREVIEW_2024_09_12 = "o1-preview 2024-09-12",
+  // O1_PRO = "o1-pro"
 }
 
 export const OPENAI_MODELS = [
   ChatModelDisplayNames.GPT_35_TURBO,
   ChatModelDisplayNames.GPT_4,
   ChatModelDisplayNames.GPT_4_TURBO,
-  ChatModelDisplayNames.GPT_4_32K,
   ChatModelDisplayNames.GPT_4o,
-  ChatModelDisplayNames.GPT_4o_MINI
+  ChatModelDisplayNames.CHATGPT_4o_LATEST,
+  ChatModelDisplayNames.GPT_4o_MINI,
+  ChatModelDisplayNames.GPT_4o_2024_11_20,
+  ChatModelDisplayNames.GPT_4o_2024_08_06,
+  ChatModelDisplayNames.GPT_4o_2024_05_13,
+  ChatModelDisplayNames.GPT_4o_MINI_2024_07_18,
+  // ChatModelDisplayNames.O1,
+  // ChatModelDisplayNames.O1_MINI,
+  // ChatModelDisplayNames.O1_PREVIEW,
+  // ChatModelDisplayNames.O1_2024_12_17,
+  // ChatModelDisplayNames.O1_MINI_2024_09_12,
+  // ChatModelDisplayNames.O1_PREVIEW_2024_09_12,
+  // ChatModelDisplayNames.O1_PRO
 ];
 
 export const DISPLAY_NAME_TO_MODEL: Record<ChatModelDisplayNames, ChatModels> = {
   [ChatModelDisplayNames.GPT_35_TURBO]: ChatModels.GPT_35_TURBO,
   [ChatModelDisplayNames.GPT_4]: ChatModels.GPT_4,
   [ChatModelDisplayNames.GPT_4_TURBO]: ChatModels.GPT_4_TURBO,
-  [ChatModelDisplayNames.GPT_4_32K]: ChatModels.GPT_4_32K,
   [ChatModelDisplayNames.GPT_4o]: ChatModels.GPT_4o,
+  [ChatModelDisplayNames.CHATGPT_4o_LATEST]: ChatModels.CHATGPT_4o_LATEST,
   [ChatModelDisplayNames.GPT_4o_MINI]: ChatModels.GPT_4o_MINI,
+  [ChatModelDisplayNames.GPT_4o_2024_11_20]: ChatModels.GPT_4o_2024_11_20,
+  [ChatModelDisplayNames.GPT_4o_2024_08_06]: ChatModels.GPT_4o_2024_08_06,
+  [ChatModelDisplayNames.GPT_4o_2024_05_13]: ChatModels.GPT_4o_2024_05_13,
+  [ChatModelDisplayNames.GPT_4o_MINI_2024_07_18]: ChatModels.GPT_4o_MINI_2024_07_18,
+  // [ChatModelDisplayNames.O1]: ChatModels.O1,
+  // [ChatModelDisplayNames.O1_MINI]: ChatModels.O1_MINI,
+  // [ChatModelDisplayNames.O1_PREVIEW]: ChatModels.O1_PREVIEW,
+  // [ChatModelDisplayNames.O1_2024_12_17]: ChatModels.O1_2024_12_17,
+  // [ChatModelDisplayNames.O1_MINI_2024_09_12]: ChatModels.O1_MINI_2024_09_12,
+  // [ChatModelDisplayNames.O1_PREVIEW_2024_09_12]: ChatModels.O1_PREVIEW_2024_09_12,
+  // [ChatModelDisplayNames.O1_PRO]: ChatModels.O1_PRO,
 };
 
 export const MODEL_TO_DISPLAY_NAME: Record<ChatModels, ChatModelDisplayNames> = Object.fromEntries(
@@ -117,13 +168,32 @@ export const MODEL_TO_DISPLAY_NAME: Record<ChatModels, ChatModelDisplayNames> = 
 ) as Record<ChatModels, ChatModelDisplayNames>;
 
 export const DEFAULT_SETTINGS: SRSettings = {
-  defaultModel: ChatModels.GPT_4,
-  defaultModelDisplayName: ChatModelDisplayNames.GPT_4,
+  defaultModel: ChatModels.GPT_4o,
+  defaultModelDisplayName: ChatModelDisplayNames.GPT_4o,
   openAIApiKey: "",
   inlineSeparator: "::",
   multilineSeparator: "?",
   includeCurrentFile: true,
+  onboardingStatus: OnboardingStatus.Import,
 };
 
 // From here https://github.com/open-spaced-repetition/fsrs4anki/blob/main/fsrs4anki_scheduler.js#L108
 export const DEFAULT_FSRS_WEIGHTS = [0.41, 1.18, 3.04, 15.24, 7.14, 0.64, 1.00, 0.06, 1.65, 0.17, 1.11, 2.02, 0.09, 0.30, 2.12, 0.24, 2.94, 0.48, 0.64];
+
+
+export const IMAGE_FORMATS = [
+  "jpg",
+  "jpeg",
+  "gif",
+  "png",
+  "svg",
+  "webp",
+  "apng",
+  "avif",
+  "jfif",
+  "pjpeg",
+  "pjp",
+  "bmp",
+];
+export const AUDIO_FORMATS = ["mp3", "webm", "m4a", "wav", "ogg"];
+export const VIDEO_FORMATS = ["mp4", "mkv", "avi", "mov"];

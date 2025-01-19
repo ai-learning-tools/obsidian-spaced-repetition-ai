@@ -6,13 +6,23 @@ import { Root, createRoot } from 'react-dom/client';
 import Chat from "../components/Chat";
 import NavBar from '@/components/NavBar';
 import Review from '@/components/Review';
+import { useMessageHistory } from '../hooks/useMessageHistory';
+import { ChatMessage } from "@/chatMessage";
 
 export default class MainView extends ItemView {
   private root: Root | null = null;
+  private plugin: SRPlugin;
+  private messageHistory: ChatMessage[];
   
-  constructor(leaf: WorkspaceLeaf, private plugin: SRPlugin) {
+  constructor(leaf: WorkspaceLeaf, plugin: SRPlugin) {
     super(leaf);
     this.plugin = plugin;
+    this.messageHistory = [{ 
+      userMessage: null,
+      modifiedMessage: null,
+      aiString: null,
+      aiEntries: null
+    }];
   }
   
   getViewType(): string {
@@ -24,35 +34,46 @@ export default class MainView extends ItemView {
   }
 
   getTitle(): string {
-    return 'Notes to Flashcards';
+    return 'Spaced Repetition AI';
   }
 
   getDisplayText(): string {
-    return 'Notes to Flashcards';
+    return 'Spaced Repetition AI';
   }
 
   renderContent(): React.ReactNode {
-    return (
-      <div className='learn-plugin'>
-        <NavBar 
-          currentSubview={this.plugin.subviewType}
-          changeSubview={(subview: SubviewType) => {
-            this.plugin.subviewType = subview;
-            this.root?.render(this.renderContent());
-          }}
-        />
-        {this.plugin.subviewType === SubviewType.CHAT && (
-          <Chat
-            plugin={this.plugin}
+    const MainContent: React.FC = () => {
+      const messageHistoryHook = useMessageHistory(this.messageHistory);
+      this.messageHistory = messageHistoryHook.messageHistory;
+      const [subviewType, setSubviewType] = React.useState(this.plugin.subviewType);
+
+      return (
+        <div className='learn-plugin'>
+          <NavBar 
+            currentSubview={subviewType}
+            changeSubview={(subview: SubviewType) => {
+              this.plugin.subviewType = subview;
+              setSubviewType(subview);
+            }}
           />
-        )}
-        {this.plugin.subviewType === SubviewType.REVIEW && (
-          <Review
-            plugin={this.plugin}
-          />
-        )}
-      </div>
-    );
+          <div className="mt-8 mx-auto max-w-[768px]">
+            {this.plugin.subviewType === SubviewType.CHAT && (
+              <Chat
+                plugin={this.plugin}
+                messageHistoryHook={messageHistoryHook}
+              />
+            )}
+            {this.plugin.subviewType === SubviewType.REVIEW && (
+              <Review
+                plugin={this.plugin}
+              />
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    return <MainContent />;
   }
 
   async onOpen(): Promise<void> {

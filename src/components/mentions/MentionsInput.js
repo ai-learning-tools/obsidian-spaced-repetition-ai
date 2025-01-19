@@ -184,7 +184,19 @@ class MentionsInput extends React.Component {
 
   render() {
     return (
-      <div ref={this.setContainerElement} className='bg-neutral-50 py-2' {...this.props.style} >
+      <div ref={this.setContainerElement} className='py-2' {...this.props.style} >
+        <style>
+          {`
+            .sr-mentions-input-element::placeholder {
+              color: var(--text-faint) !important;
+            }
+            .sr-mentions-input-element {
+              outline: none !important;
+              border: 1px solid var(--border) !important;
+            }
+            
+          `}
+        </style>
         {this.renderControl()}
         {this.renderSuggestionsOverlay()}
       </div>
@@ -241,7 +253,7 @@ class MentionsInput extends React.Component {
     let inputProps = this.getInputProps()
 
     return (
-      <div {...style('control')}>
+      <div {...style('control')} className="theme-bg-transparent sr-mentions-control">
         {this.renderHighlighter()}
         {singleLine
           ? this.renderInput(inputProps)
@@ -251,11 +263,11 @@ class MentionsInput extends React.Component {
   }
 
   renderInput = (props) => {
-    return <input type="text" ref={this.setInputRef} {...props} />
+    return <input type="text" ref={this.setInputRef} {...props} className={`${props.className} sr-mentions-input-element theme-bg-transparent`} />
   }
 
   renderTextarea = (props) => {
-    return <textarea ref={this.setInputRef} {...props} />
+    return <textarea ref={this.setInputRef} {...props} className={`${props.className} sr-mentions-input-element theme-bg-transparent`} />
   }
 
   setInputRef = (el) => {
@@ -627,7 +639,6 @@ class MentionsInput extends React.Component {
   handleKeyDown = (ev) => {
     // do not intercept key events if the suggestions overlay is not shown
 
-    console.log("key down detected", ev.keyCode)
     const suggestionsCount = countSuggestions(this.state.suggestions)
 
     if (suggestionsCount === 0 || !this.suggestionsElement) {

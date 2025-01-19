@@ -121,9 +121,8 @@ function SuggestionsOverlay({
   }
 
   return (
-    // TODO: Athena - remove this 
     <div
-      className='w-full border'
+      className='w-full theme-bg-surface theme-border theme-text border rounded-md shadow-sm'
       onMouseDown={onMouseDown}
       ref={containerRef}
     >

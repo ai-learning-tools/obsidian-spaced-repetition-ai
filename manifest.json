@@ -1,11 +1,11 @@
 {
-	"id": "obsidian-learn",
-	"name": "Obsidian Learn",
+	"id": "spaced-repetition-ai",
+	"name": "Spaced Repetition AI",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "A clean learning interface for spaced repetition in Obsidian.",
+	"description": "A learning interface using spaced repetition and AI in Obsidian.",
 	"author": "Belinda Mo <justanexperimentpark@gmail.com>, Athena Leong <athenaleong619@gmail.com>",
-	"authorUrl": "https://justanexperiment.com/obsidianlearn",
+	"authorUrl": "https://justanexperiment.com",
 	"fundingUrl": "https://buymeacoffee.com/obsidianlearn",
 	"isDesktopOnly": false
 }
