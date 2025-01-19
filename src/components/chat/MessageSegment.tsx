@@ -6,7 +6,6 @@ import SRPlugin from '@/main';
 import MentionsInput from '@/components/mentions/MentionsInput';
 import { ChatMessage } from '@/chatMessage';
 import Mention from '@/components/mentions/Mention'; 
-import AIManager from '@/llm/AIManager';
 import { useAIState } from '@/hooks/useAIState';
 import { getFileContent, writeCardtoFile } from '@/utils/obsidianFiles';
 import { EnterIcon, RefreshIcon } from '@/components/Icons';
@@ -89,23 +88,28 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
     updateUserMessage(userMessage);
 
-    let modifiedMessage = `----- USER MESSAGE -----\n\n${userMessage}`;
+    let modifiedMessage = `<USER MESSAGE>\n\n${userMessage}</USER MESSAGE>`;
     const entriesToEdit = messageHistory[index-1]?.aiEntries;
     if (index !== 0 && entriesToEdit && entriesToEdit.length > 0) {
-      modifiedMessage += `----- FLASHCARDS FOR YOU TO EDIT -----\n\n${entriesToEdit!.join('\n\n')}`
+      const stringifiedEntries = entriesToEdit.map(entry => 
+        `<flashcard><question>${entry.front}</question><answer>${entry.back}</answer></flashcard>`
+      ).join('\n\n');
+      modifiedMessage += `<FLASHCARDS FOR YOU TO EDIT>\n\n${stringifiedEntries}</FLASHCARDS FOR YOU TO EDIT>`;
     }
+
     if (mentionedFiles.length > 0) {
-      modifiedMessage += `\n\n----- REFERENCE FILES -----\n\n`
+      modifiedMessage += `\n\n<REFERENCE FILES>`
       for (const [index, file] of mentionedFiles.entries()) {
         const fileContent = await getFileContent(file, plugin.app.vault);
-        modifiedMessage += `\n\n--REFERENCE #${index + 1}: [[${file.name}]]--\n\n${fileContent}`;
+        modifiedMessage += `\n\n<REFERENCE>#${index + 1}: [[${file.name}]]\n---\n\n${fileContent}</REFERENCE>`;
       }
+      modifiedMessage += '</REFERENCE FILES>'
     }
 
     updateModifiedMessage(modifiedMessage);
 
     if (index < messageHistory.length - 1) {
-      await aiManager.setNewThread(messageHistory.slice(0, index));
+      await aiManager.setNewThread(index);
     } 
 
     const controller = new AbortController();
@@ -147,11 +151,13 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     if (feedback === 'y') {
       if (activeFile) {
         await writeCardtoFile(entry, activeFile, plugin);
+        removeEntry();
       } else {
         errorMessage(`Oops, please open the file where you'd like to write this flashcard`);
       }
+    } else {
+      removeEntry();
     }
-    removeEntry();
   };
 
   const addAllCards = async (event: React.MouseEvent<HTMLButtonElement>) => {

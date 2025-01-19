@@ -87,36 +87,76 @@ export enum ChatModels {
   GPT_35_TURBO = "gpt-3.5-turbo",
   GPT_4 = "gpt-4",
   GPT_4_TURBO = "gpt-4-turbo-preview",
-  GPT_4_32K = "gpt-4-32k",
   GPT_4o = "gpt-4o",
-  GPT_4o_MINI = "gpt-4o-mini"
+  CHATGPT_4o_LATEST = "chatgpt-4o-latest",
+  GPT_4o_MINI = "gpt-4o-mini",
+  GPT_4o_2024_11_20 = "gpt-4o-2024-11-20",
+  GPT_4o_2024_08_06 = "gpt-4o-2024-08-06",
+  GPT_4o_2024_05_13 = "gpt-4o-2024-05-13",
+  GPT_4o_MINI_2024_07_18 = "gpt-4o-mini-2024-07-18",
+  O1 = "o1",
+  O1_MINI = "o1-mini",
+  O1_PREVIEW = "o1-preview",
+  O1_2024_12_17 = "o1-2024-12-17",
+  O1_MINI_2024_09_12 = "o1-mini-2024-09-12",
+  O1_PREVIEW_2024_09_12 = "o1-preview-2024-09-12"
 }
 
 export enum ChatModelDisplayNames {
   GPT_35_TURBO = "GPT-3.5 Turbo",
   GPT_4 = "GPT-4",
   GPT_4_TURBO = "GPT-4 Turbo",
-  GPT_4_32K = "GPT-4 32k",
   GPT_4o = "GPT-4o",
-  GPT_4o_MINI = "GPT-4o Mini"
+  CHATGPT_4o_LATEST = "ChatGPT-4o latest",
+  GPT_4o_MINI = "GPT-4o mini",
+  GPT_4o_2024_11_20 = "GPT-4o 2024-11-20",
+  GPT_4o_2024_08_06 = "GPT-4o 2024-08-06",
+  GPT_4o_2024_05_13 = "GPT-4o 2024-05-13",
+  GPT_4o_MINI_2024_07_18 = "GPT-4o mini 2024-07-18",
+  O1 = "o1",
+  O1_MINI = "o1-mini",
+  O1_PREVIEW = "o1-preview",
+  O1_2024_12_17 = "o1 2024-12-17",
+  O1_MINI_2024_09_12 = "o1-mini 2024-09-12",
+  O1_PREVIEW_2024_09_12 = "o1-preview 2024-09-12"
 }
 
 export const OPENAI_MODELS = [
   ChatModelDisplayNames.GPT_35_TURBO,
   ChatModelDisplayNames.GPT_4,
   ChatModelDisplayNames.GPT_4_TURBO,
-  ChatModelDisplayNames.GPT_4_32K,
   ChatModelDisplayNames.GPT_4o,
-  ChatModelDisplayNames.GPT_4o_MINI
+  ChatModelDisplayNames.CHATGPT_4o_LATEST,
+  ChatModelDisplayNames.GPT_4o_MINI,
+  ChatModelDisplayNames.GPT_4o_2024_11_20,
+  ChatModelDisplayNames.GPT_4o_2024_08_06,
+  ChatModelDisplayNames.GPT_4o_2024_05_13,
+  ChatModelDisplayNames.GPT_4o_MINI_2024_07_18,
+  ChatModelDisplayNames.O1,
+  ChatModelDisplayNames.O1_MINI,
+  ChatModelDisplayNames.O1_PREVIEW,
+  ChatModelDisplayNames.O1_2024_12_17,
+  ChatModelDisplayNames.O1_MINI_2024_09_12,
+  ChatModelDisplayNames.O1_PREVIEW_2024_09_12
 ];
 
 export const DISPLAY_NAME_TO_MODEL: Record<ChatModelDisplayNames, ChatModels> = {
   [ChatModelDisplayNames.GPT_35_TURBO]: ChatModels.GPT_35_TURBO,
   [ChatModelDisplayNames.GPT_4]: ChatModels.GPT_4,
   [ChatModelDisplayNames.GPT_4_TURBO]: ChatModels.GPT_4_TURBO,
-  [ChatModelDisplayNames.GPT_4_32K]: ChatModels.GPT_4_32K,
   [ChatModelDisplayNames.GPT_4o]: ChatModels.GPT_4o,
+  [ChatModelDisplayNames.CHATGPT_4o_LATEST]: ChatModels.CHATGPT_4o_LATEST,
   [ChatModelDisplayNames.GPT_4o_MINI]: ChatModels.GPT_4o_MINI,
+  [ChatModelDisplayNames.GPT_4o_2024_11_20]: ChatModels.GPT_4o_2024_11_20,
+  [ChatModelDisplayNames.GPT_4o_2024_08_06]: ChatModels.GPT_4o_2024_08_06,
+  [ChatModelDisplayNames.GPT_4o_2024_05_13]: ChatModels.GPT_4o_2024_05_13,
+  [ChatModelDisplayNames.GPT_4o_MINI_2024_07_18]: ChatModels.GPT_4o_MINI_2024_07_18,
+  [ChatModelDisplayNames.O1]: ChatModels.O1,
+  [ChatModelDisplayNames.O1_MINI]: ChatModels.O1_MINI,
+  [ChatModelDisplayNames.O1_PREVIEW]: ChatModels.O1_PREVIEW,
+  [ChatModelDisplayNames.O1_2024_12_17]: ChatModels.O1_2024_12_17,
+  [ChatModelDisplayNames.O1_MINI_2024_09_12]: ChatModels.O1_MINI_2024_09_12,
+  [ChatModelDisplayNames.O1_PREVIEW_2024_09_12]: ChatModels.O1_PREVIEW_2024_09_12,
 };
 
 export const MODEL_TO_DISPLAY_NAME: Record<ChatModels, ChatModelDisplayNames> = Object.fromEntries(
@@ -124,8 +164,8 @@ export const MODEL_TO_DISPLAY_NAME: Record<ChatModels, ChatModelDisplayNames> = 
 ) as Record<ChatModels, ChatModelDisplayNames>;
 
 export const DEFAULT_SETTINGS: SRSettings = {
-  defaultModel: ChatModels.GPT_4o_MINI,
-  defaultModelDisplayName: ChatModelDisplayNames.GPT_4o_MINI,
+  defaultModel: ChatModels.GPT_4o,
+  defaultModelDisplayName: ChatModelDisplayNames.GPT_4o,
   openAIApiKey: "",
   inlineSeparator: "::",
   multilineSeparator: "?",
