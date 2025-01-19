@@ -204,6 +204,26 @@ class MemoryManager {
         }
     }
 
+    async renameDeck(oldName: string, newName: string): Promise<void> {
+        if (this.deckFile) {
+            try {
+                const fileContent = await this.vault.read(this.deckFile);
+                const decks = JSON.parse(fileContent)['decks'] as DeckMetaData[];
+                const deck = decks.find(deck => deck.name === oldName);
+                if (deck) {
+                    deck.name = newName;
+                    await this.vault.modify(this.deckFile, JSON.stringify({ decks: decks }, null, 2));
+                } else {
+                    throw new Error(`Deck with name ${oldName} not found`);
+                }
+            } catch (error) {
+                throw new Error(`Cannot rename deck: ${error.message}`);
+            }
+        } else {
+            throw new Error(`Cannot rename deck: deck.md does not exist`);
+        }
+    }
+
     static generateRandomID(length= 8): string {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         const charactersLength = characters.length;

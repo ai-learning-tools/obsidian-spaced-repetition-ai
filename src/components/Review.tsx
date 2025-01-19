@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Deck } from '@/fsrs/Deck';
 import { DeckMetaData, State } from '@/fsrs';
 import DeckDisplay from '@/components/review/DeckDisplay';
@@ -103,10 +103,10 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
   };
 
   const modifyDeck = (deck: Deck) => {
-    const onDeckModify = async (metaData: DeckMetaData) => {
-      await memoryManager.deleteDeck(deck.metaData);
-      await memoryManager.addDeck(metaData);
-      await refresh();
+    const onDeckModify = async (name: string) => {
+      await memoryManager.renameDeck(deck.metaData.name, name);
+      deck.metaData.name = name;
+      setDecks([...deckManager.decks]); // Update the decks state to trigger re-render
     };
     new ModifyDeckModal(plugin.app, deck.metaData, onDeckModify).open();
   };
@@ -157,6 +157,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
           );
         })}
         <div className="flex justify-end w-full pt-4 space-x-2 items-center">
+          {deckManager.isSyncing && <div>Meta</div>}
           {isSyncing && <div className="spinner ml-2">Syncing</div>}
           <div className={`p-2 flex items-center cursor-pointer ${isSyncing ? 'animate-spin' : ''}`} onClick={() => refresh()}>
             <span ref={el => el && setIcon(el, 'refresh-ccw')}></span>
@@ -182,13 +183,15 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
           </div>
           <DeckDisplay className="flex w-full h-full flex-col justify-center" deck={selectedDeck} />
         </div>
-      ) : (
+      ) : 
+      (
         decks.length ? renderDeckSelection() : (
           <div className="flex justify-center items-center h-full my-2">
             <div>Add some cards man ♠️</div>
           </div>
         )
-      )}
+      )
+      }
     </div>
   );
 };

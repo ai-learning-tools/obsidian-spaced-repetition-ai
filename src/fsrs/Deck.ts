@@ -87,6 +87,7 @@ export class DeckManager {
     memoryManager: MemoryManager
     vault: Vault
     settings: SRSettings
+    isSyncing: boolean
 
     constructor(
         memoryManager: MemoryManager,
@@ -96,6 +97,7 @@ export class DeckManager {
         this.memoryManager = memoryManager;
         this.vault = vault;
         this.settings = settings;
+        this.isSyncing = false;
         console.log('DEBUG-ATHENA setting up deck manager');
         (async() => {
             await this.syncMemoryWithNotes()
@@ -107,6 +109,7 @@ export class DeckManager {
     async syncMemoryWithNotes() {
         // Part 1: Extract cards from notes
         console.log('DEBUG-ATHENA syncing memory with notes');
+        this.isSyncing = true
         const files = this.vault.getFiles();
         const newEntries: {[key: string]: Entry} = {}
         for (const file of files) {
@@ -142,7 +145,7 @@ export class DeckManager {
 
                 // if entry already has Id but doesnt have a memory file, log a warning
                 if (!entry.isNew) {
-                    console.warn(`memory file of ${entry.id} cannot be found, rewriting`)
+                    console.warn(`memory file of ${entry.id} cannot be found, rewritten`)
                 } else {
                     // write id into newly created card using lineToAddId, this only works when entries are visited 
                     // in descending lineToAddId order
@@ -164,6 +167,8 @@ export class DeckManager {
                 this.memoryManager.updateMemoryContent(id, undefined, false)
             }
         }
+
+        this.isSyncing = false
     }
 
 

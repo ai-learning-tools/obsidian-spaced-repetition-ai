@@ -3,12 +3,14 @@ import { DeckMetaData } from '@/fsrs';
 
 export default class ModifyDeckModal extends Modal {
     metaData: DeckMetaData
-    onModify: (metaData: DeckMetaData) => Promise<void>;
+    onModify: (name: string) => Promise<void>;
+    newName: string
 
-    constructor(app: App, metaData: DeckMetaData, onModify: (metaData: DeckMetaData) => Promise<void>) {
+    constructor(app: App, metaData: DeckMetaData, onModify: (name: string) => Promise<void>) {
         super(app);
         this.onModify = onModify;
         this.metaData = metaData;
+        this.newName = metaData.name
     }
 
     onOpen() {
@@ -21,19 +23,9 @@ export default class ModifyDeckModal extends Modal {
         .addText((text) => {
           text.setValue(this.metaData.name);
           text.onChange((value) => {
-            this.metaData.name = value;
+            this.newName = value
           });
         });
-
-        new Setting(contentEl)
-          .setName("Root path")
-          .setDesc("Include all cards from files that begin with the specified root path\nexample: main/")
-          .addText((text) => {
-            text.setValue(this.metaData.rootPath);
-            text.onChange((value) => {
-              this.metaData.rootPath = value;
-            });
-          });
     
         new Setting(contentEl)
           .addButton((btn) =>
@@ -46,7 +38,7 @@ export default class ModifyDeckModal extends Modal {
                   return;
                 }
                 this.close();
-                await this.onModify(this.metaData);
+                await this.onModify(this.newName);
               }));
       }
 }
