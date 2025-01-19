@@ -4,11 +4,13 @@ import { DeckMetaData } from '@/fsrs';
 export default class ModifyDeckModal extends Modal {
     metaData: DeckMetaData
     onModify: (name: string) => Promise<void>;
+    onDelete: () => Promise<void>;
     newName: string
 
-    constructor(app: App, metaData: DeckMetaData, onModify: (name: string) => Promise<void>) {
+    constructor(app: App, metaData: DeckMetaData, onModify: (name: string) => Promise<void>, onDelete: () => Promise<void>) {
         super(app);
         this.onModify = onModify;
+        this.onDelete = onDelete;
         this.metaData = metaData;
         this.newName = metaData.name
     }
@@ -39,6 +41,20 @@ export default class ModifyDeckModal extends Modal {
                 }
                 this.close();
                 await this.onModify(this.newName);
+              }));
+
+        new Setting(contentEl)
+          .settingEl.style.border = "none"; // Remove the black line between sections
+          new Setting(contentEl)
+          .addButton((btn) =>
+            btn
+              .setButtonText("Delete Deck")// Assuming "red-text" is a CSS class that makes text red
+              .onClick(async () => {
+                const confirmDelete = confirm("Are you sure you want to delete this deck? Your cards will not be deleted.");
+                if (confirmDelete) {
+                  this.close();      
+                  await this.onDelete();          
+                }
               }));
       }
 }

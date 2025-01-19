@@ -133,8 +133,14 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
 
   const addDeck = () => {
     const onDeckSubmit = async (metaData: DeckMetaData) => {
-      await memoryManager.addDeck(metaData);
-      await refresh();
+      try {
+        await memoryManager.addDeck(metaData);
+        setDecks([...deckManager.decks]);
+        await refresh();
+        setDecks([...deckManager.decks]);
+      } catch (error) {
+        new Notice(`${error.message}`);
+      }
     };
     new NewDeckModal(plugin.app, onDeckSubmit).open();
   };
@@ -145,7 +151,13 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
       deck.metaData.name = name;
       setDecks([...deckManager.decks]); // Update the decks state to trigger re-render
     };
-    new ModifyDeckModal(plugin.app, deck.metaData, onDeckModify).open();
+    const onDeckDelete = async () => {
+      console.log('deleting deck...');
+      const updatedDecks = deckManager.decks.filter((d: Deck) => d.metaData.name !== deck.metaData.name);
+      setDecks(updatedDecks);
+      await memoryManager.deleteDeck(deck.metaData);
+    }
+    new ModifyDeckModal(plugin.app, deck.metaData, onDeckModify, onDeckDelete).open();
   };
 
   const renderDeckSelection = () => (

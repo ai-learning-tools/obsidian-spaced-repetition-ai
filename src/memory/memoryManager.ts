@@ -179,10 +179,17 @@ class MemoryManager {
             try {
                 const fileContent = await this.vault.read(this.deckFile);
                 const decks = JSON.parse(fileContent)['decks'] as DeckMetaData[];
+
+                // Check for existing deck with the same name or path
+                const duplicateDeck = decks.find(deck => deck.name == newDeck.name || deck.rootPath == newDeck.rootPath);
+                if (duplicateDeck) {
+                    throw new Error(`A deck with the same name or path already exists.`);
+                }
+
                 decks.push(newDeck);
                 await this.vault.modify(this.deckFile, JSON.stringify({ decks: decks }, null, 2));
             } catch (error) {
-                throw new Error(`Cannot add deck: Invalid content in deck.md`);
+                throw new Error(`Cannot add deck: ${error.message}`);
             }
         } else {
             throw new Error(`Cannot add deck: deck.md does not exist`);
@@ -194,7 +201,10 @@ class MemoryManager {
             try {
                 const fileContent = await this.vault.read(this.deckFile);
                 let decks = JSON.parse(fileContent)['decks'] as DeckMetaData[];
+                
+                console.log('toDelete', toDelete)
                 decks = decks.filter(deck => toDelete.name != deck.name && toDelete.rootPath != deck.rootPath);
+                console.log('exisitng deck', decks)
                 await this.vault.modify(this.deckFile, JSON.stringify({ decks: decks }, null, 2));
             } catch (error) {
                 throw new Error(`Cannot delete deck: Invalid content in deck.md`);
