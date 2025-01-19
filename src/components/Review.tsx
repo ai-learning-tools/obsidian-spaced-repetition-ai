@@ -18,6 +18,10 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
   const [isNarrow, setIsNarrow] = useState(false);
   const observerRef = useRef<ResizeObserver| null>(null);
   const loadPromiseRef = useRef<Promise<void>>();
+  const syncPromiseRef = useRef<{
+    promise: Promise<void>;
+    pendingDeck: Deck | null;
+  } | null>(null);
 
   const { deckManager, memoryManager } = plugin;
 
@@ -82,47 +86,47 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
   const refresh = async (currDeck: Deck | null = null) => {
     if (!isSyncing) {
       try {
-          setIsSyncing(true);
-          await deckManager.syncMemoryWithNotes();
-          await deckManager.populateDecks();
-          console.log("finished populating!!!", selectedDeck)
-          if (currDeck) {
-            console.log('updating deck with new info!!! 1')
-            const updatedDeck = deckManager.decks.find(
-              (deck: Deck) => deck.metaData.name === currDeck.metaData.name
-            );
-
-            if (updatedDeck) {
-              // Create a new deck instance to force React to see the change
-              setSelectedDeck(new Deck(
-                [...updatedDeck.cards],
-                {...updatedDeck.metaData},
-                updatedDeck.memoryManager
-              ));
+        setIsSyncing(true);
+        
+        // Create sync promise with pendingDeck
+        syncPromiseRef.current = {
+          promise: (async () => {
+            await deckManager.syncMemoryWithNotes();
+            await deckManager.populateDecks();
+            
+            // Use either the pending deck or selectedDeck
+            const deckToUpdate = syncPromiseRef.current?.pendingDeck || selectedDeck;
+            console.log("updating deck", deckToUpdate)
+            if (deckToUpdate) {
+              const updatedDeck = deckManager.decks.find(
+                (deck: Deck) => deck.metaData.name === deckToUpdate.metaData.name
+              );
+              if (updatedDeck) {
+                setSelectedDeck(new Deck(
+                  [...updatedDeck.cards],
+                  {...updatedDeck.metaData},
+                  updatedDeck.memoryManager
+                ));
+              }
             }
-          } 
-          else if (selectedDeck) {
-            console.log('updating deck with new info!!! 2')
-            const updatedDeck = deckManager.decks.find(
-              (deck: Deck) => deck.metaData.name === selectedDeck.metaData.name
-            );
-
-            if (updatedDeck) {
-              // Create a new deck instance to force React to see the change
-              setSelectedDeck(new Deck(
-                [...updatedDeck.cards],
-                {...updatedDeck.metaData},
-                updatedDeck.memoryManager
-              ));
-            }
-
-          }
-
-          setDecks([...deckManager.decks]);
+            
+            setDecks([...deckManager.decks]);
+          })(),
+          pendingDeck: currDeck
+        };
+        
+        await syncPromiseRef.current.promise;
+        
       } catch (error) {
         console.error('Error refreshing decks:', error);
       } finally {
         setIsSyncing(false);
+        syncPromiseRef.current = null;
+      }
+    } else if (currDeck) {
+      // Update pendingDeck if there's an ongoing sync
+      if (syncPromiseRef.current) {
+        syncPromiseRef.current.pendingDeck = currDeck;
       }
     }
   };
@@ -190,7 +194,6 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
           );
         })}
         <div className="flex justify-end w-full pt-4 space-x-2 items-center">
-          {deckManager.isSyncing && <div>Meta</div>}
           {isSyncing && <div className="spinner ml-2">Syncing</div>}
           <div className={`p-2 flex items-center cursor-pointer ${isSyncing ? 'animate-spin' : ''}`} onClick={() => refresh()}>
             <span ref={el => el && setIcon(el, 'refresh-ccw')}></span>

@@ -107,21 +107,27 @@ export class DeckManager {
 
     // Update memory folder with new cards and card details
     async syncMemoryWithNotes() {
+        if (this.isSyncing) {
+            // this checks prevents the initial sync from turning on the plugin from conflicting with other sync
+            console.log('Sync is already in progress. Exiting syncMemoryWithNotes.');
+            return;
+        }
+
         // Part 1: Extract cards from notes
         try {
             console.log('DEBUG-ATHENA syncing memory with notes');
-            this.isSyncing = true
+            this.isSyncing = true;
             const files = this.vault.getFiles();
-            const newEntries: {[key: string]: Entry} = {}
+            const newEntries: { [key: string]: Entry } = {};
             for (const file of files) {
                 if (file.extension === 'md' && !file.path.startsWith(`${DIRECTORY}`)) {
                     const content = await this.vault.read(file);
                     const extractedEntries = this.extractEntriesFromContent(content, file.path);
-                    console.log('extracted entries from', file.path)
-                    console.log(extractedEntries)
+                    console.log('extracted entries from', file.path);
+                    console.log(extractedEntries);
                     for (const newEntry of extractedEntries) {
                         const id = newEntry.id ?? MemoryManager.generateRandomID();
-                        newEntry.id = id
+                        newEntry.id = id;
                         newEntries[id] = newEntry;
                     }
                 }
@@ -130,7 +136,6 @@ export class DeckManager {
             // INSERT_YOUR_CODE
             // Introduce an artificial 10-second delay
             await new Promise(resolve => setTimeout(resolve, 10000));
-
 
             // Sort entries by their lineToAddId in descending order to prevent line shifting
             const sortedEntries = Object.values(newEntries).sort((a, b) => (b.lineToAddId ?? 0) - (a.lineToAddId ?? 0));
@@ -142,23 +147,22 @@ export class DeckManager {
                 }
                 // Check if card exists in memory file
                 if (this.memoryManager.getFile(entry.id)) {
-                    this.memoryManager.updateMemoryContent(entry.id, entry, true)
+                    this.memoryManager.updateMemoryContent(entry.id, entry, true);
                 } else {
                     // card doesn't exists in memory, we will create one
-                    const card = createEmptyCard(entry)
-                    const memory = MemoryManager.createNewMemory(card, true)
-                    await this.memoryManager.writeMemory(memory) 
+                    const card = createEmptyCard(entry);
+                    const memory = MemoryManager.createNewMemory(card, true);
+                    await this.memoryManager.writeMemory(memory);
 
                     // if entry already has Id but doesnt have a memory file, log a warning
                     if (!entry.isNew) {
-                        console.warn(`memory file of ${entry.id} cannot be found, rewritten`)
+                        console.warn(`memory file of ${entry.id} cannot be found, rewritten`);
                     } else {
                         // write id into newly created card using lineToAddId, this only works when entries are visited 
                         // in descending lineToAddId order
-                        const separator = entry.entryType == EntryType.Multiline ? this.settings.multilineSeparator : this.settings.inlineSeparator
-                        await writeIdToCardInFile(this.vault, entry, separator)
+                        const separator = entry.entryType == EntryType.Multiline ? this.settings.multilineSeparator : this.settings.inlineSeparator;
+                        await writeIdToCardInFile(this.vault, entry, separator);
                     }
-                    
                 }
             }
 
@@ -170,12 +174,14 @@ export class DeckManager {
             for (const file of memoryFiles) {
                 const id = file.basename;
                 if (!trackedIds.has(id)) {
-                    this.memoryManager.updateMemoryContent(id, undefined, false)
+                    this.memoryManager.updateMemoryContent(id, undefined, false);
                 }
             }
         } catch (error) {
             console.error("Error during sync:", error);
-        } 
+        } finally {
+            this.isSyncing = false;
+        }
     }
 
 
