@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback} from 'react';
 import { Deck } from '@/fsrs/Deck';
 import { State, Card, Rating, Grade, RecordLogItem } from '@/fsrs';
 import EntryView from '@/components/EntryView'
@@ -9,13 +9,19 @@ interface DeckDisplayProps {
 
 const DeckDisplay: React.FC<DeckDisplayProps> = ({ deck }: DeckDisplayProps) => {
   const [stateCounts, setStateCounts] = useState(deck.getCountForStates());
-  const [topCard, setTopCard] = useState<Card>(deck.cards[0]);
+  const [cards, setCards] = useState<Card[]>(deck.cards);
+  const [topCard, setTopCard] = useState<Card | null>(deck.cards[0] || null);
 
   useEffect(() => {
+    console.log("DEBUG-ATHENA", "deck update received")
     setStateCounts(deck.getCountForStates());
-  }, [deck.cards]);
+    setCards([...deck.cards]); // Create new array to ensure state update
+    setTopCard(deck.cards[0] || null);
+  }, [deck, deck.cards]);
 
   const onTopCardReview = async (rating: Rating) => {
+    if (!topCard) return;
+
     const record: RecordLogItem = Deck.scheduleNext(topCard, rating as Grade)
     await deck.updateCard(record)
     deck.sortCards()
@@ -52,10 +58,10 @@ const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewPro
     cardReviewRef.current?.focus();
   }, []);
 
-  const handleReview = async (rating: Rating) => {
-    setShowBack(false)
+  const handleReview = useCallback(async (rating: Rating) => {
+    setShowBack(false);
     await onReview(rating);
-  };
+  }, [onReview]);
   
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -86,7 +92,7 @@ const CardReview: React.FC<CardReviewProps> = ({ card, onReview }: CardReviewPro
 		return () => {
 			window.removeEventListener('keydown', handleKeyDown);
 		};
-	}, [showBack]);
+	}, [showBack, handleReview]);
 
   return (
     <div ref={cardReviewRef} className="h-full w-full flex-col flex space-y-5 items-center" tabIndex={0}>

@@ -127,7 +127,6 @@ export class DeckManager {
         }
         // Sort entries by their lineToAddId in descending order to prevent line shifting
         const sortedEntries = Object.values(newEntries).sort((a, b) => (b.lineToAddId ?? 0) - (a.lineToAddId ?? 0));
-
         // Part 2: Update memory files with new content
         for (const entry of sortedEntries) {
             if (!entry.id) {

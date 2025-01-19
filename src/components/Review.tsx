@@ -78,14 +78,31 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
     loadDecks();
   }, [deckManager]); // Only depends on deckManager now
 
-  const refresh = async () => {
+
+  const refresh = async (selectedDeck: Deck | null = null) => {
     
     try {
       if (!isSyncing) {
         setIsSyncing(true);
         await deckManager.syncMemoryWithNotes();
         await deckManager.populateDecks();
-        setDecks(deckManager.decks);
+        console.log("finished populating!!!", selectedDeck)
+        if (selectedDeck) {
+          const updatedDeck = deckManager.decks.find(
+            (deck: Deck) => deck.metaData.name === selectedDeck.metaData.name
+          );
+          console.log('set selected deck')
+          if (updatedDeck) {
+            // Create a new deck instance to force React to see the change
+            setSelectedDeck(new Deck(
+              [...updatedDeck.cards],
+              {...updatedDeck.metaData},
+              updatedDeck.memoryManager
+            ));
+          }
+        }
+
+        setDecks([...deckManager.decks]);
       }
     } catch (error) {
       console.error('Error refreshing decks:', error);
@@ -132,9 +149,9 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
               key={deck.metaData.name} 
               className={`grid ${isNarrow ? 'grid-cols-5' : 'grid-cols-7'} gap-4 bg-gray-100 rounded-lg py-2 px-6 mb-2 h-10 items-center cursor-pointer`}
               onClick={async() => { 
-                await refresh(); 
                 if (deck.cards.length > 0) { 
                   setSelectedDeck(deck);
+                  await refresh(deck); 
                 } else {
                   new Notice(`There are no cards detected in ${deck.metaData.name}. Add some cards to path ${deck.metaData.rootPath} or modify its settings`);
                 }
@@ -176,7 +193,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
       {selectedDeck ? (
         <div>
           <div className="m-2 p-2 flex items-center" 
-            onClick={async() => {setSelectedDeck(null); await refresh();}}
+            onClick={async() => {setSelectedDeck(null)}}
           >
             <span ref={el => el && setIcon(el, 'arrow-left')}></span>
             Decks
