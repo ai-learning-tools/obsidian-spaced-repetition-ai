@@ -87,7 +87,7 @@ export class DeckManager {
     memoryManager: MemoryManager
     vault: Vault
     settings: SRSettings
-    isSyncing: boolean
+    isSyncing: boolean //NOTE: this will not work if we are using multi-thread
 
     constructor(
         memoryManager: MemoryManager,
@@ -108,66 +108,74 @@ export class DeckManager {
     // Update memory folder with new cards and card details
     async syncMemoryWithNotes() {
         // Part 1: Extract cards from notes
-        console.log('DEBUG-ATHENA syncing memory with notes');
-        this.isSyncing = true
-        const files = this.vault.getFiles();
-        const newEntries: {[key: string]: Entry} = {}
-        for (const file of files) {
-            if (file.extension === 'md' && !file.path.startsWith(`${DIRECTORY}`)) {
-                const content = await this.vault.read(file);
-                const extractedEntries = this.extractEntriesFromContent(content, file.path);
-                console.log('extracted entries from', file.path)
-                console.log(extractedEntries)
-                for (const newEntry of extractedEntries) {
-                    const id = newEntry.id ?? MemoryManager.generateRandomID();
-                    newEntry.id = id
-                    newEntries[id] = newEntry;
+        try {
+            console.log('DEBUG-ATHENA syncing memory with notes');
+            this.isSyncing = true
+            const files = this.vault.getFiles();
+            const newEntries: {[key: string]: Entry} = {}
+            for (const file of files) {
+                if (file.extension === 'md' && !file.path.startsWith(`${DIRECTORY}`)) {
+                    const content = await this.vault.read(file);
+                    const extractedEntries = this.extractEntriesFromContent(content, file.path);
+                    console.log('extracted entries from', file.path)
+                    console.log(extractedEntries)
+                    for (const newEntry of extractedEntries) {
+                        const id = newEntry.id ?? MemoryManager.generateRandomID();
+                        newEntry.id = id
+                        newEntries[id] = newEntry;
+                    }
                 }
             }
-        }
-        // Sort entries by their lineToAddId in descending order to prevent line shifting
-        const sortedEntries = Object.values(newEntries).sort((a, b) => (b.lineToAddId ?? 0) - (a.lineToAddId ?? 0));
-        // Part 2: Update memory files with new content
-        for (const entry of sortedEntries) {
-            if (!entry.id) {
-                console.warn(`Entry with ID ${entry.id} is missing. Skipping this entry.`);
-                continue;
-            }
-            // Check if card exists in memory file
-            if (this.memoryManager.getFile(entry.id)) {
-                this.memoryManager.updateMemoryContent(entry.id, entry, true)
-            } else {
-                // card doesn't exists in memory, we will create one
-                const card = createEmptyCard(entry)
-                const memory = MemoryManager.createNewMemory(card, true)
-                await this.memoryManager.writeMemory(memory) 
 
-                // if entry already has Id but doesnt have a memory file, log a warning
-                if (!entry.isNew) {
-                    console.warn(`memory file of ${entry.id} cannot be found, rewritten`)
+            // INSERT_YOUR_CODE
+            // Introduce an artificial 10-second delay
+            await new Promise(resolve => setTimeout(resolve, 10000));
+
+
+            // Sort entries by their lineToAddId in descending order to prevent line shifting
+            const sortedEntries = Object.values(newEntries).sort((a, b) => (b.lineToAddId ?? 0) - (a.lineToAddId ?? 0));
+            // Part 2: Update memory files with new content
+            for (const entry of sortedEntries) {
+                if (!entry.id) {
+                    console.warn(`Entry with ID ${entry.id} is missing. Skipping this entry.`);
+                    continue;
+                }
+                // Check if card exists in memory file
+                if (this.memoryManager.getFile(entry.id)) {
+                    this.memoryManager.updateMemoryContent(entry.id, entry, true)
                 } else {
-                    // write id into newly created card using lineToAddId, this only works when entries are visited 
-                    // in descending lineToAddId order
-                    const separator = entry.entryType == EntryType.Multiline ? this.settings.multilineSeparator : this.settings.inlineSeparator
-                    await writeIdToCardInFile(this.vault, entry, separator)
+                    // card doesn't exists in memory, we will create one
+                    const card = createEmptyCard(entry)
+                    const memory = MemoryManager.createNewMemory(card, true)
+                    await this.memoryManager.writeMemory(memory) 
+
+                    // if entry already has Id but doesnt have a memory file, log a warning
+                    if (!entry.isNew) {
+                        console.warn(`memory file of ${entry.id} cannot be found, rewritten`)
+                    } else {
+                        // write id into newly created card using lineToAddId, this only works when entries are visited 
+                        // in descending lineToAddId order
+                        const separator = entry.entryType == EntryType.Multiline ? this.settings.multilineSeparator : this.settings.inlineSeparator
+                        await writeIdToCardInFile(this.vault, entry, separator)
+                    }
+                    
                 }
-                
             }
-        }
 
-        // Note: We no longer moved untracked files to trash. this allows users move cards between files without losing data.
-        // Part 3: update untracked memory files
-        const trackedIds = new Set(Object.keys(newEntries));
-        const memoryFiles = this.memoryManager.getAllMemoryFiles();
+            // Note: We no longer moved untracked files to trash. this allows users move cards between files without losing data.
+            // Part 3: update untracked memory files
+            const trackedIds = new Set(Object.keys(newEntries));
+            const memoryFiles = this.memoryManager.getAllMemoryFiles();
 
-        for (const file of memoryFiles) {
-            const id = file.basename;
-            if (!trackedIds.has(id)) {
-                this.memoryManager.updateMemoryContent(id, undefined, false)
+            for (const file of memoryFiles) {
+                const id = file.basename;
+                if (!trackedIds.has(id)) {
+                    this.memoryManager.updateMemoryContent(id, undefined, false)
+                }
             }
-        }
-
-        this.isSyncing = false
+        } catch (error) {
+            console.error("Error during sync:", error);
+        } 
     }
 
 

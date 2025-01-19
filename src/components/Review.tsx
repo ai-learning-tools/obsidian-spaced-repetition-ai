@@ -79,35 +79,51 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
   }, [deckManager]); // Only depends on deckManager now
 
 
-  const refresh = async (selectedDeck: Deck | null = null) => {
-    
-    try {
-      if (!isSyncing) {
-        setIsSyncing(true);
-        await deckManager.syncMemoryWithNotes();
-        await deckManager.populateDecks();
-        console.log("finished populating!!!", selectedDeck)
-        if (selectedDeck) {
-          const updatedDeck = deckManager.decks.find(
-            (deck: Deck) => deck.metaData.name === selectedDeck.metaData.name
-          );
-          console.log('set selected deck')
-          if (updatedDeck) {
-            // Create a new deck instance to force React to see the change
-            setSelectedDeck(new Deck(
-              [...updatedDeck.cards],
-              {...updatedDeck.metaData},
-              updatedDeck.memoryManager
-            ));
-          }
-        }
+  const refresh = async (currDeck: Deck | null = null) => {
+    if (!isSyncing) {
+      try {
+          setIsSyncing(true);
+          await deckManager.syncMemoryWithNotes();
+          await deckManager.populateDecks();
+          console.log("finished populating!!!", selectedDeck)
+          if (currDeck) {
+            console.log('updating deck with new info!!! 1')
+            const updatedDeck = deckManager.decks.find(
+              (deck: Deck) => deck.metaData.name === currDeck.metaData.name
+            );
 
-        setDecks([...deckManager.decks]);
+            if (updatedDeck) {
+              // Create a new deck instance to force React to see the change
+              setSelectedDeck(new Deck(
+                [...updatedDeck.cards],
+                {...updatedDeck.metaData},
+                updatedDeck.memoryManager
+              ));
+            }
+          } 
+          else if (selectedDeck) {
+            console.log('updating deck with new info!!! 2')
+            const updatedDeck = deckManager.decks.find(
+              (deck: Deck) => deck.metaData.name === selectedDeck.metaData.name
+            );
+
+            if (updatedDeck) {
+              // Create a new deck instance to force React to see the change
+              setSelectedDeck(new Deck(
+                [...updatedDeck.cards],
+                {...updatedDeck.metaData},
+                updatedDeck.memoryManager
+              ));
+            }
+
+          }
+
+          setDecks([...deckManager.decks]);
+      } catch (error) {
+        console.error('Error refreshing decks:', error);
+      } finally {
+        setIsSyncing(false);
       }
-    } catch (error) {
-      console.error('Error refreshing decks:', error);
-    } finally {
-      setIsSyncing(false);
     }
   };
 
