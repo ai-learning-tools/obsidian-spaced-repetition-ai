@@ -22,6 +22,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
     promise: Promise<void>;
     pendingDeck: Deck | null;
   } | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   const { deckManager, memoryManager } = plugin;
 
@@ -56,14 +57,15 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
     const loadDecks = async () => {
       if (!loadPromiseRef.current) {
         loadPromiseRef.current = (async () => {
-          console.log("DEBUG-ATHENA loading deck")
+          console.log("DEBUG-ATHENA loading deck", isInitialLoad)
           try {
             setIsSyncing(true);
             
             // First populate with existing cards
             await deckManager.populateDecks();
             setDecks(deckManager.decks);
-    
+            setIsInitialLoad(false) //initial load is set to false when deck is first populated
+
             // Then do full sync
             await deckManager.syncMemoryWithNotes();
             await deckManager.populateDecks();
@@ -206,7 +208,7 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
           );
         })}
         <div className="flex justify-end w-full pt-4 space-x-2 items-center">
-          {isSyncing && <div className="spinner ml-2">Syncing</div>}
+          {/* {isSyncing && <div className="spinner ml-2">Syncing</div>} */}
           <div className={`p-2 flex items-center cursor-pointer ${isSyncing ? 'animate-spin' : ''}`} onClick={() => refresh()}>
             <span ref={el => el && setIcon(el, 'refresh-ccw')}></span>
           </div>
@@ -221,27 +223,34 @@ const Review: React.FC<ReviewProps> = ({ plugin }) => {
 
   return (
     <div>
-      {selectedDeck ? (
-        <div>
-          <div className="m-2 p-2 flex items-center" 
-            onClick={async() => {setSelectedDeck(null)}}
-          >
-            <span ref={el => el && setIcon(el, 'arrow-left')}></span>
-            Decks
+      {isInitialLoad 
+      ? <div className="flex justify-center"><p className="mt-2">Loading decks, please wait...</p></div>
+      : (selectedDeck ? (
+          <div>
+            <div
+              className="m-2 p-2 flex items-center"
+              onClick={async () => {
+                setSelectedDeck(null);
+              }}
+            >
+              <span ref={(el) => el && setIcon(el, "arrow-left")}></span>
+              Decks
+            </div>
+            <DeckDisplay
+              className="flex w-full h-full flex-col justify-center"
+              deck={selectedDeck}
+            />
           </div>
-          <DeckDisplay className="flex w-full h-full flex-col justify-center" deck={selectedDeck} />
-        </div>
-      ) : 
-      (
-        decks.length ? renderDeckSelection() : (
+        ) : decks.length > 0 ? (
+          renderDeckSelection()
+        ) : (
           <div className="flex justify-center items-center h-full my-2">
-            <div>Add some cards man ♠️</div>
+            <div className="flex justify-center"><p className="mt-2">No cards detected. Need help getting started?</p></div>
           </div>
-        )
-      )
-      }
+        ))
+    }
     </div>
   );
-};
+}
 
 export default Review;

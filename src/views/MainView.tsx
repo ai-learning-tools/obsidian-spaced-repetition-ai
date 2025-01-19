@@ -33,24 +33,39 @@ export default class MainView extends ItemView {
 
   renderContent(): React.ReactNode {
     return (
-      <div className='learn-plugin'>
+      <div className="learn-plugin">
         <NavBar 
           currentSubview={this.plugin.subviewType}
           changeSubview={(subview: SubviewType) => {
+            // Update which subview is displayed
             this.plugin.subviewType = subview;
+            // Re-render
             this.root?.render(this.renderContent());
           }}
         />
-        {this.plugin.subviewType === SubviewType.CHAT && (
-          <Chat
-            plugin={this.plugin}
-          />
-        )}
-        {this.plugin.subviewType === SubviewType.REVIEW && (
-          <Review
-            plugin={this.plugin}
-          />
-        )}
+
+        {/* Instead of conditionally rendering/unmounting, 
+            we mount both components but hide one with CSS. 
+            This prevents us unnecessary mounting and unmounting    
+        */}
+        
+        {/* CHAT subview */}
+        <div
+          style={{
+            display: this.plugin.subviewType === SubviewType.CHAT ? "block" : "none",
+          }}
+        >
+          <Chat plugin={this.plugin} />
+        </div>
+
+        {/* REVIEW subview */}
+        <div
+          style={{
+            display: this.plugin.subviewType === SubviewType.REVIEW ? "block" : "none",
+          }}
+        >
+          <Review plugin={this.plugin} />
+        </div>
       </div>
     );
   }
@@ -69,5 +84,4 @@ export default class MainView extends ItemView {
       this.root.unmount();
     }
   }
-
 }
