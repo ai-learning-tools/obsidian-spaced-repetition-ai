@@ -10,7 +10,7 @@ import OpenAI from "openai";
 
 const PROMPT = `
 <INSTRUCTION>
-You are the world's best teacher. You can generate flashcards for review. Respond with the XML response format below, where chat response is your chat response alongside flashcards that contain question answer flashcards.
+You are the world's best teacher. You can generate flashcards for review. Respond with the XML response format below, where chat response is your chat response alongside question answer flashcards.
 
 Best practices for flashcard generation:
 1. Focus on a Single Concept: Ensure each card addresses only one idea at a time. Eliminate extra details and break complex topics into multiple smaller cards.
@@ -24,9 +24,11 @@ Best practices for flashcard generation:
 9. Keep Items Standalone: Don't rely on external resources during recall. Cards should function independently of each other or outside references.
 10. Check for Relevance: Make sure the item is genuinely worth memorizing. Ask: "Will I need to recall this later?" or "Is this fundamental to my understanding?"
 
-Best practices for using reference files
+Best practices for using reference files and chat response
 1. Avoid making flashcards about existing flashcards in the file. You can identify them by an embedded flashcard id, like: "What is capital of France? [[SR/memory/r3HHdEhi.md|>>]] Paris"
-2. Follow best practices for flashcard generation! :)
+2. If flashcards are generated, your chat response should be coherent and reference the flashcards too!
+3. Make sure flashcards are generated if the user is trying to learn something. 
+3. Follow best practices for flashcard generation! :)
 
 </INSTRUCTION>
 <RESPONSE FORMAT>
@@ -158,7 +160,7 @@ export default class AIManager {
 
       // Push user message into messageHistory
       this.messageHistory.push({ role: 'user' as const, content: newMessageModded });
-
+      console.log('Starting AI stream with model:', this.chatModel);
       const stream = await this.client.chat.completions.create({
         model: this.chatModel,
         messages: this.messageHistory,
@@ -169,26 +171,34 @@ export default class AIManager {
       let lastChatResponse = '';
       let lastEntries: EntryItemGeneration[] = [];
 
+      console.log('Stream created, beginning to process chunks');
       for await (const chunk of stream) {
-        if (abortController.signal.aborted) break;
+        if (abortController.signal.aborted) {
+          console.log('Stream aborted');
+          break;
+        }
 
         const content = chunk.choices[0]?.delta?.content || '';
+        console.log('Received chunk:', content);
         fullResponse += content;
         
         const { chatResponse, entries } = this.parseFlashcards(fullResponse);
         
         // Only update if we have new content
         if (chatResponse && chatResponse !== lastChatResponse) {
+          console.log('Updating AI string:', chatResponse);
           setAIString(chatResponse);
           lastChatResponse = chatResponse;
         }
         
         if (entries.length > lastEntries.length) {
+          console.log('Updating AI entries:', entries);
           setAIEntries(entries);
           lastEntries = entries;
         }
       }
       
+      console.log('Stream completed, parsing final response');
       const finalParse = this.parseFlashcards(fullResponse);
       
       // Push assistant message response into messageHistory
@@ -197,9 +207,11 @@ export default class AIManager {
         content: fullResponse
       });
 
+      console.log('Returning final parsed response');
       return { str: finalParse.chatResponse, entries: finalParse.entries };
 
     } catch (e) {
+      console.error('Error in AI stream:', e);
       if (!(e instanceof APIUserAbortError)) {
         errorMessage(`Streaming AI response ${e}`);
       }

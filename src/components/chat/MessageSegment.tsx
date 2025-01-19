@@ -196,7 +196,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           value={currentModel}
           onChange={handleModelChange}
           className="text-center theme-bg-surface theme-border theme-text"
-          style={{ width: '150px' }}
+          style={{ width: '160px' }}
         >
           {Object.entries(ChatModelDisplayNames).map(([key, displayName]) => (
             <option key={key} value={displayName}>
