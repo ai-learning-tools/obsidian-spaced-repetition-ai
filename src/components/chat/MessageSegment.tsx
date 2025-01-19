@@ -130,7 +130,6 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
   const handleStopGenerating = () => {
     if (abortController) {
-      console.log("User stopping generation...");
       abortController.abort();
     }
   };

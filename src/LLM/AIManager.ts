@@ -154,13 +154,8 @@ export default class AIManager {
 
     try {
 
-      console.log('Current chat model:', this.chatModel);
-      console.log('Messages:', JSON.stringify(this.messageHistory, null, 2));
-
-
       // Push user message into messageHistory
       this.messageHistory.push({ role: 'user' as const, content: newMessageModded });
-      console.log('Starting AI stream with model:', this.chatModel);
       const stream = await this.client.chat.completions.create({
         model: this.chatModel,
         messages: this.messageHistory,
@@ -171,34 +166,28 @@ export default class AIManager {
       let lastChatResponse = '';
       let lastEntries: EntryItemGeneration[] = [];
 
-      console.log('Stream created, beginning to process chunks');
       for await (const chunk of stream) {
         if (abortController.signal.aborted) {
-          console.log('Stream aborted');
           break;
         }
 
         const content = chunk.choices[0]?.delta?.content || '';
-        console.log('Received chunk:', content);
         fullResponse += content;
         
         const { chatResponse, entries } = this.parseFlashcards(fullResponse);
         
         // Only update if we have new content
         if (chatResponse && chatResponse !== lastChatResponse) {
-          console.log('Updating AI string:', chatResponse);
           setAIString(chatResponse);
           lastChatResponse = chatResponse;
         }
         
         if (entries.length > lastEntries.length) {
-          console.log('Updating AI entries:', entries);
           setAIEntries(entries);
           lastEntries = entries;
         }
       }
       
-      console.log('Stream completed, parsing final response');
       const finalParse = this.parseFlashcards(fullResponse);
       
       // Push assistant message response into messageHistory
@@ -207,7 +196,6 @@ export default class AIManager {
         content: fullResponse
       });
 
-      console.log('Returning final parsed response');
       return { str: finalParse.chatResponse, entries: finalParse.entries };
 
     } catch (e) {
