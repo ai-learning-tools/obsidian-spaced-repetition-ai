@@ -2,7 +2,19 @@ import { EntryItemGeneration } from '@/constants';
 import { ChatMessage, chatReducer } from '../chatMessage';
 import { useReducer, useEffect } from 'react';
 
-export const useMessageHistory = (initialHistory: ChatMessage[] = []) => {
+export type MessageHistoryHook = {
+  messageHistory: ChatMessage[];
+  createUpdateFunctions: (index: number) => {
+    updateUserMessage: (userMessage: string) => void;
+    updateModifiedMessage: (modifiedMessage: string) => void;
+    updateAIResponse: (aiString: string | null, aiEntries: EntryItemGeneration[] | null) => void;
+    clearMessageHistory: () => void;
+  };
+  addNewMessage: () => void;
+  clearAll: () => void;
+};
+
+export const useMessageHistory = (initialHistory: ChatMessage[] = []): MessageHistoryHook => {
     const [messageHistory, dispatch] = useReducer(chatReducer, initialHistory);
 
     const createUpdateFunctions = (index: number) => {

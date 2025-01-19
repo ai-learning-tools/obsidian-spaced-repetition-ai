@@ -11,10 +11,11 @@
     "importHelpers": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
+    "allowSyntheticDefaultImports": true,
     "paths": {
       "@/*": ["src/*"]
     },
-	"strictNullChecks": true,
+    "strictNullChecks": true,
     "lib": [
       "DOM",
       "ES5",
@@ -24,6 +25,7 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx"
   ]
 }

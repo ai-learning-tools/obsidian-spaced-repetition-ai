@@ -1,12 +1,11 @@
 import * as React from 'react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { ChatModelDisplayNames, EntryItemGeneration } from '@/constants';
 import { TFile } from 'obsidian';
 import SRPlugin from '@/main';
 import MentionsInput from '@/components/mentions/MentionsInput';
 import { ChatMessage } from '@/chatMessage';
 import Mention from '@/components/mentions/Mention'; 
-import AIManager from '@/llm/AIManager';
 import { useAIState } from '@/hooks/useAIState';
 import { getFileContent, writeCardtoFile } from '@/utils/obsidianFiles';
 import { EnterIcon, RefreshIcon } from '@/components/Icons';
@@ -14,11 +13,10 @@ import ChatTag from '@/components/chat/ChatTag';
 import { errorMessage } from '@/utils/errorMessage';
 import Markdown from 'react-markdown';
 import { EntryView } from '@/components/EntryView';
-import { useMessageContext } from '@/hooks/useMessageContext';
+import { useFiles } from '@/hooks/useFiles';
 
 interface MessageSegmentProps {
   segment: ChatMessage
-  aiManager: AIManager;
   updateHistory: {
     updateUserMessage: (userMessage: string) => void;
     updateModifiedMessage: (modifiedMessage: string) => void;
@@ -31,7 +29,6 @@ interface MessageSegmentProps {
   index: number,
   plugin: SRPlugin,
   activeFile: TFile | null,
-  activeFileCards: EntryItemGeneration[],
   files: TFile[],
 }
 
@@ -40,15 +37,15 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   segment,
   updateHistory,
   messageHistory,
-  aiManager,
   addNewMessage,
   clearAll,
   plugin,
   activeFile,
-  activeFileCards,
   files,
 }) => {
+
   // LLM
+  const { aiManager } = plugin;
   const [ currentModel, setModel ] = useAIState(aiManager);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
 
@@ -57,7 +54,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
   const [aiEntries, setAIEntries] = useState<EntryItemGeneration[] | null>(segment.aiEntries);
   const [userMessage, setUserMessage] = useState<string | null>(segment.userMessage);
 
-  const { mentionedFiles, mentionedCards, remainingActiveCards, handleFileAdd, handleCardAdd, removeFile, removeCard } = useMessageContext(files, activeFileCards, activeFile, plugin.settings.includeCurrentFile);
+  const { mentionedFiles, handleFileAdd, removeFile } = useFiles(files, activeFile, plugin.settings.includeCurrentFile); // See commit 7ef47c918bc8f9e8252373cd1286e288c5ce0a91 and 1 commit ahead of it to add cards back in
 
   // Mentions 
   const inputRef = useRef<HTMLDivElement | null>(null);
@@ -73,9 +70,8 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
 
   const handleMentionsChange = (e: any, newValue: string) => {
-    const fileRegex = /\[\[(.*?)\]\((.*?)\)/g;
-    const cardRegex = /@\[([\s\S]*?)\]\(([\s\S]*?)\)/g;
-    const newUserMessage = newValue.replace(cardRegex, '').replace(fileRegex, '');
+    const fileRegex = /@\[(.*?)\]\((.*?)\)/g;
+    const newUserMessage = newValue.replace(fileRegex, '');
     setUserMessage(newUserMessage);
   };
 
@@ -92,55 +88,48 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
 
     updateUserMessage(userMessage);
 
-    let modifiedMessage = `----- USER MESSAGE -----\n\n${userMessage}`;
+    let modifiedMessage = `<USER MESSAGE>\n\n${userMessage}</USER MESSAGE>`;
     const entriesToEdit = messageHistory[index-1]?.aiEntries;
     if (index !== 0 && entriesToEdit && entriesToEdit.length > 0) {
-      modifiedMessage += `----- FLASHCARDS FOR YOU TO EDIT -----\n\n${entriesToEdit!.join('\n\n')}`
-    }
-    if (mentionedFiles.length > 0) {
-      modifiedMessage += `\n\n----- REFERENCE FILES -----\n\n`
-      for (const [index, file] of mentionedFiles.entries()) {
-        const fileContent = await getFileContent(file, plugin.app.vault);
-        modifiedMessage += `\n\n--REFERENCE #${index + 1}: [[${file.name}]]--\n\n${fileContent}`;
-      }
+      const stringifiedEntries = entriesToEdit.map(entry => 
+        `<flashcard><question>${entry.front}</question><answer>${entry.back}</answer></flashcard>`
+      ).join('\n\n');
+      modifiedMessage += `<FLASHCARDS FOR YOU TO EDIT>\n\n${stringifiedEntries}</FLASHCARDS FOR YOU TO EDIT>`;
     }
 
-    if (mentionedCards.length > 0) {
-      modifiedMessage += `\n\n--- REFERENCE CARDS ---\n\nUse these as context. They are existing flashcards in the user's deck.`
-      for (const card of mentionedCards) {
-        modifiedMessage += `\n\nfront:${card.front}\nback:${card.back}\n\n`
+    if (mentionedFiles.length > 0) {
+      modifiedMessage += `\n\n<REFERENCE FILES>`
+      for (const [index, file] of mentionedFiles.entries()) {
+        const fileContent = await getFileContent(file, plugin.app.vault);
+        modifiedMessage += `\n\n<REFERENCE>#${index + 1}: [[${file.name}]]\n---\n\n${fileContent}</REFERENCE>`;
       }
+      modifiedMessage += '</REFERENCE FILES>'
     }
 
     updateModifiedMessage(modifiedMessage);
 
-    // If currentMessage is not the last message, ie. user is overwriting a message that has already been sent, then we clean conversation history after this message
-    setAIString(null);
-    setAIEntries(null);
-
     if (index < messageHistory.length - 1) {
-      await aiManager.setNewThread(messageHistory.slice(0, index));
+      await aiManager.setNewThread(index);
     } 
 
     const controller = new AbortController();
     setAbortController(controller);
     
-    await aiManager.streamAIResponse(
+    const { str, entries } = await aiManager.streamAIResponse(
       modifiedMessage,
       controller,
       setAIString,
-      setAIEntries,
+      setAIEntries
     );
 
     setAbortController(null);
 
-    updateAIResponse(aiString, aiEntries);
+    updateAIResponse(str, entries);
     addNewMessage();
   }
 
   const handleStopGenerating = () => {
     if (abortController) {
-      console.log("User stopping generation...");
       abortController.abort();
     }
   };
@@ -157,15 +146,17 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
         setAIEntries([...updatedEntries]);
         updateAIResponse(aiString, updatedEntries);
       }
-    };
+    }
     if (feedback === 'y') {
       if (activeFile) {
         await writeCardtoFile(entry, activeFile, plugin);
+        removeEntry();
       } else {
         errorMessage(`Oops, please open the file where you'd like to write this flashcard`);
       }
+    } else {
+      removeEntry();
     }
-    removeEntry();
   };
 
   const addAllCards = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -187,8 +178,8 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
           value={userMessage || ''} 
           inputRef={inputRef}
           onChange={handleMentionsChange}
-          className="w-full resize-none p-2 height-auto border border-neutral-200 rounded overflow-hidden"
-          placeholder={index === 0 ? 'Remember anything, @ or [[ to include your notes' : 'Ask a follow-up question'}
+          className="w-full resize-none p-2 height-auto theme-border border rounded overflow-hidden"
+          placeholder={index === 0 ? 'Remember anything, [[ to include your notes' : 'Ask a follow-up question'}
           onKeyDown={handleSendMessage}
           suggestionsPortalHost={portalRef.current}
         >
@@ -197,20 +188,14 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
             data={files.map((file) => ({ id: file.path, display: file.path }))}
             onAdd={(id: string) => handleFileAdd(id)}
           />
-          <Mention
-            trigger="@"
-            // TODO @belindamo: update this once there is a global cards array
-            data={activeFileCards ? activeFileCards.map((card) => ({ id: card.front, display: card.front })) : []}            
-            onAdd={(id: string) => handleCardAdd(id)}
-          />
         </MentionsInput>
       </div>
-      <div className="flex flex-row flex-wrap items-center justify-start my-2 space-x-4 text-neutral-400 [&>*]:cursor-pointer [&>*]:mb-2">
+      <div className="flex flex-row flex-wrap items-center justify-start my-2 space-x-4 theme-text-faint [&>*]:cursor-pointer [&>*]:mb-2">
         <select
           value={currentModel}
           onChange={handleModelChange}
-          className="text-center"
-          style={{ width: '150px' }}
+          className="text-center theme-bg-surface theme-border theme-text"
+          style={{ width: '160px' }}
         >
           {Object.entries(ChatModelDisplayNames).map(([key, displayName]) => (
             <option key={key} value={displayName}>
@@ -229,28 +214,22 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
             }
             await aiManager.setNewThread();
           }}
+          className="theme-bg-hover rounded px-4 py-2"
         >
           + New
-        </div>
-        <div 
-          onClick={() => {
-            setUserMessage((userMessage || '') + ' @')
-            inputRef.current?.focus();
-          }} 
-        >
-          <p>@ for Card</p>
         </div>
         <div 
           onClick={() => {
             setUserMessage((userMessage || '') + ' [[')
             inputRef.current?.focus();
           }} 
+          className="theme-bg-hover rounded px-4 py-2"
         >
           <p>{`[[`} for File</p>
         </div>
         <div 
           onClick={async (e) => {await handleSendMessage(e)}}
-          className='flex flex-row items-center space-x-2'
+          className='flex flex-row items-center space-x-2 theme-bg-hover rounded px-4 py-2'
         > 
           <EnterIcon /> 
           <p>Enter</p> 
@@ -258,13 +237,13 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
         {aiString && !abortController && (userMessage === messageHistory[index].userMessage) && (
           <div  
             onClick={async (e) => {await handleSendMessage(e)}}
-            className='flex flex-row items-center space-x-2'
+            className='flex flex-row items-center space-x-2 theme-bg-hover rounded px-4 py-2'
           >
             <RefreshIcon />
           </div>
         )}
         {abortController && (
-          <button className='p-4' onClick={handleStopGenerating}>Cancel generation</button>
+          <button className='p-4 theme-bg-hover rounded' onClick={handleStopGenerating}>Cancel generation</button>
         )}
       </div>
 
@@ -275,9 +254,9 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
       ></div>
 
       {
-        (mentionedFiles.length > 0 || mentionedCards.length > 0) && 
+        mentionedFiles.length > 0 && 
         <div className='m-4'>
-          <p className='pb-2'>Using context:</p>
+          <p className='pb-2 theme-text'>Using context:</p>
           <div className="flex-wrap">
             {mentionedFiles.map((file, index) => (
               <ChatTag 
@@ -286,21 +265,14 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
                 handleRemove={() => removeFile(index)} 
               />
             ))}
-            {mentionedCards.map((card, index) => (
-              <ChatTag 
-                key={`${card.front}-${index}`} 
-                name={`${card.front}`} 
-                handleRemove={() => removeCard(index)} 
-              />
-            ))}
           </div>
         </div>
       }
 
-      {(index === 0 && !aiString && (remainingActiveCards.length > 0 || (activeFile && !plugin.settings.includeCurrentFile  && !mentionedFiles.some(file => file.path === activeFile.path)))) && (
+      {(index === 0 && !aiString && (activeFile && !plugin.settings.includeCurrentFile  && !mentionedFiles.some(file => file.path === activeFile.path))) && (
       <div className='m-4'>
-        <div className='mb-2'> 
-          Contexts from current file:
+        <div className='mb-2 theme-text'> 
+          Add current file:
         </div>
         <div>
           {!plugin.settings.includeCurrentFile && activeFile && !mentionedFiles.some(file => file.path === activeFile.path) && (
@@ -310,20 +282,13 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
               handleClick={() => { handleFileAdd(activeFile.path) }} 
             />
           )}
-          {remainingActiveCards.map((c, i) => (
-            <ChatTag 
-              key={`active-${c.front}-${i}`}
-              name={`+ ${c.front}`}
-              handleClick={() => { handleCardAdd(c.front) }} 
-            />
-          ))}
         </div>
       </div>
       )}
    
       <div className='m-4 space-y-2'>
         {aiString && (
-          <div className='pb-4'>
+          <div className='pb-4 theme-text'>
             <Markdown>{aiString}</Markdown>
           </div>
         )}
@@ -337,16 +302,15 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
             key={`entry-${i}-length-${aiEntries.length}`}
           />
         ))}
-        {aiEntries && (
+        {aiEntries && aiEntries.length > 0 && (
           <>
             <div className='float-right'>
               {activeFile ? (
-                  <span>Adding to {activeFile.name}</span>
+                  <span className="theme-text">Adding to {activeFile.name}</span>
               ) : (
-                  <span>Open a file to add cards</span>
+                  <span className="theme-text">Open a file to add cards</span>
               )}
-              <button disabled={activeFile === null || aiEntries.length === 0} className='cursor-pointer p-4 ml-4 disabled:text-neutral-400' onClick={addAllCards}>Add all cards</button>
-              
+              <button disabled={activeFile === null} className='cursor-pointer p-4 ml-4 disabled:theme-text-faint theme-bg-hover rounded' onClick={addAllCards}>Add all cards</button>
             </div>
           </>
         )}

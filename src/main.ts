@@ -110,7 +110,7 @@ export default class SRPlugin extends Plugin {
 	async activateView(viewType: ViewType) {
 		this.app.workspace.detachLeavesOfType(viewType);
 		await this.app.workspace
-		.getRightLeaf(false)!
+		.getLeaf(false)
 		.setViewState({
 			type: viewType,
 			active: true,

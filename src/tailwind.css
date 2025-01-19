@@ -3,6 +3,65 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+body, p {
   user-select: text;
+}
+
+/* EntryView component */
+code {
+  white-space : pre-wrap !important;
+  word-break: break-word;
+}
+
+/* Theme-aware utility classes */
+.theme-bg-base {
+  background-color: var(--background-primary);
+}
+
+.theme-bg-secondary {
+  background-color: var(--background-secondary);
+}
+
+.theme-bg-surface {
+  background-color: var(--background-primary-alt);
+}
+
+.theme-border {
+  border-color: var(--background-modifier-border);
+}
+
+.theme-border-focus {
+  border-color: var(--background-modifier-border-focus);
+}
+
+.theme-text {
+  color: var(--text-normal);
+}
+
+.theme-text-faint {
+  color: var(--text-muted);
+}
+
+.theme-text-accent {
+  color: var(--text-accent);
+}
+
+.theme-divider {
+  background-color: var(--background-modifier-border);
+}
+
+.theme-bg-transparent {
+  background-color: transparent;
+}
+
+.theme-bg-hover:hover {
+  background-color: var(--background-modifier-hover);
+}
+
+.theme-bg-active-hover:hover {
+  background-color: var(--background-modifier-active-hover);  
+}
+
+.theme-bg-active {
+  background-color: var(--background-modifier-active-hover);
 }

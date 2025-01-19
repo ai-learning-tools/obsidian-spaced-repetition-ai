@@ -71,7 +71,6 @@ export class Deck {
         const card = Object.assign(this.cards[index], recordLog.card);
 
         if (updateMemory) {
-            console.log("ATHENA-DEBUG", 'updating card', card.id)
             await this.memoryManager.updateCard(card)
             await this.memoryManager.insertReviewLog(recordLog.log, card.id)
         }
@@ -309,7 +308,6 @@ export class DeckManager {
 
         // Get Deck
         const decksMetaData = await this.memoryManager.getAllDeckMetaData()
-        console.log("DEBUG-ATHENA", decksMetaData)
         const allDecks : Deck[] = []
 
         for (const currData of decksMetaData) {
