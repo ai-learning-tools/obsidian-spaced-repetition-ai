@@ -202,9 +202,7 @@ class MemoryManager {
                 const fileContent = await this.vault.read(this.deckFile);
                 let decks = JSON.parse(fileContent)['decks'] as DeckMetaData[];
                 
-                console.log('toDelete', toDelete)
                 decks = decks.filter(deck => toDelete.name != deck.name && toDelete.rootPath != deck.rootPath);
-                console.log('exisitng deck', decks)
                 await this.vault.modify(this.deckFile, JSON.stringify({ decks: decks }, null, 2));
             } catch (error) {
                 throw new Error(`Cannot delete deck: Invalid content in deck.md`);

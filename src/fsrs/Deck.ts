@@ -100,7 +100,6 @@ export class DeckManager {
         
         if (this.settings.onboardingStatus == OnboardingStatus.Done) {
             (async() => {
-                console.log('DEBUG-ATHENA setting up deck manager');
                 await this.syncMemoryWithNotes()
             })();
         }
@@ -117,7 +116,6 @@ export class DeckManager {
 
         // Part 1: Extract cards from notes
         try {
-            console.log('DEBUG-ATHENA syncing memory with notes');
             this.isSyncing = true;
             const files = this.vault.getFiles();
             const newEntries: { [key: string]: Entry } = {};
@@ -125,8 +123,6 @@ export class DeckManager {
                 if (file.extension === 'md' && !file.path.startsWith(`${DIRECTORY}`)) {
                     const content = await this.vault.read(file);
                     const extractedEntries = this.extractEntriesFromContent(content, file.path);
-                    console.log('extracted entries from', file.path);
-                    console.log(extractedEntries);
                     for (const newEntry of extractedEntries) {
                         const id = newEntry.id ?? MemoryManager.generateRandomID();
                         newEntry.id = id;
@@ -290,7 +286,6 @@ export class DeckManager {
     }
 
     async populateDecks() {
-        console.log('DEBUG-ATHENA populate deck')
         // Get all files
         const directory = `${DIRECTORY}/memory`
         const files = this.vault.getFiles().filter(file => file.path.startsWith(directory) && file.extension === 'md');

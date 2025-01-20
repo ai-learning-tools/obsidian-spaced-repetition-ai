@@ -782,7 +782,6 @@ class MentionsInput extends React.Component {
 
     // if suggestions menu is in a portal, update position to be releative to its portal node
     if (suggestionsPortalHost) {
-      // console.log("DEEBUG-ATHENA", "suggestion portal")
       position.position = 'fixed'
       let left = viewportRelative.left
       let top = viewportRelative.top

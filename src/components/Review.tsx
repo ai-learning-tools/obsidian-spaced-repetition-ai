@@ -62,7 +62,6 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
     const loadDecks = async () => {
       if (!loadPromiseRef.current) {
         loadPromiseRef.current = (async () => {
-          console.log("DEBUG-ATHENA loading deck", isInitialLoad)
           try {
             setIsSyncing(true);
             
@@ -105,7 +104,6 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
             
             // Use either the pending deck or selectedDeck
             const deckToUpdate = syncPromiseRef.current?.pendingDeck || selectedDeck;
-            console.log("updating deck", deckToUpdate)
             if (deckToUpdate) {
               const updatedDeck = deckManager.decks.find(
                 (deck: Deck) => deck.metaData.name === deckToUpdate.metaData.name
@@ -140,12 +138,6 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
     }
   };
 
-  // useEffect(() => {
-  //   if (!isSyncing && onboardingStatus == OnboardingStatus.Done) {
-  //     refresh();
-  //   }
-  // }, [deckManager]); //TODO: check with bmo
-
   const updateOnboardingStatus = (status: OnboardingStatus) => {
     setOnboardingStatus(status);
     // if (status == OnboardingStatus.Done) {
@@ -176,7 +168,6 @@ const Review: React.FC<ReviewProps> = ({ plugin }: ReviewProps) => {
       setDecks([...deckManager.decks]); // Update the decks state to trigger re-render
     };
     const onDeckDelete = async () => {
-      console.log('deleting deck...');
       const updatedDecks = deckManager.decks.filter((d: Deck) => d.metaData.name !== deck.metaData.name);
       setDecks(updatedDecks);
       await memoryManager.deleteDeck(deck.metaData);

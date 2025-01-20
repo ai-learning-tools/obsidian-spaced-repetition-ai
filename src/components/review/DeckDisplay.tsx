@@ -14,7 +14,6 @@ const DeckDisplay: React.FC<DeckDisplayProps> = ({ deck, plugin }: DeckDisplayPr
   const [topCard, setTopCard] = useState<Card | null>(deck.cards[0] || null);
 
   useEffect(() => {
-    console.log("DEBUG-ATHENA", "deck update received")
     setStateCounts(deck.getCountForStates());
     setTopCard(deck.cards[0] || null);
   }, [deck, deck.cards]);
