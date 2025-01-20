@@ -3,7 +3,7 @@
 	"name": "Spaced Repetition AI",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "A learning plugin using spaced repetition and AI in Obsidian.",
+	"description": "A Obsidian plugin using spaced repetition and AI for learning.",
 	"author": "Belinda Mo <justanexperimentpark@gmail.com>, Athena Leong <athenaleong619@gmail.com>",
 	"authorUrl": "https://obsidian-spaced-repetition-ai-docs.vercel.app/",
 	"fundingUrl": "https://buymeacoffee.com/obsidianlearn",
