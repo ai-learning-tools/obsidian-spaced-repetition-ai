@@ -2,11 +2,14 @@
 
 Obsidian Learn is a flashcard generation and review plugin in [Obsidian](https://obsidian.md). It uses spaced repetition and AI to help you remember your notes for the long-term.
 
+[🔗 Read the documentation](https://obsidian-spaced-repetition-ai.vercel.app/)
+[Join our Discord](https://discord.gg/TRDrTESsK4)
+
 ## Features
 
 - Spaced repetition review that uses the FSRS algorithm
 - Flashcards embedded in your notes
-- OpenAI GPT integration to make and edit flashcards
+- OpenAI integration to make and edit flashcards
 
 ## Installing through Obsidian Community Plugins
 
