@@ -13,7 +13,6 @@ export function useFiles(files: TFile[], activeFile: TFile | null, includeCurren
     if (!file) return false;
     const extension = file.path.split('.').pop()?.toLowerCase();
     const isNonText = extension ? NON_TEXT_EXTENSIONS.includes(extension as typeof NON_TEXT_EXTENSIONS[number]) : false;
-    console.log('Checking file:', file.path, 'Extension:', extension, 'Is non-text:', isNonText);
     return isNonText;
   };
 
