@@ -23,22 +23,18 @@ export default class ModifyDeckModal extends Modal {
     onOpen() {
         const { contentEl } = this;
 
-        // 1. Create a flex container for the heading and the trash icon
-        const headingContainer = contentEl.createDiv({ cls: "modify-deck-heading" });
-        headingContainer.style.display = "flex";
-        headingContainer.style.alignItems = "center";
-        headingContainer.style.justifyContent = "space-between";
+        // Create a container for the heading and trash icon
+        const headingContainer = contentEl.createDiv({ cls: "setting-item" }); // Leverage Obsidian's existing "setting-item" class
 
-        // 2. Add the heading text
-        headingContainer.createEl("h1", { text: `Modify ${this.metaData.name}` });
+        // Add heading text
+        const heading = headingContainer.createEl("h1", { text: `Modify ${this.metaData.name}` });
+        heading.classList.add("setting-item-heading"); // Optional for headings
 
-        // 3. Create a pressable icon (no button border)
-        const trashIcon = headingContainer.createEl("div");
+        // Create a pressable trash icon
+        const trashIcon = headingContainer.createEl("div", { cls: "clickable-icon" });
         setIcon(trashIcon, "trash"); // Built-in Obsidian icon
-        // Give it a class or inline styling to show it's clickable
-        trashIcon.style.cursor = "pointer";
-        trashIcon.style.padding = "0.25rem"; // optional “click area” padding
-
+        trashIcon.setAttribute("aria-label", "Delete Deck");
+        
         // 4. Wire up the "delete" behavior
         trashIcon.addEventListener("click", async () => {
             const confirmDelete = confirm(

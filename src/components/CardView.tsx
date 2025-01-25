@@ -23,14 +23,18 @@ export const CardView: React.FC<CardViewProps> = ({
     useEffect(() => {
         const renderMarkdown = async () => {
             if (frontRef.current) {
-                frontRef.current.innerHTML = ''; // Clear existing content
-                const wrapper = new RenderMarkdownWrapper(plugin, path);
-                await wrapper.renderMarkdownWrapper(front.trimStart(), frontRef.current);
+                while (frontRef.current.firstChild) {
+                    frontRef.current.removeChild(frontRef.current.firstChild);
+                }
+                const frontWrapper = new RenderMarkdownWrapper(plugin, path);
+                await frontWrapper.renderMarkdownWrapper(front.trimStart(), frontRef.current);
             }
             if (showBack && backRef.current) {
-                backRef.current.innerHTML = ''; // Clear existing content
-                const wrapper = new RenderMarkdownWrapper(plugin, path);
-                await wrapper.renderMarkdownWrapper(back.trimStart(), backRef.current);
+                while (backRef.current.firstChild) {
+                    backRef.current.removeChild(backRef.current.firstChild);
+                }
+                const backWrapper = new RenderMarkdownWrapper(plugin, path);
+                await backWrapper.renderMarkdownWrapper(back.trimStart(), backRef.current);
             }
         };
         renderMarkdown();

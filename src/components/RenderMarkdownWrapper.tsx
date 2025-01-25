@@ -75,17 +75,12 @@ export class RenderMarkdownWrapper {
                         img.setAttribute("width", el.getAttribute("width") as string);
                     else img.setAttribute("width", "100%");
                     if (el.hasAttribute("alt")) img.setAttribute("alt", el.getAttribute("alt") as string);
-                    el.addEventListener(
-                        "click",
-                        (ev) =>
-                            ((ev.target as HTMLElement).style.minWidth =
-                                (ev.target as HTMLElement).style.minWidth === "100%"
-                                    ? ""
-                                    : "100%"),
-                    );
                 },
             );
             el.addClasses(["image-embed", "is-loaded"]);
+            el.addEventListener("click", (ev) => {
+                el.toggleClass("expanded", !el.hasClass("expanded"));
+            });
         } else if (
             AUDIO_FORMATS.includes(target.extension) ||
             VIDEO_FORMATS.includes(target.extension)
