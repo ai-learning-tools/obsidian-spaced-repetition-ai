@@ -1,12 +1,11 @@
 import { 
   ChatModels, 
   EntryItemGeneration,
-  MAX_CHARACTERS,
 } from "@/constants";
 import { errorMessage } from "@/utils/errorMessage";
-import { APIUserAbortError } from "openai/error";
+import { APIUserAbortError, BadRequestError } from "openai/error";
 import OpenAI from "openai";
-import { ChatCompletionCreateParamsBase, ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 const PROMPT = `
 <INSTRUCTION>
@@ -147,13 +146,8 @@ export default class AIManager {
     setAIString: (response: string) => void,
     setAIEntries: (response: EntryItemGeneration[]) => void
   ): Promise<{ str: string; entries: EntryItemGeneration[] }> {
-    if (newMessageModded.length > MAX_CHARACTERS) {
-      setAIString(`Oops! Your message context is too long. Please keep it under about ${MAX_CHARACTERS/5} words.`);
-      return { str: '', entries: [] };
-    }
-
+    
     try {
-
       // Push user message into messageHistory
       this.messageHistory.push({ role: 'user' as const, content: newMessageModded });
       const stream = await this.client.chat.completions.create({
@@ -201,7 +195,30 @@ export default class AIManager {
     } catch (e) {
       console.error('Error in AI stream:', e);
       if (!(e instanceof APIUserAbortError)) {
-        errorMessage(`Streaming AI response ${e}`);
+        if (e instanceof BadRequestError) {
+          const message = e.message;
+          // Check for token limit error
+          const tokenMatch = message.match(/maximum context length is (\d+).*resulted in (\d+) tokens/);
+          if (tokenMatch) {
+            const [, maxTokens, actualTokens] = tokenMatch;
+            setAIString(`Oops! Your message is ${actualTokens} tokens. Please keep it under ${maxTokens} tokens (about ${Math.round(Number(maxTokens) * 0.75)} words).`);
+            return { str: '', entries: [] };
+          }
+          
+          // Check for string length error
+          const lengthMatch = message.match(/maximum length (\d+).*length (\d+)/);
+          if (lengthMatch) {
+            const [, maxLength, actualLength] = lengthMatch;
+            // Rough estimation: 1 token ≈ 4 characters
+            const estimatedTokens = Math.ceil(Number(actualLength) / 4);
+            const maxTokens = Math.ceil(Number(maxLength) / 4);
+            setAIString(`Oops! Your message is too long (approximately ${estimatedTokens} tokens). Please keep it under ${maxTokens} tokens (about ${Math.round(maxTokens * 0.75)} words).`);
+            return { str: '', entries: [] };
+          }
+                  
+        } else {
+          errorMessage(`Streaming AI response ${e}`);
+        }
       }
       return { str: '', entries: [] };
     }
