@@ -110,7 +110,6 @@ export class DeckManager {
     async syncMemoryWithNotes() {
         if (this.isSyncing) {
             // this checks prevents the initial sync from turning on the plugin from conflicting with other sync
-            console.log('Sync is already in progress. Exiting syncMemoryWithNotes.');
             return;
         }
 

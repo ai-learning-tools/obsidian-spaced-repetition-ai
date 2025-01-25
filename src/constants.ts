@@ -191,3 +191,24 @@ export const IMAGE_FORMATS = [
 ];
 export const AUDIO_FORMATS = ["mp3", "webm", "m4a", "wav", "ogg"];
 export const VIDEO_FORMATS = ["mp4", "mkv", "avi", "mov"];
+
+export const NON_TEXT_EXTENSIONS = [
+  // Images
+  'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'svg', 'ico', 'psd', 'ai', 'eps', 'raw', 'cr2', 'nef', 'heic', 'dng', 'arw', 'xcf', 'cdr',
+  // Videos
+  'mp4', 'mov', 'avi', 'wmv', 'flv', 'mkv', 'webm', 'm4v', 'mpg', 'mpeg', '3gp', '3g2', 'ogv', 'vob', 'ts', 'mts', 'm2ts', 'divx', 'xvid',
+  // Audio
+  'mp3', 'wav', 'aac', 'ogg', 'wma', 'm4a', 'flac', 'mid', 'midi', 'aiff', 'opus', 'ra', 'rm', 'amr', 'ac3', 'ape', 'mka', 'dsf', 'pcm',
+  // Documents & PDFs
+  // 'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'pages', 'numbers', 'key',
+  // Archives
+  'zip', 'rar', '7z', 'tar', 'gz', 'bz2', 'iso', 'dmg', 'xz', 'tgz', 'pkg', 'cab', 'lz', 'lzma', 'tbz2', 'tlz',
+  // Executables & Binaries
+  'exe', 'dll', 'app', 'deb', 'rpm', 'msi', 'bin', 'dat', 'db', 'sqlite', 'class', 'pyc', 'so', 'dylib', 'sys', 'o', 'ko', 'lib', 'a',
+  // Design & 3D
+  'sketch', 'fig', 'xd', 'stl', 'obj', 'fbx', 'blend', '3ds', 'max', 'dae', 'dwg', 'lwo', 'c4d', 'mb', 'ma', 'hip', 'hda',
+  // Font files
+  'ttf', 'otf', 'woff', 'woff2', 'eot', 'pfm', 'pfb', 'fon', 'bdf', 'pcf',
+  // Other Binary
+  'swf', 'fla', 'qxd', 'indd', 'prproj', 'aep', 'drw', 'gbr', 'ger', 'cam', 'idx', 'bak', 'tmp', 'temp'
+] as const;
