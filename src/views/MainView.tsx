@@ -70,7 +70,7 @@ export default class MainView extends ItemView {
         >
           <Chat plugin={this.plugin} messageHistoryHook={messageHistoryHook}/>
         </div>
-
+ 
         {/* REVIEW subview */}
         <div
           className="mt-8 mx-auto max-w-[768px]"
