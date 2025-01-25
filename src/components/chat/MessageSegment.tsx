@@ -83,6 +83,8 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
     }
     if (!userMessage) return;
     
+    setAIString('');
+    setAIEntries([]);
     clearMessageHistory(); // Clear message history from current index
     handleStopGenerating();
 
@@ -307,7 +309,7 @@ const MessageSegment: React.FC<MessageSegmentProps> = ({
         {aiEntries && aiEntries.length > 0 && (
           <>
             <div className='float-right'>
-              {activeFile ? (
+              {activeFile && activeFile.path.endsWith('.md') ? (
                   <span className="theme-text">Adding to {activeFile.name}</span>
               ) : (
                   <span className="theme-text">Open a file to add cards</span>
