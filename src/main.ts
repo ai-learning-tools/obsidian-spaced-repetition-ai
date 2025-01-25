@@ -60,16 +60,6 @@ export default class SRPlugin extends Plugin {
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new SRSettingTab(this.app, this));
 
-		// Add the CSS classes
-		this.addStyle(`
-			.sr-plugin-image {
-					width: 100%;
-			}
-			.sr-plugin-image.expanded {
-					width: auto;
-			}
-	`);
-
 	}
 
 	async loadSettings() {
