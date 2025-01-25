@@ -13,6 +13,16 @@ code {
   word-break: break-word;
 }
 
+/** Markdown Render **/
+.image-embed img {
+  width: 100%;
+  min-width: 0;
+}
+
+.image-embed.expanded img {
+  min-width: 100%;
+}
+
 /* Theme-aware utility classes */
 .theme-bg-base {
   background-color: var(--background-primary);
