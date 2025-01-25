@@ -52,7 +52,7 @@ export async function writeCardtoFile(entry: EntryItemGeneration, file: TFile, p
 
 export async function writeIdToCardInFile(vault: Vault, entry: Entry, separator: string) {
   try {
-    const file = vault.getAbstractFileByPath(entry.path) as TFile;
+    const file = vault.getAbstractFileByPath(entry.path);
     if (!file) {
       console.error(`File not found at path: ${entry.path}`);
       return;
