@@ -45,7 +45,7 @@ Densely linked`}
       onClick={async () => {
           updateOnboardingStatus(OnboardingStatus.Done);
       }}
-      className={`px-4 py-2 bg-white`}
+      className={`px-4 py-2 theme-bg-hover rounded theme-border`}
     >
       Allow SR-AI to read and write cards to my notes
     </button>
