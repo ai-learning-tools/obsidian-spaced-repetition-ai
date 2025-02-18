@@ -1,6 +1,6 @@
-# Obsidian Spaced Repetition AI Plugin (SRAI)
+# Spaced Repetition AI Plugin (SRAI)
 
-Obsidian Learn is a flashcard generation and review plugin in [Obsidian](https://obsidian.md). It uses spaced repetition and AI to help you remember your notes for the long-term.
+SRAI is a flashcard generation and review plugin in [Obsidian](https://obsidian.md). It uses spaced repetition and AI to help you remember your notes for the long-term.
 
 [🔗 Read the documentation](https://obsidian-spaced-repetition-ai.vercel.app/) | [Join our Discord](https://discord.gg/TRDrTESsK4)
 
