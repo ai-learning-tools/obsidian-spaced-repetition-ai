@@ -1,7 +1,7 @@
 {
 	"id": "spaced-repetition-ai",
 	"name": "Spaced Repetition AI",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
 	"description": "Review, generate, and add flashcards for your notes using AI",
 	"author": "Belinda Mo, Athena Leong",

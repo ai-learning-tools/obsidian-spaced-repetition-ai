@@ -33,7 +33,7 @@ export default class ModifyDeckModal extends Modal {
         // Create a pressable trash icon
         const trashIcon = headingContainer.createEl("div", { cls: "clickable-icon" });
         setIcon(trashIcon, "trash"); // Built-in Obsidian icon
-        trashIcon.setAttribute("aria-label", "Delete Deck");
+        trashIcon.setAttribute("aria-label", "Delete deck");
         
         // 4. Wire up the "delete" behavior
         trashIcon.addEventListener("click", async () => {
@@ -48,7 +48,7 @@ export default class ModifyDeckModal extends Modal {
 
         // 5. Setting to modify the deck name
         new Setting(contentEl)
-            .setName("Deck Name")
+            .setName("Deck name")
             .addText((text) => {
                 text.setValue(this.newName);
                 text.onChange((value) => {

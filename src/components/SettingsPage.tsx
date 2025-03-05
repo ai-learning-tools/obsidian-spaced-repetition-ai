@@ -37,7 +37,7 @@ export class SRSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName('OpenAI API Key')
+      .setName('OpenAI API key')
       .setDesc(`Add an API key to chat with your notes and generate flashcards. Note that you can still do flashcard reviews without AI`)
 			.addText(text => text
 				.setPlaceholder('Enter your secret')
@@ -53,7 +53,7 @@ export class SRSettingTab extends PluginSettingTab {
       )
 
     new Setting(containerEl)
-      .setName('Default Model')
+      .setName('Default model')
       .setDesc(`When you open a new chat, this AI model is used by default`)
       .addDropdown(dropdown => dropdown
         .addOptions(MODEL_TO_DISPLAY_NAME)

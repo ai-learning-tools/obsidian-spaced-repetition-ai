@@ -7,7 +7,7 @@ import '@/tailwind.css';
 import EncryptionService from '@/utils/encryptionService';
 import MemoryManager from './memory/memoryManager';
 import { DeckManager } from './fsrs/Deck';
-import AIManager from './llm/AIManager';
+import AIManager from './LLM/AIManager';
 import { errorMessage } from './utils/errorMessage';
 
 export default class SRPlugin extends Plugin {
@@ -96,7 +96,6 @@ export default class SRPlugin extends Plugin {
 	toggleView(viewType: ViewType, subviewType: SubviewType) {
 		const leaves = this.app.workspace.getLeavesOfType(viewType);
 		if (leaves.length > 0) {
-			this.deactivateView(viewType); 
 			if (this.subviewType !== subviewType) {
 				this.subviewType = subviewType;
 				this.activateView(viewType);
@@ -108,23 +107,23 @@ export default class SRPlugin extends Plugin {
 	}
 
 	async activateView(viewType: ViewType) {
-		this.app.workspace.detachLeavesOfType(viewType);
-		await this.app.workspace
-		.getLeaf(false)
-		.setViewState({
-			type: viewType,
-			active: true,
-		});
-		this.app.workspace.revealLeaf(
-			this.app.workspace.getLeavesOfType(viewType)[0],
-		);
-
+		const leaves = this.app.workspace.getLeavesOfType(viewType);
+		if (leaves.length === 0) {
+			await this.app.workspace
+			.getLeaf(false)
+			.setViewState({
+				type: viewType,
+				active: true,
+			});
+			this.app.workspace.revealLeaf(
+				this.app.workspace.getLeavesOfType(viewType)[0],
+			);
+		}
 	}
 	
 	async deactivateView(viewType: ViewType) {
-		this.app.workspace.detachLeavesOfType(viewType);
+		// Let Obsidian handle view lifecycle
 	}
 
 
 }
-

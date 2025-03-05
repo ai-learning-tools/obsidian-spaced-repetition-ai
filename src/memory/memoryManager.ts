@@ -201,7 +201,7 @@ class MemoryManager {
             try {
                 const fileContent = await this.vault.read(this.deckFile);
                 let decks = JSON.parse(fileContent)['decks'] as DeckMetaData[];
-                
+                 
                 decks = decks.filter(deck => toDelete.name != deck.name && toDelete.rootPath != deck.rootPath);
                 await this.vault.modify(this.deckFile, JSON.stringify({ decks: decks }, null, 2));
             } catch (error) {
