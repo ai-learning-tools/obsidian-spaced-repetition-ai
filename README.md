@@ -6,25 +6,14 @@ SRAI is a flashcard generation and review plugin in [Obsidian](https://obsidian.
 
 ## Features
 
-- Spaced repetition review that uses the FSRS algorithm
-- Flashcards embedded in your notes
-- OpenAI integration to make and edit flashcards
+It does all of this:
 
-## Installing through Obsidian Community Plugins
+1. Add your flashcards directly in your Obsidian notes with tracking
+2. Review your flashcards with the best spaced repetition algorithm ever, called FSRS (based on thousands of Anki reviews)
+3. Generate flashcards from your notes using AI
+You can use just review or generation, or both depending on what you need.
 
-1. Open Obsidian and go to Settings
-2. Navigate to Community Plugins
-3. Click on Browse and search for "Spaced Repetition AI"
-4. Install the plugin and enable it
-
-## Installing for development
-1. Clone this repository
-2. Run `npm install` to install dependencies
-3. Run `npm run dev` to compile the plugin
-
-## Contributing
-
-We welcome contributions! Submit a Github issue or pull request to contribute.
+We use an algorithm called FSRS for spaced repetition scheduling, and OpenAI for flashcard generation.
 
 ## Authors
 
