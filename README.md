@@ -4,6 +4,8 @@ SRAI is a flashcard generation and review plugin in [Obsidian](https://obsidian.
 
 [🔗 Read the documentation](https://obsidian-spaced-repetition-ai.vercel.app/) | [Join our Discord](https://discord.gg/TRDrTESsK4)
 
+Important note: this plugin will add a folder called `SR` to your vault. It contains files that track the spaced repetition cards for each file detected in your vault. 
+
 ## Features
 
 It does all of this:
