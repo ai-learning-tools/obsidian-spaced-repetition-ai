@@ -26,8 +26,6 @@ We use an algorithm called FSRS for spaced repetition scheduling, and OpenAI for
 
 We use the open source [FSRS algorithm](https://github.com/open-spaced-repetition/ts-fsrs).
 
-[Buy us boba if you'd like 🧋](https://buymeacoffee.com/obsidianlearn)
-
 ## License
 
 The MIT License.
